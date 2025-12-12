@@ -1,0 +1,62 @@
+{
+  "home": "Главная",
+  "games": "Игры",
+  "code": "Код",
+  "profile-link": "Профиль",
+  "rating": "Рейтинг",
+  "hello_jasur": "Привет, Жасур!",
+  "progress_title": "Прогресс выполнения",
+  "homework_progress": "Выданные дз (6 из 12)",
+  "quality_progress": "Качество (4.4 из 5.0)",
+  "overall_progress": "Общий прогресс",
+  "status_bad": "Критично",
+  "status_ok": "Нормально",
+  "status_good": "Отлично",
+
+  "homework": {
+    "title": "Домашнее задание",
+    "description": "Отправляйте проект через GitHub и Vercel",
+    "labels": {
+      "github": "GitHub Ссылка",
+      "vercel": "Vercel Ссылка",
+      "comment": "Комментарий"
+    },
+    "buttons": {
+      "submit": "Отправить"
+    },
+    "messages": {
+      "success": "Успешно отправлено!",
+      "successDetail": "Ваше домашнее задание принято",
+      "footer": "Все поля обязательны. Комментарий не более 50 символов."
+    },
+    "errors": {
+      "githubRequired": "Ссылка на GitHub обязательна",
+      "githubInvalid": "Введите правильную ссылку GitHub",
+      "vercelRequired": "Ссылка на Vercel обязательна",
+      "vercelInvalid": "Введите правильную ссылку Vercel",
+      "commentRequired": "Комментарий обязателен",
+      "commentMax": "Комментарий не должен превышать 50 символов"
+    }
+  },
+    "profile": {
+    "name": "Пользователь",
+    "joined": "Присоединился: 01 Января 2025",
+    "totalLessons": "Всего уроков",
+    "completedLessons": "Завершено",
+    "pendingLessons": "Ожидается",
+    "overallProgress": "Общий прогресс",
+    "recentSubmissions": "Последние задания",
+    "streak": "Серия",
+    "days": "дней подряд",
+    "achievements": "Достижения",
+    "first10": "Первые 10",
+    "first10Desc": "Сдать 10 уроков",
+    "fastLearner": "Быстрый ученик",
+    "fastLearnerDesc": "5 дней подряд",
+    "perfection": "Совершенство",
+    "perfectionDesc": "75% выполнения",
+    "status_good": "Сдано",
+    "status_ok": "В процессе"
+  }
+
+}
