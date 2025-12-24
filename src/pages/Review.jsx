@@ -1,28 +1,84 @@
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import api from "../utils/api";
 
 const Review = () => {
-  return (
-    <div className='mb-30'>
-        <div className="max-w-xs overflow-hidden bg-base-100 border border-base-100 rounded-xl shadow-md transform transition-all duration-500 hover:shadow-lg hover:scale-105 relative group">
-      <div className="absolute inset-0 bg-gradient-to-br from-base-100 to-base opacity-0 transition-opacity duration-500 group-hover:opacity-30 blur-md" />
-      <div className="p-6 relative z-10">
-        <p className="text-xl font-semibold text-base-900">Classic Blue Jeans</p>
-        <p className="mt-2 text-base-600">
-          Our classic blue jeans are a timeless addition to your wardrobe. Crafted
-          from premium denim, they offer both style and comfort. Perfect for any
-          casual occasion.
-        </p>
-        <div className="flex items-center mt-4 text-base-600">
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 fill-current text-yellow-500">
-            <path d="M0 0h24v24H0z" fill="none" />
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
-          <span className="ml-2">4.8 (24 reviews)</span>
-        </div>
-      </div>
-    </div>
-    </div>
-  )
-}
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-export default Review
+  // ✅ Redux'dan user
+  const { user } = useSelector((state) => state.auth);
+
+  console.log("USER:", user);
+
+  const getMyReviews = async (id) => {
+  
+
+    try {
+      const res = await api({
+        url: `/submissions/${id}`,
+        method: "GET",
+      });
+      setReviews(res.data);
+    } catch (err) {
+      console.error("User fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  useEffect(() => {
+    getMyReviews();
+  }, [user]);
+
+  if (loading) return <p className="text-center mt-8">Yuklanmoqda...</p>;
+  if (reviews.length === 0)
+    return <p className="text-center mt-8">Hech qanday topshiriq yo'q</p>;
+
+  
+  return (
+    <div className="mb-30 grid md:grid-cols-2 gap-6">
+      {reviews.map((e) => (
+        <div
+          key={e._id}
+          className="max-w-xs overflow-hidden bg-base-100 border border-base-100 rounded-xl shadow-md transform transition-all duration-500 hover:shadow-lg hover:scale-105 relative group"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-base-100 to-base opacity-0 transition-opacity duration-500 group-hover:opacity-30 blur-md" />
+          <div className="p-6 relative z-10">
+            <p className="text-xl font-semibold">{e.HwLink}</p>
+            <p className="mt-2">{e.description || "Hech qanday tavsif yo'q"}</p>
+            <p className="mt-1 text-sm text-gray-500">Sana: {e.date}</p>
+
+            <p className="mt-1 text-sm font-semibold">
+              Status:{" "}
+              <span
+                className={
+                  e.status === "CHECKED"
+                    ? "text-green-500"
+                    : "text-yellow-500"
+                }
+              >
+                {e.status}
+              </span>
+            </p>
+
+            {e.status === "CHECKED" && (
+              <>
+                <p className="mt-2 font-semibold">Teacher Feedback:</p>
+                <p className="text-sm">
+                  {e.teacherDescription || "Izoh berilmagan"}
+                </p>
+                <p className="mt-1 text-sm font-semibold">
+                  Rating: {e.rating || 0} ⭐
+                </p>
+              </>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default Review;

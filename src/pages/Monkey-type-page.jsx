@@ -1,42 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
 
-// Single-file React page component for a MonkeyType-like typing game
-// Uses Tailwind CSS + DaisyUI classes and framer-motion for smooth UI animations
-// Default export: MonkeyTypePage
+ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
 
 const WORDS = [
-  "react",
-  "javascript",
-  "frontend",
-  "daisyui",
-  "tailwind",
-  "component",
-  "props",
-  "state",
-  "hook",
-  "function",
-  "variable",
-  "network",
-  "design",
-  "responsive",
-  "performance",
-  "optimize",
-  "animation",
-  "framer",
-  "motion",
-  "keyboard",
-  "challenge",
-  "practice",
-  "speed",
-  "accuracy",
-  "developer",
-  "portfolio",
-  "project",
-  "testing",
-  "deploy",
-  "session",
-  "random",
+  "react", "javascript", "frontend", "daisyui", "tailwind", "component",
+  "props", "state", "hook", "function", "variable", "network", "design",
+  "responsive", "performance", "optimize", "animation", "framer", "motion",
+  "keyboard", "challenge", "practice", "speed", "accuracy", "developer",
+  "portfolio", "project", "testing", "deploy", "session", "random",
 ];
 
 function randomWords(count = 50) {
@@ -55,14 +37,36 @@ export default function MonkeyTypePage() {
   const [totalTyped, setTotalTyped] = useState(0);
   const [correctWords, setCorrectWords] = useState(0);
   const [started, setStarted] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60); // default 60s
+  const [timeLeft, setTimeLeft] = useState(60);
   const [duration, setDuration] = useState(60);
   const [finished, setFinished] = useState(false);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
+  const [leaderboard, setLeaderboard] = useState([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [savedResult, setSavedResult] = useState(null);
+  
   const inputRef = useRef(null);
   const progress = Math.min(100, Math.round((index / wordPool.length) * 100));
 
+  // Leaderboard ni yuklash
+  useEffect(() => {
+    fetchLeaderboard();
+  }, []);
+
+  const fetchLeaderboard = async () => {
+    try {
+      const res = await fetch("http://localhost:8080/api/users/typing/leaderboard");
+      const data = await res.json();
+      if (data.success) {
+        setLeaderboard(data.data);
+      }
+    } catch (err) {
+      console.error("Leaderboard yuklashda xatolik:", err);
+    }
+  };
+
+  // Timer
   useEffect(() => {
     let timer;
     if (started && timeLeft > 0) {
@@ -75,6 +79,7 @@ export default function MonkeyTypePage() {
     return () => clearInterval(timer);
   }, [started, timeLeft]);
 
+  // WPM va accuracy hisoblash
   useEffect(() => {
     setWpm(Math.round((correctChars / 5) / ((duration - timeLeft || 1) / 60)));
     setAccuracy(totalTyped ? Math.max(0, Math.round((correctChars / totalTyped) * 100)) : 100);
@@ -91,29 +96,66 @@ export default function MonkeyTypePage() {
     setTotalTyped(0);
     setCorrectWords(0);
     setWordPool(randomWords(120));
+    setShowSuccessModal(false);
     setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  function finishSession() {
+  async function finishSession() {
     setStarted(false);
     setFinished(true);
     setTimeout(() => inputRef.current?.blur(), 50);
+    
+    // Natijani serverga yuborish
+    await saveResult(wpm, accuracy);
   }
+
+  const saveResult = async (finalWpm, finalAccuracy) => {
+    try {
+      const token = localStorage.getItem('token');
+      const userId = localStorage.getItem('userId');
+      
+      if (!token || !userId) {
+        console.log("Login qilmagan foydalanuvchi");
+        return;
+      }
+
+      const response = await fetch(`http://localhost:8080/api/users/typing/${userId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ 
+          wp: finalWpm,
+          accuracy: finalAccuracy 
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        setSavedResult(data);
+        setShowSuccessModal(true);
+        // Leaderboard ni yangilash
+        fetchLeaderboard();
+      }
+    } catch (error) {
+      console.error("Natijani saqlashda xatolik:", error);
+    }
+  };
 
   function handleInputChange(e) {
     const value = e.target.value;
 
-    // start on first typed letter
     if (!started && value.length > 0) {
       startSession(duration);
     }
 
-    // When user hits space or completes word
     if (value.endsWith(" ") || value.endsWith("\n")) {
       const typed = value.trim();
       const target = wordPool[index] || "";
       setTotalTyped((t) => t + typed.length + 1);
-      // update correct chars
+      
       let matchChars = 0;
       for (let i = 0; i < Math.min(typed.length, target.length); i++) {
         if (typed[i] === target[i]) matchChars++;
@@ -126,13 +168,11 @@ export default function MonkeyTypePage() {
       return;
     }
 
-    // Regular typing update
     setInput(value);
   }
 
   function handleKeyDown(e) {
     if (e.key === "Escape") {
-      // reset
       setStarted(false);
       setInput("");
       setTimeLeft(duration);
@@ -163,6 +203,59 @@ export default function MonkeyTypePage() {
       </div>
     );
   }
+
+  // Chart uchun data
+  const chartData = {
+    labels: leaderboard.map((u) => u.name + (u.surname ? ` ${u.surname}` : '')),
+    datasets: [
+      {
+        label: "WPM",
+        data: leaderboard.map((u) => u.wp),
+        borderColor: 'rgb(99, 102, 241)',
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        pointRadius: 6,
+        pointBackgroundColor: 'rgb(99, 102, 241)',
+        borderWidth: 3,
+        tension: 0.4,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: '#fff',
+        bodyColor: '#fff',
+        padding: 12,
+        displayColors: false,
+        callbacks: {
+          label: (context) => `${context.parsed.y} WPM`
+        }
+      },
+    },
+    scales: {
+      x: { 
+        ticks: { 
+          color: '#9ca3af',
+          font: { size: 12, weight: '500' } 
+        },
+        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+      },
+      y: { 
+        beginAtZero: true,
+        ticks: { 
+          color: '#9ca3af',
+          font: { size: 12, weight: '500' } 
+        },
+        grid: { color: 'rgba(156, 163, 175, 0.1)' }
+      },
+    },
+    animation: { duration: 1000, easing: "easeOutQuart" },
+  };
 
   return (
     <div className="min-h-screen bg-base-100 p-4 flex flex-col items-center">
@@ -246,7 +339,6 @@ export default function MonkeyTypePage() {
               <div className="bg-base-100 p-4 rounded-lg min-h-[96px] flex flex-col justify-center">
                 <div className="mb-2">
                   <div className="flex flex-wrap gap-2 items-center">
-                    {/* preview next words */}
                     {wordPool.slice(index, index + 10).map((w, i) => (
                       <motion.span
                         key={`${w}-${i}`}
@@ -344,6 +436,69 @@ export default function MonkeyTypePage() {
             </div>
           </aside>
         </motion.main>
+
+        {/* Leaderboard Chart */}
+        {leaderboard.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mt-6 bg-white/5 p-6 rounded-2xl shadow-md"
+          >
+            <h2 className="text-2xl font-bold mb-4 text-center">🏆 Top 5 WP Typers</h2>
+            <div className="h-64">
+              <Line data={chartData} options={chartOptions} />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Success Modal */}
+        {showSuccessModal && savedResult && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={() => setShowSuccessModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              className="bg-base-200 p-8 rounded-2xl shadow-2xl max-w-md w-full"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="text-center">
+                <div className="text-6xl mb-4">
+                  {savedResult.message && savedResult.message.includes('rekord') ? '🎉' : '✅'}
+                </div>
+                <h3 className="text-2xl font-bold mb-2">
+                  {savedResult.message || 'Natija saqlandi'}
+                </h3>
+                <div className="space-y-2 mt-4">
+                  <div className="flex justify-between">
+                    <span className="opacity-70">Your WPM:</span>
+                    <span className="font-bold">{wpm}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="opacity-70">Accuracy:</span>
+                    <span className="font-bold">{accuracy}%</span>
+                  </div>
+                  {savedResult.data?.bestWP && (
+                    <div className="flex justify-between">
+                      <span className="opacity-70">Best WPM:</span>
+                      <span className="font-bold text-success">{savedResult.data.bestWP}</span>
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={() => setShowSuccessModal(false)}
+                  className="btn btn-primary mt-6 w-full"
+                >
+                  Continue
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
 
         <footer className="mt-6 text-center opacity-70 text-sm">
           Made with ❤️ · DaisyUI + Tailwind + Framer Motion

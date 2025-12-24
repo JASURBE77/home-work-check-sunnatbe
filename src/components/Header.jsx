@@ -37,10 +37,8 @@ const Header = () => {
               >
                 <li>
               <Link to={'/profile'} >
-                  <a className="justify-between">
                     Profile
                     <span className="badge">New</span>
-                  </a>
               </Link>
                 </li>
                 <li><a>Settings</a></li>

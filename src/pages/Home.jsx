@@ -20,11 +20,11 @@ export default function Home() {
         variants={fadeIn}
         className="w-full bg-base-100 p-6 rounded-2xl shadow-xl space-y-7"
       >
-        <motion.h1 variants={fadeIn} className="font-bold text-3xl mb-3">
+        <motion.h1 variants={fadeIn} className="font-bold max-[500px]:text-xl text-3xl mb-3">
           {t("hello_jasur")}
         </motion.h1>
 
-        <motion.h2 variants={fadeIn} className="text-2xl font-bold">
+        <motion.h2 variants={fadeIn} className="text-2xl max-[500px]:text-xl font-bold">
           {t("progress_title")}
         </motion.h2>
 
