@@ -13,47 +13,27 @@ import ProtectedRoute from "../components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
-    path: "/",
-    element: <App />,
-    children: [
-      {
-        index: true, // default route "/"
-        element: <Home />,
-      },
-      {
-        path: "homework",
-        element: <HomeWork />,
-      },
-      {
-        path: "games",
-        element: <Games />,
-      },
-      {
-        path: "reviews",
-        element: <Review />,
-      },
-      {
-        path: "typer",
-        element: <MonkeyTypePage />,
-      },
-      {
-        path: "rating",
-        element: <Rating />,
-      },
-      {
-        path: "profile",
-        element: (
-          <ProtectedRoute>
-            <Profile />
-          </ProtectedRoute>
-        ),
-      },
-    ],
-  },
-  {
-    path: "/login",
-    element: <Login />,
-  },
+  path: "/",
+  element: (
+    <ProtectedRoute>
+      <App />
+    </ProtectedRoute>
+  ),
+  children: [
+    { index: true, element: <Home /> },
+    { path: "homework", element: <HomeWork /> },
+    { path: "games", element: <Games /> },
+    { path: "reviews", element: <Review /> },
+    { path: "typer", element: <MonkeyTypePage /> },
+    { path: "rating", element: <Rating /> },
+    { path: "profile", element: <Profile /> },
+  ],
+},
+{
+  path: "/login",
+  element: <Login />,
+},
+
 ]);
 
 const AppRouter = () => <RouterProvider router={router} />;
