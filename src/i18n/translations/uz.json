@@ -1,0 +1,64 @@
+{
+  "home": "Bosh sahifa",
+  "homework-link": "Uy vazifa",
+  "games": "O'yinlar",
+  "code": "Kodlar",
+  "profile-link": "Profil",
+  "rating": "Reyting",
+  "hello_jasur": "Salom Jasur!",
+  "progress_title": "Bajarilish jarayoni",
+  "homework_progress": "Uy ishi tashalganlar (6 dan 12)",
+  "quality_progress": "Sifat (4.4 dan 5.0)",
+  "overall_progress": "Umumiy progress",
+  "status_bad": "Juda past",
+  "status_ok": "Yaxshi",
+  "status_good": "A'lo",
+  
+  "homework": {
+    "title": "Uy Ishi Topshirish",
+    "description": "Loyihangizni GitHub va Vercel orqali jönating",
+    "labels": {
+      "github": "GitHub Link",
+      "vercel": "Vercel Link",
+      "comment": "Izoh"
+    },
+    "buttons": {
+      "submit": "Jonatish"
+    },
+    "messages": {
+      "success": "Muvaffaqiyatli jonatildi!",
+      "successDetail": "Uy ishingiz qabul qilindi",
+      "footer": "Barcha maydonlar majburiy. Izoh 50 harfdan oshmasligi kerak."
+    },
+    "errors": {
+      "githubRequired": "GitHub silka majburiy",
+      "githubInvalid": "To'g'ri GitHub silka kiriting",
+      "vercelRequired": "Vercel silka majburiy",
+      "vercelInvalid": "To'g'ri Vercel silka kiriting",
+      "commentRequired": "Izoh majburiy",
+      "commentMax": "Izoh 50 harfdan oshmasligi kerak"
+    }
+  },
+
+    "profile": {
+    "name": "Foydalanuvchi",
+    "joined": "Qo'shildi: 01 Yanvar 2025",
+    "totalLessons": "Jami dars",
+    "completedLessons": "Topshirildi",
+    "pendingLessons": "Kutilmoqda",
+    "overallProgress": "Umumiy progress",
+    "recentSubmissions": "So'nggi topshiriqlar",
+    "streak": "Ketma-ketlik",
+    "days": "kun ketma-ket",
+    "achievements": "Yutuqlar",
+    "first10": "Birinchi 10 ta",
+    "first10Desc": "10 ta dars topshirish",
+    "fastLearner": "Tezkor o'quvchi",
+    "fastLearnerDesc": "5 kun ketma-ket",
+    "perfection": "Mukammallik",
+    "perfectionDesc": "75% bajarish",
+    "status_good": "Bajarildi",
+    "status_ok": "Jarayonda"
+  }
+
+}
