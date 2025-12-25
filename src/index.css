@@ -9,10 +9,29 @@
     margin: 0 auto;
 }
 
+.loginBG {
+    background-image: url('https://space.marsit.uz/img/auth-bg.ad12831f.webp');
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+}
+
+.container_login{
+    max-width: 100%;
+    width: 70%;
+    margin: 0 auto;
+}
+
 @media only screen and (max-width:768px) {
     .container{
         max-width: 100%;
         width: 98%;
         margin: 0 auto;
     }
+    .container_login{
+          max-width: 100%;
+        width: 90%;
+        margin: 0 auto;
+    }
 }
+

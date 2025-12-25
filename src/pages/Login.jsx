@@ -13,6 +13,7 @@ export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
@@ -50,14 +51,15 @@ export default function Login() {
   };
 
   return (
-    <div>
+    <div className="">
       <div className="flex items-center justify-around">
         <h1 className="font-bold text-3xl my-6">Login Page</h1>
         <LanguageSelector />
       </div>
 
-      <div className="min-h-screen flex items-center justify-center bg-base-200 p-4">
-        <form
+      <div className="min-h-screen loginBG flex items-center  bg-base-200 p-4">
+    <div className="container_login">
+          <form
           className="card w-full max-w-sm bg-base-100 shadow-xl p-6"
           onSubmit={handleLogin}
         >
@@ -103,6 +105,7 @@ export default function Login() {
             </a>
           </p>
         </form>
+    </div>
       </div>
     </div>
   );
