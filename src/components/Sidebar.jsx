@@ -29,7 +29,7 @@ const Sidebar = () => {
           <NavLink to="/homework" className={linkClass}><Backpack /> {t("homework-link")}</NavLink>
           <NavLink to="/typer" className={linkClass}><Gamepad2 /> {t("games")}</NavLink>
           <NavLink to="/reviews" className={linkClass}><Code /> {t("code")}</NavLink>
-          <NavLink to="/rating" className={linkClass}><ChartNoAxesColumn /> {t("rating")}</NavLink>
+      
         </ul>
       </div>
 
@@ -66,7 +66,7 @@ const Sidebar = () => {
           <NavLink onClick={() => setOpen(false)} to="/homework" className={linkClass}><Backpack /> {t("homework-link")}</NavLink>
           <NavLink onClick={() => setOpen(false)} to="/typer" className={linkClass}><Gamepad2 /> {t("games")}</NavLink>
           <NavLink onClick={() => setOpen(false)} to="/reviews" className={linkClass}><Code /> {t("code")}</NavLink>
-          <NavLink onClick={() => setOpen(false)} to="/rating" className={linkClass}><ChartNoAxesColumn /> {t("rating")}</NavLink>
+      
           <ThemeSwitcher />
         </ul>
       </div>

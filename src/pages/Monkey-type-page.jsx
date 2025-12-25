@@ -321,10 +321,7 @@ export default function MonkeyTypePage() {
             <div className="divider" />
             <div className="mb-4">
               <div className="text-sm opacity-60">Theme</div>
-              <div className="mt-2 flex gap-2">
-                <button onClick={() => document.documentElement.setAttribute("data-theme", "light")} className="btn btn-ghost btn-sm">Light</button>
-                <button onClick={() => document.documentElement.setAttribute("data-theme", "dark")} className="btn btn-ghost btn-sm">Dark</button>
-              </div>
+           
             </div>
 
             <div className="divider" />
@@ -339,15 +336,7 @@ export default function MonkeyTypePage() {
           </aside>
         </motion.main>
 
-        {/* Leaderboard Chart */}
-        {leaderboard.length > 0 && (
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-6 bg-white/5 p-6 rounded-2xl shadow-md">
-            <h2 className="text-2xl font-bold mb-4 text-center">🏆 Top WP Typers</h2>
-            <div className="h-64">
-              <Line data={chartData} options={chartOptions} />
-            </div>
-          </motion.div>
-        )}
+  
 
         {/* Success Modal */}
         {showSuccessModal && savedResult && (
