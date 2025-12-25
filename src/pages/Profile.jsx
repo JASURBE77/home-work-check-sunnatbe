@@ -15,7 +15,10 @@ export default function Profile() {
     ? Math.round((user.completedLessons / user.totalLessons) * 100)
     : 0;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
   const fetchProfile = async () => {
     try {
       const res = await api({ url: "/me", method: "GET" });
@@ -31,7 +34,11 @@ export default function Profile() {
     fetchProfile()
   }, [storedUser]);
 
+<<<<<<< HEAD
   if (loading) return<span className="loading  loading-spinner text-primary"></span>
+=======
+  if (loading) return <p className="text-center mt-8">{t('loading', 'Yuklanmoqda...')}</p>;
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
 
   
   return (
@@ -161,6 +168,52 @@ export default function Profile() {
             </div>
           </div>
 
+<<<<<<< HEAD
+=======
+          {/* Right Column - Achievements */}
+          <div className="space-y-6 w-full">
+            {/* Streak Card */}
+            <div className="card bg-primary text-primary-content rounded-3xl shadow-xl p-6 w-full">
+              <div className="flex items-center gap-3 mb-4">
+                <Award className="w-6 h-6" />
+                <h2 className="text-xl font-bold">{t('profile.streak', 'Ketma-ketlik')}</h2>
+              </div>
+              <div className="text-center">
+                <div className="text-5xl font-bold mb-2">🔥</div>
+                <div className="text-4xl font-bold mb-1">{user.streak}</div>
+                <div className="text-base-content/70 text-sm">{t('profile.days', 'kun ketma-ket')}</div>
+              </div>
+            </div>
+
+            {/* Achievements Card */}
+            <div className="card bg-base-100 shadow-xl rounded-3xl border border-base-300 p-6 w-full">
+              <div className="flex items-center gap-3 mb-4">
+                <Trophy className="w-6 h-6 text-yellow-400" />
+                <h2 className="text-xl font-bold text-base-content">{t('profile.achievements', 'Yutuqlar')}</h2>
+              </div>
+
+              <div className="space-y-3">
+                <div className="card bg-success/20 border border-success/30 rounded-xl p-4 w-full">
+                  <div className="text-2xl mb-2">🏆</div>
+                  <div className="text-base-content font-semibold text-sm">{t('profile.first10', 'Birinchi 10 ta')}</div>
+                  <div className="text-base-content/70 text-xs">{t('profile.first10Desc', '10 ta dars topshirish')}</div>
+                </div>
+
+                <div className="card bg-primary/20 border border-primary/30 rounded-xl p-4 w-full">
+                  <div className="text-2xl mb-2">⭐</div>
+                  <div className="text-base-content font-semibold text-sm">{t('profile.fastLearner', 'Tezkor o\'quvchi')}</div>
+                  <div className="text-base-content/70 text-xs">{t('profile.fastLearnerDesc', '5 kun ketma-ket')}</div>
+                </div>
+
+                <div className="card bg-info/20 border border-info/30 rounded-xl p-4 w-full">
+                  <div className="text-2xl mb-2">💎</div>
+                  <div className="text-base-content font-semibold text-sm">{t('profile.perfection', 'Mukammallik')}</div>
+                  <div className="text-base-content/70 text-xs">{t('profile.perfectionDesc', '75% bajarish')}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
         </div>
       </div>
     </div>

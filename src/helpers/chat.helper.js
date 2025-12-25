@@ -3,6 +3,7 @@ import fuzzysort from "fuzzysort";
 export const knowledgeBase = [
   {
     keywords: [
+<<<<<<< HEAD
       "uyga vazifa",
       "vazifa topish",
       "yangi vazifa",
@@ -11,10 +12,24 @@ export const knowledgeBase = [
     ],
     answer:
       "O‘quvchi sifatida siz uyga vazifalarni 'Uyga vazifalar' bo‘limida ko‘rishingiz va topshirishingiz mumkin. Vazifa linki GitHub, Netlify yoki Codesandbox bo‘lishi kerak.",
+=======
+      "shikoyat",
+      "sotuvchi ustidan shikoyat",
+      "sotuvchi bilan muammo",
+      "sotuvchi aldagan",
+      "sotuvchi yomon gapirdi",
+      "admin kerak",
+      "operator kerak",
+      "yordam kerak",
+    ],
+    answer:
+      "Sotuvchi ustidan shikoyat berish uchun operator bilan bog‘laning: +998910118353",
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
   },
 
   {
     keywords: [
+<<<<<<< HEAD
       "ball",
       "natija",
       "score",
@@ -23,10 +38,22 @@ export const knowledgeBase = [
     ],
     answer:
       "O‘qituvchi topshirilgan vazifalarga ball qo‘yadi va siz natijani o‘zingizning panelingizdan ko‘rishingiz mumkin.",
+=======
+      "qaytarish",
+      "qaytarib berish",
+      "qaytarib bo‘ladimi",
+      "qaytarib yuborish",
+      "xato keldi",
+      "orqaga qaytarish",
+    ],
+    answer:
+      "Mahsulotni qaytarish uchun sotuvchi yoki admin bilan bog‘lanishingiz kerak.",
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
   },
 
   {
     keywords: [
+<<<<<<< HEAD
       "status",
       "tekshirildi",
       "bajarilmagan",
@@ -35,10 +62,22 @@ export const knowledgeBase = [
     ],
     answer:
       "Har bir vazifa statusi quyidagicha ko‘rsatiladi: 'Bajarilmagan', 'Qayta ishlansin', 'Tekshirildi'. Bu orqali vazifangiz holatini kuzatishingiz mumkin.",
+=======
+      "dostavka",
+      "yetkazib",
+      "keladi",
+      "necha kunda",
+      "buyurtma kelishi",
+      "kuryer",
+    ],
+    answer:
+      "Yetkazib berish muddati 24–48 soat. Savollar bo‘lsa: +998 91 554 56 65",
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
   },
 
   {
     keywords: [
+<<<<<<< HEAD
       "komentar",
       "feedback",
       "o‘qituvchi javobi",
@@ -116,6 +155,95 @@ export const knowledgeBase = [
     ],
     answer:
       "Platforma Frontend: React + Tailwind CSS + DaisyUI; Backend: Node.js + MongoDB. Foydalanuvchilar roli: o‘quvchi, o‘qituvchi, ota-ona, admin.",
+=======
+      "tolov",
+      "pulini qanday",
+      "karta orqali",
+      "naqd",
+      "online to‘lov",
+      "payme",
+      "click",
+      "uzum",
+    ],
+    answer:
+      "To‘lov mahsulot yetkazilgandan keyin amalga oshiriladi. Naqd yoki karta orqali.",
+  },
+
+  {
+    keywords: [
+      "kafolat",
+      "garantiya",
+      "nosoz",
+      "ishlamayapti",
+      "ta’mirlash",
+      "servis",
+    ],
+    answer:
+      "Nosoz mahsulot bo‘lsa qaytarib yuborishingiz yoki almashtirishingiz mumkin.",
+  },
+
+  {
+    keywords: [
+      "operator",
+      "boglanish",
+      "telefon",
+      "aloqa",
+      "raqam",
+      "admin bilan gaplashaman",
+    ],
+    answer: "Operator bilan bog‘lanish: +998 91 --- -- --",
+  },
+
+  {
+    keywords: [
+      "qoidalar",
+      "offerta",
+      "maxfiylik",
+      "foydalanish shartlari",
+      "shartnoma",
+    ],
+    answer:
+      "Qoidalar bilan tanishish uchun havola: https://texnopbazaar/offerta",
+  },
+
+  {
+    keywords: [
+      "zakaz berish",
+      "buyurtma",
+      "olmoqchiman",
+      "sotib olaman",
+      "savatcha",
+    ],
+    answer:
+      "Mahsulotlarni savatchaga qo‘shib, manzilni kiritgan holda buyurtma berishingiz mumkin.",
+  },
+
+  {
+    keywords: [
+      "seller",
+      "sotuvchi bo‘laman",
+      "do‘kon ochaman",
+      "tovar joylash",
+      "platformada sotish",
+    ],
+    answer: "Seller bo‘lish uchun admin bilan bog‘laning: https://t.me/y_bahodirovich",
+  },
+
+  {
+    keywords: [
+      "shikoyat yuborish",
+      "kamchilik bor",
+      "feedback",
+      "noroziman",
+    ],
+    answer:
+      "Shikoyat yuborish uchun: https://t.me/savdo_x_bot",
+  },
+
+  {
+    keywords: ["versiya", "update", "sayt versiyasi"],
+    answer: "Saytning joriy versiyasi: 2.2.6",
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
   },
 ];
 
@@ -159,4 +287,8 @@ export function generateSmartReply(text) {
   }
 
   return "Assalomu alaykum! Sizga qanday yordam bera olaman?";
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d

@@ -110,7 +110,11 @@ const postFetch = async () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+<<<<<<< HEAD
       className="w-full overflow-auto bg-base-100 flex items-center justify-center p-4"
+=======
+      className="w-screen min-h-screen bg-base-100 flex items-center justify-center p-4"
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
     >
       <div className="w-full max-w-4xl">
         {/* Header */}

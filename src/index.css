@@ -1,7 +1,12 @@
 @import "tailwindcss";
+<<<<<<< HEAD
 @plugin "daisyui" {
   themes: all; 
 }
+=======
+@plugin "daisyui";
+
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
 
 .container{
     max-width: 100%;

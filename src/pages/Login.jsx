@@ -35,7 +35,11 @@ export default function Login() {
         })
       );
 
+<<<<<<< HEAD
  
+=======
+      // accessTokenni localStorage-ga saqlaymiz (api.js uchun)
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
       localStorage.setItem("accessToken", data.accessToken);
 
       navigate("/");
@@ -44,8 +48,11 @@ export default function Login() {
         err.response?.data?.message ||
         "Server bilan aloqa yo'q yoki CORS xatosi";
       setError(message);
+<<<<<<< HEAD
       
       
+=======
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
     }
   };
 

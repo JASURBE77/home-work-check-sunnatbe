@@ -26,7 +26,11 @@ const Rating = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
+<<<<<<< HEAD
         const res = await fetch("https://homework-backend-sunnatbe.onrender.com/top");
+=======
+        const res = await fetch("http://localhost:8080/top");
+>>>>>>> 668f6e499cbcb6a854d97ccc9ef853068bf6615d
         const data = await res.json();
 
         const sorted = [...data].sort((a, b) => b.wpm - a.wpm);
