@@ -22,6 +22,95 @@
     margin: 0 auto;
 }
 
+
+@keyframes rotateSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg) scale3d(1.1, 1.1, 1);
+  }
+}
+
+@keyframes spinFast {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes revolve {
+  0% {
+    border-color: #00ffff9c;
+    border-right-color: transparent;
+  }
+  25% {
+    border-color: #00ffff9c;
+    border-bottom-color: transparent;
+  }
+  50% {
+    border-color: #00ffff9c;
+    border-left-color: transparent;
+  }
+  75% {
+    border-color: #00ffff9c;
+    border-top-color: transparent;
+  }
+  100% {
+    border-color: #00ffff9c;
+    border-right-color: transparent;
+  }
+}
+
+@keyframes moveElectron {
+  0% {
+    top: 60%;
+    left: 100%;
+  }
+  25% {
+    top: 100%;
+    left: 60%;
+  }
+  50% {
+    top: 60%;
+    left: 0%;
+  }
+  75% {
+    top: 0%;
+    left: 60%;
+  }
+  100% {
+    top: 60%;
+    left: 100%;
+  }
+}
+
+/* Tailwind bilan ishlaydigan custom classlar */
+.animate-rotateSlow {
+  animation: rotateSlow 3s linear infinite;
+}
+
+.animate-spinFast {
+  animation: spinFast 1s linear infinite;
+}
+
+.animate-revolve {
+  animation: revolve 1s linear infinite;
+}
+
+.electron::before {
+  content: "";
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  background: cyan;
+  border-radius: 9999px;
+  animation: moveElectron 1s infinite;
+}
+
+
 @media only screen and (max-width:768px) {
     .container{
         max-width: 100%;

@@ -46,13 +46,13 @@ const Review = () => {
         {user.recentSubmissions.map((e, idx) => (
           <div
             key={e._id || idx}
-            className="max-w-xs bg-base-100 border rounded-xl shadow-md hover:shadow-lg transition"
+            className="max-w-xs bg-base-100  rounded-xl shadow-md hover:shadow-lg transition"
           >
             <div className="p-6">
               <p className="text-lg font-semibold break-all">{e.HwLink}</p>
 
               <p className="mt-2">
-                {e.description || "Hech qanday tavsif yo‘q"}
+              komentariya:  {e.description || "Hech qanday tavsif yo‘q"}
               </p>
 
               <p className="mt-1 text-sm opacity-60">

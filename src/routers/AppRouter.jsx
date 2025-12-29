@@ -10,6 +10,7 @@ import Review from "../pages/Review.jsx";
 import Profile from "../pages/Profile.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import Error from "../pages/Error.jsx";
+import TeacherTasks from "../pages/TeacherTasks.jsx";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,7 @@ const router = createBrowserRouter([
     { path: "typer", element: <MonkeyTypePage /> },
     { path: "rating", element: <Rating /> },
     { path: "profile", element: <Profile /> },
+    {path: "tasks" , element: <TeacherTasks />}
   ],
 },
 {path: "/500", element: <Error />},

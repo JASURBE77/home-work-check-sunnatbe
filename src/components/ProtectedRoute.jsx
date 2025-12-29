@@ -4,21 +4,25 @@ import { logout } from "../app/slice/authSlice";
 
 export default function ProtectedRoute({ children }) {
   const dispatch = useDispatch();
-  const token = useSelector((state) => state.auth.token);
+  const accessToken = useSelector((state) => state.auth.accessToken);
 
-  if (!token) {
+  // 🔒 token yo‘q bo‘lsa
+  if (!accessToken) {
     return <Navigate to="/login" replace />;
   }
 
   try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
+    // JWT decode
+    const payload = JSON.parse(atob(accessToken.split(".")[1]));
     const exp = payload.exp * 1000;
 
+    // ⏰ token eskirgan bo‘lsa
     if (Date.now() > exp) {
       dispatch(logout());
       return <Navigate to="/login" replace />;
     }
-  } catch {
+  } catch (err) {
+    // buzilgan token
     dispatch(logout());
     return <Navigate to="/login" replace />;
   }

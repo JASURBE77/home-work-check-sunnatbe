@@ -1,20 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
-import { Line } from "react-chartjs-2";
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Tooltip,
-  Legend,
-} from "chart.js";
-
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Tooltip, Legend);
+import React, { useEffect, useState } from "react";
 
 const WORDS = [
-  "react", "javascript", "frontend", "daisyui", "tailwind", "component",
+  "react", "javascript", "frontend", "tailwind", "component",
   "props", "state", "hook", "function", "variable", "network", "design",
   "responsive", "performance", "optimize", "animation", "framer", "motion",
   "keyboard", "challenge", "practice", "speed", "accuracy", "developer",
@@ -29,6 +16,107 @@ function randomWords(count = 50) {
   return arr;
 }
 
+// Keyboard Component
+const Keyboard = ({ pressedKey }) => {
+  const keyMap = {
+    'Escape': 'esc',
+    'Backspace': 'delete',
+    'Tab': 'tab',
+    'CapsLock': 'caps lock',
+    'Enter': 'return',
+    'Shift': 'shift',
+    ' ': 'space',
+  };
+
+  const isKeyPressed = (keyLabel) => {
+    if (!pressedKey) return false;
+    const normalizedPressed = keyMap[pressedKey] || pressedKey.toLowerCase();
+    const normalizedLabel = keyLabel.toLowerCase();
+    
+    if (normalizedLabel === 'space' && pressedKey === ' ') return true;
+    if (normalizedLabel === 'shift' && pressedKey === 'Shift') return true;
+    
+    return normalizedPressed === normalizedLabel;
+  };
+
+  const KeyButton = ({ children, className = "", special = false }) => (
+    <div className={`
+      ${special ? 'bg-gray-200' : 'bg-white'} 
+      border border-gray-300 rounded-lg shadow-sm
+      min-w-[35px] text-center px-2 py-2
+      text-xs font-medium text-gray-700
+      transition-all duration-75
+      ${isKeyPressed(children) ? 'bg-blue-400 text-white scale-95 shadow-inner' : 'hover:bg-gray-50'}
+      ${className}
+    `}>
+      {children}
+    </div>
+  );
+
+  return (
+    <div className="bg-gradient-to-b from-gray-100 to-gray-200 p-5 rounded-2xl shadow-lg w-full max-w-[600px] mx-auto select-none">
+      {/* Row 1: Function Keys */}
+      <div className="flex gap-1 mb-1">
+        <KeyButton special>esc</KeyButton>
+        {['F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12'].map(k => (
+          <KeyButton key={k} special>{k}</KeyButton>
+        ))}
+        <KeyButton special className="ml-3">⏏</KeyButton>
+      </div>
+
+      {/* Row 2: Numbers */}
+      <div className="flex gap-1 mb-1">
+        {['`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '='].map(k => (
+          <KeyButton key={k}>{k}</KeyButton>
+        ))}
+        <KeyButton special className="px-5">delete</KeyButton>
+      </div>
+
+      {/* Row 3: QWERTY */}
+      <div className="flex gap-1 mb-1">
+        <KeyButton special className="px-4">tab</KeyButton>
+        {['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '[', ']'].map(k => (
+          <KeyButton key={k}>{k}</KeyButton>
+        ))}
+        <KeyButton className="px-3">\</KeyButton>
+      </div>
+
+      {/* Row 4: ASDF */}
+      <div className="flex gap-1 mb-1">
+        <KeyButton special className="px-3">caps lock</KeyButton>
+        {['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ';', "'"].map(k => (
+          <KeyButton key={k}>{k}</KeyButton>
+        ))}
+        <KeyButton special className="flex-1">return</KeyButton>
+      </div>
+
+      {/* Row 5: ZXCV */}
+      <div className="flex gap-1 mb-1">
+        <KeyButton special className="px-8">shift</KeyButton>
+        {['Z', 'X', 'C', 'V', 'B', 'N', 'M', ',', '.', '/'].map(k => (
+          <KeyButton key={k}>{k}</KeyButton>
+        ))}
+        <KeyButton special className="flex-1">shift</KeyButton>
+      </div>
+
+      {/* Row 6: Bottom */}
+      <div className="flex gap-1">
+        <KeyButton special>fn</KeyButton>
+        <KeyButton special>ctrl</KeyButton>
+        <KeyButton special>⌥</KeyButton>
+        <KeyButton special>⌘</KeyButton>
+        <KeyButton className="flex-[5]">space</KeyButton>
+        <KeyButton special>⌘</KeyButton>
+        <KeyButton special>⌥</KeyButton>
+        <KeyButton special>◀</KeyButton>
+        <KeyButton special>▼</KeyButton>
+        <KeyButton special>▲</KeyButton>
+        <KeyButton special>▶</KeyButton>
+      </div>
+    </div>
+  );
+};
+
 export default function MonkeyTypePage() {
   const [wordPool, setWordPool] = useState(() => randomWords(120));
   const [index, setIndex] = useState(0);
@@ -42,27 +130,9 @@ export default function MonkeyTypePage() {
   const [finished, setFinished] = useState(false);
   const [wpm, setWpm] = useState(0);
   const [accuracy, setAccuracy] = useState(100);
-  const [leaderboard, setLeaderboard] = useState([]);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [savedResult, setSavedResult] = useState(null);
-  
-  const inputRef = useRef(null);
+  const [pressedKey, setPressedKey] = useState(null);
+
   const progress = Math.min(100, Math.round((index / wordPool.length) * 100));
-
-  // Leaderboard ni yuklash
-  useEffect(() => {
-    fetchLeaderboard();
-  }, []);
-
-  const fetchLeaderboard = async () => {
-    try {
-      const res = await fetch("http://localhost:8080/top");
-      const data = await res.json();
-      setLeaderboard(data); // backend faqat array qaytaradi
-    } catch (err) {
-      console.error("Leaderboard yuklashda xatolik:", err);
-    }
-  };
 
   // Timer
   useEffect(() => {
@@ -92,77 +162,74 @@ export default function MonkeyTypePage() {
     setTotalTyped(0);
     setCorrectWords(0);
     setWordPool(randomWords(120));
-    setShowSuccessModal(false);
-    setTimeout(() => inputRef.current?.focus(), 100);
   }
 
-  async function finishSession() {
+  function finishSession() {
     setStarted(false);
     setFinished(true);
-    setTimeout(() => inputRef.current?.blur(), 50);
-    await saveResult(wpm);
   }
 
-  const saveResult = async (finalWpm) => {
-    try {
-      const token = localStorage.getItem("token");
-      const userId = localStorage.getItem("userId");
+  // Fizik klaviatura event listener
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      setPressedKey(e.key);
 
-      if (!userId) return;
-
-      const res = await fetch("http://localhost:8080/addtyping", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }),
-        },
-        body: JSON.stringify({
-          userId,
-          wpm: finalWpm
-        })
-      });
-
-      const data = await res.json();
-      setSavedResult(data);
-      setShowSuccessModal(true);
-      fetchLeaderboard();
-    } catch (err) {
-      console.error("Typing saqlashda xatolik:", err);
-    }
-  };
-
-  function handleInputChange(e) {
-    const value = e.target.value;
-
-    if (!started && value.length > 0) startSession(duration);
-
-    if (value.endsWith(" ") || value.endsWith("\n")) {
-      const typed = value.trim();
-      const target = wordPool[index] || "";
-      setTotalTyped((t) => t + typed.length + 1);
-      
-      let matchChars = 0;
-      for (let i = 0; i < Math.min(typed.length, target.length); i++) {
-        if (typed[i] === target[i]) matchChars++;
+      // Agar hali boshlanmagan bo'lsa va biror harf bosilgan bo'lsa, start qil
+      if (!started && e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        startSession(duration);
       }
-      setCorrectChars((c) => c + matchChars);
-      if (typed === target) setCorrectWords((w) => w + 1);
 
-      setIndex((i) => i + 1);
-      setInput("");
-      return;
-    }
+      // Escape - reset
+      if (e.key === "Escape") {
+        setStarted(false);
+        setInput("");
+        setTimeLeft(duration);
+        setFinished(false);
+        return;
+      }
 
-    setInput(value);
-  }
+      if (!started) return;
 
-  function handleKeyDown(e) {
-    if (e.key === "Escape") {
-      setStarted(false);
-      setInput("");
-      setTimeLeft(duration);
-    }
-  }
+      // Backspace
+      if (e.key === "Backspace") {
+        e.preventDefault();
+        setInput((prev) => prev.slice(0, -1));
+      } 
+      // Space yoki Enter - so'zni tasdiqlash
+      else if (e.key === " " || e.key === "Enter") {
+        e.preventDefault();
+        const typed = input.trim();
+        const target = wordPool[index] || "";
+        setTotalTyped((t) => t + typed.length + 1);
+
+        let matchChars = 0;
+        for (let i = 0; i < Math.min(typed.length, target.length); i++) {
+          if (typed[i] === target[i]) matchChars++;
+        }
+        setCorrectChars((c) => c + matchChars);
+        if (typed === target) setCorrectWords((w) => w + 1);
+
+        setIndex((i) => i + 1);
+        setInput("");
+      } 
+      // Oddiy belgilar
+      else if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+        e.preventDefault();
+        setInput((prev) => prev + e.key);
+      }
+    };
+
+    const handleKeyUp = () => {
+      setPressedKey(null);
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, [input, started, duration, index, wordPool]);
 
   const currentWord = wordPool[index] || "";
 
@@ -170,17 +237,14 @@ export default function MonkeyTypePage() {
     const chars = word.split("");
     const typedChars = typed || "";
     return (
-      <div className="flex flex-wrap gap-0.5 items-center">
+      <div className="flex flex-wrap gap-0.5 items-center justify-center">
         {chars.map((ch, i) => {
           const typedCh = typedChars[i];
           const isCorrect = typedCh === ch;
           const isTyped = typeof typedCh !== "undefined";
-          const base = isTyped ? (isCorrect ? "text-success" : "text-error") : "text-base-content/60";
+          const color = isTyped ? (isCorrect ? "text-green-500" : "text-red-500") : "text-gray-500";
           return (
-            <span
-              key={i}
-              className={`inline-block px-1 py-0.5 rounded-md font-mono ${base} bg-transparent`}
-            >
+            <span key={i} className={`inline-block px-1 py-0.5 rounded font-mono text-2xl ${color}`}>
               {ch}
             </span>
           );
@@ -189,174 +253,99 @@ export default function MonkeyTypePage() {
     );
   }
 
-  // Chart uchun data
-  const chartData = {
-    labels: leaderboard.map((u) => u.name),
-    datasets: [
-      {
-        label: "WPM",
-        data: leaderboard.map((u) => u.wpm),
-        borderColor: 'rgb(99, 102, 241)',
-        backgroundColor: 'rgba(99, 102, 241, 0.1)',
-        pointRadius: 6,
-        pointBackgroundColor: 'rgb(99, 102, 241)',
-        borderWidth: 3,
-        tension: 0.4,
-      },
-    ],
-  };
-
-  const chartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: {
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: '#fff',
-        bodyColor: '#fff',
-        padding: 12,
-        displayColors: false,
-        callbacks: {
-          label: (context) => `${context.parsed.y} WPM`
-        }
-      },
-    },
-    scales: {
-      x: { 
-        ticks: { color: '#9ca3af', font: { size: 12, weight: '500' } },
-        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-      },
-      y: { 
-        beginAtZero: true,
-        ticks: { color: '#9ca3af', font: { size: 12, weight: '500' } },
-        grid: { color: 'rgba(156, 163, 175, 0.1)' }
-      },
-    },
-    animation: { duration: 1000, easing: "easeOutQuart" },
-  };
-
   return (
-    <div className="min-h-screen bg-base-100 p-4 flex flex-col items-center">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 p-6 flex flex-col items-center text-white">
+      <div className="w-full max-w-6xl">
         {/* Header */}
-        <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="mb-6">
+        <header className="mb-8">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl sm:text-3xl font-extrabold">MonkeyType — Practice</h1>
+            <h1 className="text-4xl font-extrabold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+              MonkeyType Practice
+            </h1>
             <div className="space-x-2">
-              <button onClick={() => startSession(30)} className="btn btn-sm btn-outline">30s</button>
-              <button onClick={() => startSession(60)} className="btn btn-sm btn-primary">60s</button>
-              <button onClick={() => startSession(120)} className="btn btn-sm btn-ghost">120s</button>
+              <button onClick={() => startSession(30)} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition">30s</button>
+              <button onClick={() => startSession(60)} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg text-sm font-medium transition">60s</button>
+              <button onClick={() => startSession(120)} className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg text-sm font-medium transition">120s</button>
             </div>
           </div>
-        </motion.header>
+        </header>
 
-        {/* Main */}
-        <motion.main initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <section className="lg:col-span-2 bg-white/5 p-6 rounded-2xl shadow-md">
-            {/* Timer, WPM, Accuracy, Buttons */}
-            <div className="flex sm:flex-row sm:items-center sm:justify-between mb-4 gap-4">
-              <div><div className="text-sm opacity-70">Time</div><div className="text-2xl font-bold">{timeLeft}s</div></div>
-              <div><div className="text-sm opacity-70">WPM</div><div className="text-2xl font-bold">{wpm}</div></div>
-              <div><div className="text-sm opacity-70">Accuracy</div><div className="text-2xl font-bold">{accuracy}%</div></div>
-              <div className="ml-auto">
-                {!started && !finished ? (
-                  <button onClick={() => startSession(duration)} className="btn btn-primary">Start</button>
-                ) : started ? (
-                  <button onClick={finishSession} className="btn btn-error">Stop</button>
-                ) : (
-                  <button onClick={() => startSession(duration)} className="btn btn-success">Restart</button>
-                )}
+        {/* Stats Bar */}
+        <div className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl shadow-xl mb-6">
+          <div className="grid grid-cols-4 gap-6">
+            <div className="text-center">
+              <div className="text-sm text-gray-400 mb-1">Time</div>
+              <div className="text-3xl font-bold text-blue-400">{timeLeft}s</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-400 mb-1">WPM</div>
+              <div className="text-3xl font-bold text-green-400">{wpm}</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-400 mb-1">Accuracy</div>
+              <div className="text-3xl font-bold text-purple-400">{accuracy}%</div>
+            </div>
+            <div className="text-center">
+              <div className="text-sm text-gray-400 mb-1">Words</div>
+              <div className="text-3xl font-bold text-yellow-400">{correctWords}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Typing Area */}
+        <div className="bg-gray-800/50 backdrop-blur-sm p-8 rounded-2xl shadow-xl mb-6">
+          <div className="text-sm text-gray-400 mb-4 text-center">
+            {!started && !finished ? "Start typing to begin..." : started ? "Type the highlighted word:" : "Session finished!"}
+          </div>
+          
+          <div className="bg-gray-900/50 p-6 rounded-xl min-h-[180px] flex flex-col justify-center mb-4">
+            {/* Next words preview */}
+            <div className="mb-6 flex flex-wrap gap-3 justify-center">
+              {wordPool.slice(index, index + 8).map((w, i) => (
+                <span
+                  key={`${w}-${i}`}
+                  className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                    i === 0 
+                      ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105" 
+                      : "bg-gray-700 text-gray-300"
+                  }`}
+                >
+                  {w}
+                </span>
+              ))}
+            </div>
+
+            {/* Current word being typed */}
+            <div className="mt-2 mb-4">
+              {renderWord(currentWord, input)}
+            </div>
+
+            {/* Visual input representation */}
+            <div className="text-center">
+              <div className="inline-block px-6 py-3 bg-gray-800 border-2 border-gray-600 rounded-lg min-w-[300px]">
+                <span className="text-xl font-mono text-white">{input || "_"}</span>
               </div>
             </div>
+          </div>
 
-            {/* Word Typing */}
-            <div className="mb-4">
-              <div className="text-sm opacity-60 mb-2">Type the highlighted word:</div>
-              <div className="bg-base-100 p-4 rounded-lg min-h-[96px] flex flex-col justify-center">
-                <div className="mb-2 flex flex-wrap gap-2 items-center">
-                  {wordPool.slice(index, index + 10).map((w, i) => (
-                    <motion.span
-                      key={`${w}-${i}`}
-                      initial={{ opacity: 0.6, scale: 0.98 }}
-                      animate={{ opacity: 1, scale: i === 0 ? 1.02 : 1 }}
-                      className={`px-3 py-1 rounded-md font-medium ${i === 0 ? "bg-primary text-primary-content" : "bg-base-100 text-base-content/70"}`}
-                    >
-                      {w}
-                    </motion.span>
-                  ))}
-                </div>
-                <div className="mt-2 text-lg sm:text-2xl font-mono">{renderWord(currentWord, input)}</div>
-                <input
-                  ref={inputRef}
-                  value={input}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  placeholder="Start typing..."
-                  className="input input-bordered w-full mt-4 bg-transparent"
-                  disabled={!started && finished}
-                />
-              </div>
-            </div>
+          {/* Progress */}
+          <div className="mb-2 text-sm text-gray-400 flex justify-between">
+            <span>Progress: {progress}%</span>
+            <span>Typed: {totalTyped} chars</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2 overflow-hidden">
+            <div 
+              className="bg-gradient-to-r from-blue-500 to-purple-600 h-full transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
 
-            {/* Progress */}
-            <div className="mt-2">
-              <div className="text-sm opacity-70 mb-1">Progress</div>
-              <progress className="progress progress-primary w-full" value={progress} max="100"></progress>
-            </div>
-          </section>
+        {/* Keyboard */}
+        <Keyboard pressedKey={pressedKey} />
 
-          {/* Right Sidebar */}
-          <aside className="bg-white/5 p-4 rounded-2xl shadow-md">
-            <div className="mb-4">
-              <div className="text-sm opacity-60">Stats</div>
-              <div className="flex flex-col gap-2 mt-2">
-                <div className="flex justify-between"><span className="opacity-80">Typed chars</span><span className="font-medium">{totalTyped}</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Correct chars</span><span className="font-medium">{correctChars}</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Correct words</span><span className="font-medium">{correctWords}</span></div>
-                <div className="flex justify-between"><span className="opacity-80">Session length</span><span className="font-medium">{duration}s</span></div>
-              </div>
-            </div>
-
-            <div className="divider" />
-            <div className="mb-4">
-              <div className="text-sm opacity-60">Theme</div>
-           
-            </div>
-
-            <div className="divider" />
-            <div>
-              <div className="text-sm opacity-60">Quick tips</div>
-              <ul className="list-disc pl-5 mt-2 text-sm opacity-80">
-                <li>Use home row and avoid looking at keyboard</li>
-                <li>Type whole word then press space</li>
-                <li>Press Esc to reset current session</li>
-              </ul>
-            </div>
-          </aside>
-        </motion.main>
-
-  
-
-        {/* Success Modal */}
-        {showSuccessModal && savedResult && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowSuccessModal(false)}>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} className="bg-base-200 p-8 rounded-2xl shadow-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-              <div className="text-center">
-                <div className="text-6xl mb-4">{savedResult.message && savedResult.message.includes('rekord') ? '🎉' : '✅'}</div>
-                <h3 className="text-2xl font-bold mb-2">{savedResult.message || 'Natija saqlandi'}</h3>
-                <div className="space-y-2 mt-4">
-                  <div className="flex justify-between"><span className="opacity-70">Your WPM:</span><span className="font-bold">{wpm}</span></div>
-                  {savedResult.data?.bestWP && (<div className="flex justify-between"><span className="opacity-70">Best WPM:</span><span className="font-bold text-success">{savedResult.data.bestWP}</span></div>)}
-                </div>
-                <button onClick={() => setShowSuccessModal(false)} className="btn btn-primary mt-6 w-full">Continue</button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-
-        <footer className="mt-6 text-center opacity-70 text-sm">
-          Made with ❤️ · DaisyUI + Tailwind + Framer Motion
+        <footer className="mt-8 text-center text-gray-500 text-sm">
+          Press any key to start · ESC to reset · Space to confirm word
         </footer>
       </div>
     </div>

@@ -40,9 +40,9 @@ export default function Profile() {
         <div className="card bg-base-100 shadow-xl rounded-3xl p-6 md:p-8 border border-base-300 w-full">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
-              <div className="avatar">
+              <div className="">
                 <div className="w-32 h-32 md:w-40 md:h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                  <img src={user.avatar || "/default-avatar.png"} alt="Profile" />
+                <span className='text-black text-5xl'>{user.name[0].toUpperCase()}{user.surname[0].toUpperCase()}</span>
                 </div>
               </div>
               <div className="badge badge-primary absolute -bottom-2 -right-2 text-white font-bold">
@@ -159,7 +159,6 @@ export default function Profile() {
               </div>
             </div>
           </div>
-
         </div>
       </div>
     </div>

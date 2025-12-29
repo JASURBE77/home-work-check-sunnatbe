@@ -4,7 +4,7 @@ import { Home, Send, Github, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
 
-const API_URL = 'http://localhost:8080/postHomeWork';
+const API_URL = ' http://localhost:8080/postHomeWork';
 
 const INITIAL_FORM = {
   link: '',
