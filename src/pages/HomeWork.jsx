@@ -3,8 +3,7 @@ import { motion } from 'framer-motion';
 import { Home, Send, Github, MessageSquare } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
-
-const API_URL = ' http://localhost:8080/postHomeWork';
+import api from '../utils/api';
 
 const INITIAL_FORM = {
   link: '',
@@ -20,9 +19,7 @@ export default function HouseDonationPage() {
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState('');
 
-  // --------------------
-  // Validation (faqat bo‘sh bo‘lmasligi)
-  // --------------------
+
   const validateForm = useCallback(() => {
     const newErrors = {};
 
@@ -51,21 +48,21 @@ const postFetch = async () => {
   setServerError('');
 
   try {
-    const res = await fetch(API_URL, {
+    const res = await api({
+      url: '/postHomeWork',
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,  // Tokenni Authorization headerga qo'shamiz
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        HwLink: formData.link,
+      data: {
+        HwLink: formData.link,       // ⚡ backendga mos
         description: formData.comment,
-      }),
+      },
     });
 
-    if (!res.ok) {
-      const errorText = await res.text();
-      throw new Error(errorText);
+    // axios ishlatsa:
+    if (res.status !== 201) {
+      throw new Error(res.data?.message || 'Xato yuz berdi');
     }
 
     setSubmitted(true);
@@ -73,11 +70,12 @@ const postFetch = async () => {
     setTimeout(() => setSubmitted(false), 3000);
   } catch (err) {
     console.error(err);
-    setServerError('Server bilan ulanishda xatolik yuz berdi');
+    setServerError(err.message || 'Server bilan ulanishda xatolik yuz berdi');
   } finally {
     setLoading(false);
   }
 };
+
   // --------------------
   // Handlers
   // --------------------
@@ -115,7 +113,7 @@ const postFetch = async () => {
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-primary rounded-2xl mb-4 shadow-lg">
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-[#FFB608] rounded-2xl mb-4 shadow-lg">
             <Home className="w-10 h-10 text-white" />
           </div>
           <h1 className="text-4xl md:text-5xl font-bold mb-2">
@@ -131,7 +129,7 @@ const postFetch = async () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="card bg-base-100 shadow-xl rounded-3xl p-6 md:p-8 border"
+          className="card bg-base-100 shadow-xl rounded-3xl p-6 md:p-8 "
         >
           {submitted ? (
             <div className="text-center py-12">
@@ -198,7 +196,7 @@ const postFetch = async () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="btn btn-primary w-full gap-2 disabled:opacity-60"
+                className="btn bg-[#FFB608] text-white w-full gap-2 disabled:opacity-60"
               >
                 {loading ? 'Yuborilmoqda...' : (
                   <>

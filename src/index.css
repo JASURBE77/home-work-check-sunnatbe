@@ -22,6 +22,41 @@
     margin: 0 auto;
 }
 
+.exam-card,
+.question-box {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.1);
+}
+
+.start-btn,
+.answer-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+.start-btn {
+  background: #4f46e5;
+  color: #fff;
+}
+
+.answer-btn {
+  background: #e5e7eb;
+}
+
+.answer-btn:hover {
+  background: #4f46e5;
+  color: white;
+}
+
+
 
 @keyframes rotateSlow {
   from {

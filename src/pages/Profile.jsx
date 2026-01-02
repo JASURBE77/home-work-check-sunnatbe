@@ -41,7 +41,7 @@ export default function Profile() {
           <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
               <div className="">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                <div className="w-32 h-32 flex items-center justify-center md:w-40 md:h-40 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
                 <span className='text-black text-5xl'>{user.name[0].toUpperCase()}{user.surname[0].toUpperCase()}</span>
                 </div>
               </div>

@@ -30,9 +30,10 @@ const App = () => {
   }, [dispatch, navigate, token]);
 
   return (
-    <div className="container">
+<div>
       <Header />
-      <div className="flex gap-10">
+      <div className="container">
+        <div className="flex gap-10">
         <Sidebar />
         <div className="max-h-screen overflow-auto w-full!">
           <Outlet />
@@ -40,6 +41,7 @@ const App = () => {
       </div>
       <ChatBot />
     </div>
+</div>
   );
 };
 

@@ -34,9 +34,7 @@ const Header = () => {
   }, [storedUser]);
 
   if (loading || !user) {
-    return (
-      <span className="loading loading-spinner text-primary"></span>
-    );
+    return <span className="loading loading-spinner text-primary"></span>;
   }
 
   const checkout = () => {
@@ -47,23 +45,25 @@ const Header = () => {
   };
 
   return (
-    <header className="mt-2 mb-5">
-      <div className="navbar rounded-xl px-10 bg-base-100 shadow-sm">
+    <header >
+      <div className="navbar  px-10 shadow-sm "   >
         <div className="flex-1">
-          <a className="btn btn-ghost text-xs md:text-xl">EMIRHAN HUB</a>
+          <a className="btn btn-ghost text-xs md:text-xl ">
+            EMIRHAN HUB
+          </a>
         </div>
 
         <div className="flex gap-5 items-center">
           <LanguageSelector />
 
-          <div className="dropdown dropdown-end">
+          <div className="dropdown dropdown-end ">
             <div
               tabIndex={0}
               role="button"
-              className="btn btn-ghost btn-circle bg-primary"
+              className="btn  btn-ghost btn-circle bg-gray-300"
             >
               <div className="w-10 flex items-center justify-center rounded-full">
-                <span className="text-2xl text-base-100">
+                <span className="text-2xl text-white">
                   {user?.name?.[0]?.toUpperCase()}
                   {user?.surname?.[0]?.toUpperCase()}
                 </span>

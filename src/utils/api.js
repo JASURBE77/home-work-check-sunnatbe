@@ -8,17 +8,17 @@ export const instance = axios.create({
 instance.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status;
-    const url = error.config?.url;
+    if (error.response) {
+      const status = error.response.status;
 
-    // 🔥 login endpoint uchun redirect qilmaymiz
-    if (status === 401 && !url.includes("/login")) {
-      localStorage.removeItem("accessToken");
-      window.location.href = "/login";
-    }
+      if (status === 401 && window.location.pathname !== "/login") {
+        localStorage.removeItem("accessToken");
+        window.location.href = "/login";
+      }
 
-    if ([500, 502, 503, 429].includes(status)) {
-      window.location.href = "/500";
+      if ([500, 502, 503, 429].includes(status)) {
+        window.location.href = "/500";
+      }
     }
 
     return Promise.reject(error);

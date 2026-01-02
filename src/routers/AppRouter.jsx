@@ -11,31 +11,30 @@ import Profile from "../pages/Profile.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import Error from "../pages/Error.jsx";
 import TeacherTasks from "../pages/TeacherTasks.jsx";
+import Test from "../components/Test.jsx";
 
 const router = createBrowserRouter([
   {
-  path: "/",
-  element: (
-    <ProtectedRoute>
-      <App />
-    </ProtectedRoute>
-  ),
-  children: [
-    { index: true, element: <Home /> },
-    { path: "homework", element: <HomeWork /> },
-    { path: "reviews", element: <Review /> },
-    { path: "typer", element: <MonkeyTypePage /> },
-    { path: "rating", element: <Rating /> },
-    { path: "profile", element: <Profile /> },
-    {path: "tasks" , element: <TeacherTasks />}
-  ],
-},
-{path: "/500", element: <Error />},
-{
-  path: "/login",
-  element: <Login />,
-},
-
+    path: "/",
+    element: (
+      <ProtectedRoute>
+        <App />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Home /> },
+      { path: "homework", element: <HomeWork /> },
+      { path: "reviews", element: <Review /> },
+      { path: "typer", element: <MonkeyTypePage /> },
+      { path: "rating", element: <Rating /> },
+      { path: "profile", element: <Profile /> },
+      // Majburiy bo‘lmagan groupId qo‘shdik:
+      { path: "tasks", element: <TeacherTasks /> },
+      { path: "/student-exam/:examSession", element: <Test />}
+    ],
+  },
+  { path: "/500", element: <Error /> },
+  { path: "/login", element: <Login /> },
 ]);
 
 const AppRouter = () => <RouterProvider router={router} />;

@@ -16,12 +16,12 @@ const Sidebar = () => {
   ];
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 py-2 px-3 rounded-xl transition
-    ${isActive ? "bg-primary text-white" : "hover:bg-neutral hover:text-white"}`;
+    `flex items-center gap-3 py-2 px-3 rounded-xl transition text-black
+    ${isActive ? "bg-[#FFB608] text-white" : "hover:bg-neutral hover:text-white"}`;
 
   return (
     <>
-      <aside className="hidden md:block h-full bg-gradient-to-b from-indigo-600 to-purple-700 text-white p-5 shadow-xl rounded-xl w-[280px]">
+      <aside className="hidden md:block h-screen  text-white p-5 shadow-xl w-[400px]">
         <nav>
           <ul className="flex flex-col gap-4">
             {links.map(({ to, icon, label }) => (
