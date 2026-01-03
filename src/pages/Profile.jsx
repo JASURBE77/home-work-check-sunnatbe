@@ -88,11 +88,13 @@ export default function Profile() {
 
             {/* Profile Info */}
             <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold text-base-content mb-2">{user.name}</h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-base-content mb-2">{user.name}  {user.surname}</h1>
+              <h2 className='text-xl md:text-2xl mb-3'>Role: {user.role}</h2>
+              <h2 className='text-xl md:text-2xl mb-3'>Group name: {user.group.name}</h2>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-base-content/70 mb-4">
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
-                  <span className="text-sm">{t('homework.joined') || `Qo'shildi: ${user.joinDate}`}</span>
+                  <span className="text-sm">{user.joinDate && `Qo'shildi: ${user.joinDate}`}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-yellow-400" />
@@ -168,9 +170,9 @@ export default function Profile() {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            submission.status === 'completed' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
+                            submission.status === 'CHECKED' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
                           }`}>
-                            {submission.status === 'completed' ? <CheckCircle className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
+                            {submission.status === 'CHECKED' ? <CheckCircle className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
                           </div>
                           <div>
                             <div className="text-base-content font-semibold">{submission.description || "No title"}</div>
@@ -178,9 +180,9 @@ export default function Profile() {
                           </div>
                         </div>
                         <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          submission.status === 'completed' ? 'bg-success/20 text-success border border-success/30' : 'bg-warning/20 text-warning border border-warning/30'
+                          submission.status === 'CHECKED' ? 'bg-success/20 text-success border border-success/30' : 'bg-warning/20 text-warning border border-warning/30'
                         }`}>
-                          {submission.status === 'completed' ? t('status_good', 'Topshirildi') : t('status_ok', 'Jarayonda')}
+                          {submission.status === 'CHECKED' ? t('status_good', 'Topshirildi') : t('status_ok', 'Jarayonda')}
                         </div>
                       </div>
                     </div>
