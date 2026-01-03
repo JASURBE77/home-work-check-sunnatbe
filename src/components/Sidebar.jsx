@@ -10,7 +10,6 @@ const Sidebar = () => {
   const links = [
     { to: "/", icon: <LampDesk />, label: t("home") },
     { to: "/homework", icon: <Backpack />, label: t("homework-link") },
-    { to: "/typer", icon: <Gamepad2 />, label: t("games") },
     { to: "/reviews", icon: <Code />, label: t("code") },
     { to: "/tasks", icon: <CodeXml />, label: t("tasks") },
   ];

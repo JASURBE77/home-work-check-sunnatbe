@@ -12,6 +12,7 @@ import ProtectedRoute from "../components/ProtectedRoute.jsx";
 import Error from "../pages/Error.jsx";
 import TeacherTasks from "../pages/TeacherTasks.jsx";
 import Test from "../components/Test.jsx";
+import HistoryTest from "../pages/HistoryTest.jsx";
 
 const router = createBrowserRouter([
   {
@@ -30,7 +31,11 @@ const router = createBrowserRouter([
       { path: "profile", element: <Profile /> },
       // Majburiy bo‘lmagan groupId qo‘shdik:
       { path: "tasks", element: <TeacherTasks /> },
-      { path: "/student-exam/:examSession", element: <Test />}
+      { path: "/student-exam/:examSession", element: <Test />},
+      {
+        path: "/historytask",
+        element: <HistoryTest />
+      }
     ],
   },
   { path: "/500", element: <Error /> },

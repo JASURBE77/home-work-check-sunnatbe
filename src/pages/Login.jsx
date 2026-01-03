@@ -58,8 +58,8 @@ export default function Login() {
 
   return (
     <div className="">
-      <div className="flex items-center justify-around">
-        <h1 className="font-bold text-3xl my-6">Login Page</h1>
+      <div className="flex items-center bg-[#FFB608]  justify-around">
+        <h1 className="font-bold text-3xl my-6 text-white">Login Page</h1>
         <LanguageSelector />
       </div>
 
@@ -100,7 +100,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading} 
-            className="btn btn-primary w-full uppercase tracking-wide mb-2"
+            className="btn bg-[#FFB608] text-white w-full uppercase tracking-wide mb-2"
           >
              {loading ? "Loading... " : "login"}
 

@@ -33,10 +33,6 @@ const Header = () => {
     fetchProfile();
   }, [storedUser]);
 
-  if (loading || !user) {
-    return <span className="loading loading-spinner text-primary"></span>;
-  }
-
   const checkout = () => {
     dispatch(logout());
     localStorage.removeItem("accessToken");
@@ -45,10 +41,10 @@ const Header = () => {
   };
 
   return (
-    <header >
-      <div className="navbar  px-10 shadow-sm "   >
+    <header className="bg-[#FFB608]">
+      <div className="navbar px-10 shadow-sm">
         <div className="flex-1">
-          <a className="btn btn-ghost text-xs md:text-xl ">
+          <a className="btn btn-ghost text-white text-xs md:text-xl">
             EMIRHAN HUB
           </a>
         </div>
@@ -56,34 +52,41 @@ const Header = () => {
         <div className="flex gap-5 items-center">
           <LanguageSelector />
 
-          <div className="dropdown dropdown-end ">
-            <div
-              tabIndex={0}
-              role="button"
-              className="btn  btn-ghost btn-circle bg-gray-300"
-            >
-              <div className="w-10 flex items-center justify-center rounded-full">
-                <span className="text-2xl text-white">
-                  {user?.name?.[0]?.toUpperCase()}
-                  {user?.surname?.[0]?.toUpperCase()}
-                </span>
-              </div>
+          {loading ? (
+            // Skeleton loader
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
             </div>
+          ) : (
+            <div className="dropdown dropdown-end">
+              <div
+                tabIndex={0}
+                role="button"
+                className="btn btn-ghost btn-circle bg-gray-300"
+              >
+                <div className="w-10 flex items-center justify-center rounded-full">
+                  <span className="text-2xl text-white">
+                    {user?.name?.[0]?.toUpperCase()}
+                    {user?.surname?.[0]?.toUpperCase()}
+                  </span>
+                </div>
+              </div>
 
-            <ul
-              tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-            >
-              <li>
-                <Link to="/profile">
-                  Profile <span className="badge">New</span>
-                </Link>
-              </li>
-              <li>
-                <button onClick={checkout}>Logout</button>
-              </li>
-            </ul>
-          </div>
+              <ul
+                tabIndex={0}
+                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
+              >
+                <li>
+                  <Link to="/profile">
+                    Profile <span className="badge">New</span>
+                  </Link>
+                </li>
+                <li>
+                  <button onClick={checkout}>Logout</button>
+                </li>
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </header>

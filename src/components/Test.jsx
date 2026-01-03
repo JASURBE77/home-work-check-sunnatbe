@@ -8,9 +8,7 @@ const ExamPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [isFinished, setIsFinished] = useState(false); // 🔹 Imtihon tugaganini belgilash
-
-  // Pagination
+  const [isFinished, setIsFinished] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
 
@@ -21,18 +19,10 @@ const ExamPage = () => {
     }
   }, [examSession, page]);
 
-  // 🔹 Imtihon allaqachon tugagan yoki boshlanmaganligini tekshirish
   const checkExamStatus = async () => {
     try {
-      const res = await api({
-        url: `/student-exam/status/${examSession}`, // 🔹 backenddan status endpoint
-        method: "GET",
-      });
-
-      // res.data.status: "started" | "finished" | "not_started"
-      if (res.data.status === "finished") {
-        setIsFinished(true);
-      }
+      const res = await api({ url: `/student-exam/status/${examSession}`, method: "GET" });
+      if (res.data.status === "finished") setIsFinished(true);
     } catch (err) {
       console.error("Imtihon statusini olishda xatolik", err);
     }
@@ -41,13 +31,8 @@ const ExamPage = () => {
   const fetchQuestions = async (pageNumber) => {
     try {
       setLoading(true);
-      const res = await api({
-        url: `/question/exams/${examSession}/questions?page=${pageNumber}`,
-        method: "GET",
-      });
-
-      const data = Array.isArray(res.data.data) ? res.data.data : [];
-      setQuestions(data);
+      const res = await api({ url: `/question/exams/${examSession}/questions?page=${pageNumber}`, method: "GET" });
+      setQuestions(Array.isArray(res.data.data) ? res.data.data : []);
       setCurrentIndex(0);
       setTotalPages(res.data.totalPages || 1);
     } catch (err) {
@@ -59,20 +44,17 @@ const ExamPage = () => {
   };
 
   const postAnswer = async () => {
-    if (isFinished) return; // 🔹 tugagan bo‘lsa javob yuborilmaydi
+    if (isFinished || !selectedAnswer) return;
 
     const question = questions[currentIndex];
-    if (!question || !selectedAnswer) return;
+    if (!question) return;
 
     try {
+      setLoading(true);
       await api({
         url: "/student-exam/answer",
         method: "POST",
-        data: {
-          sessionId: examSession,
-          questionId: question._id,
-          selectedAnswerId: selectedAnswer,
-        },
+        data: { sessionId: examSession, questionId: question._id, selectedAnswerId: selectedAnswer },
       });
 
       setSelectedAnswer(null);
@@ -86,6 +68,8 @@ const ExamPage = () => {
       }
     } catch (err) {
       console.error("Javob yuborishda xatolik", err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -93,66 +77,82 @@ const ExamPage = () => {
     if (isFinished) return;
 
     try {
-      await api({
-        url: "/student-exam/finish",
-        method: "POST",
-        data: { sessionId: examSession },
-      });
-      setIsFinished(true); // 🔹 tugatildi deb belgilash
+      setLoading(true);
+      await api({ url: "/student-exam/finish", method: "POST", data: { sessionId: examSession } });
+      setIsFinished(true);
       alert("✅ Imtihon yakunlandi!");
     } catch (err) {
       console.error("Imtihonni yakunlashda xatolik", err);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const isLastQuestion = () => {
-    return currentIndex === questions.length - 1 && page === totalPages - 1;
-  };
+  const isLastQuestion = () => currentIndex === questions.length - 1 && page === totalPages - 1;
 
-  if (loading) return <p>Yuklanmoqda...</p>;
-  if (questions.length === 0) return <p>Savollar topilmadi</p>;
+  if (loading && questions.length === 0)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Yuklanmoqda...</p>
+      </div>
+    );
+
+  if (questions.length === 0)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-gray-500">Savollar topilmadi</p>
+      </div>
+    );
 
   const question = questions[currentIndex];
 
   return (
-    <div className="p-4 max-w-xl mx-auto">
+    <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
       {isFinished && (
-        <p className="mb-4 text-red-600 font-bold">
+        <div className="mb-4 px-4 py-2 bg-red-100 text-red-600 rounded-lg font-bold">
           ⚠️ Imtihon allaqachon tugatilgan
-        </p>
+        </div>
       )}
 
-      <h2 className="text-xl font-bold mb-4">
-        Savol {currentIndex + 1} / {questions.length} (Page {page + 1} / {totalPages})
-      </h2>
+      <div className="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 space-y-4">
+        <div className="flex justify-between mb-2 text-gray-500 text-sm">
+          <span>Savol {currentIndex + 1} / {questions.length}</span>
+          <span>Page {page + 1} / {totalPages}</span>
+        </div>
 
-      <div className="border p-4 rounded">
-        <h3 className="font-semibold">{question.question}</h3>
-        <p className="text-sm text-gray-500 mb-3">{question.description}</p>
+        <h2 className="text-purple-700 font-bold text-lg mb-2">{question.question}</h2>
+        <p className="text-gray-500 text-sm mb-4">{question.description}</p>
 
-        {question.answers.map((ans) => (
-          <label key={ans._id} className="block mb-2 cursor-pointer">
-            <input
-              type="radio"
-              name="answer"
-              value={ans._id}
-              checked={selectedAnswer === ans._id}
-              onChange={() => setSelectedAnswer(ans._id)}
-              className="mr-2"
-              disabled={isFinished} // 🔹 tugagan bo‘lsa radio ham disabled
-            />
-            {ans.value}
-          </label>
-        ))}
+        <div className="space-y-3">
+          {question.answers.map((ans) => (
+            <label
+              key={ans._id}
+              className={`flex items-center p-3 border rounded-lg cursor-pointer transition
+                ${selectedAnswer === ans._id ? "border-purple-500 bg-purple-50" : "border-gray-300 hover:border-purple-300"}
+              `}
+            >
+              <input
+                type="radio"
+                name={`answer-${currentIndex}`}
+                value={ans._id}
+                checked={selectedAnswer === ans._id}
+                onChange={() => setSelectedAnswer(ans._id)}
+                className="mr-3 accent-purple-600"
+                disabled={isFinished || loading}
+              />
+              <span className="text-gray-700">{ans.value}</span>
+            </label>
+          ))}
+        </div>
 
         <button
           onClick={isLastQuestion() ? finishExam : postAnswer}
-          disabled={!selectedAnswer || isFinished} // 🔹 tugagan bo‘lsa button disabled
-          className={`mt-4 px-4 py-2 rounded text-white ${
-            !isFinished && selectedAnswer ? "bg-[#FFB608]" : "bg-gray-400 cursor-not-allowed"
-          }`}
+          disabled={!selectedAnswer || isFinished || loading}
+          className={`w-full mt-4 py-2 rounded-lg font-semibold text-white transition
+            ${!isFinished && selectedAnswer && !loading ? "bg-[#FFB608] hover:bg-yellow-500" : "bg-gray-400 cursor-not-allowed"}
+          `}
         >
-          {isLastQuestion() ? "Yakunlash" : "Keyingi savol"}
+          {loading ? "Kuting..." : isLastQuestion() ? "Yakunlash" : "Keyingi savol"}
         </button>
       </div>
     </div>
