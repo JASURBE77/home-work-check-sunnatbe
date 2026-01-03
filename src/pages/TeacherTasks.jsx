@@ -6,6 +6,9 @@ const TeacherTasks = () => {
   const [groupId, setGroupId] = useState("");
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [startingId, setStartingId] = useState(null);
+const [startLoading, setStartLoading] = useState(false);
+
   const navigate = useNavigate();
 
   // 🔹 teacher ma'lumotini olish
@@ -81,6 +84,7 @@ const TeacherTasks = () => {
             className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition"
           >
             <h3 className="text-lg font-bold text-purple-700 mb-2">{task.examId?.title}</h3>
+            <p>description {task.examId?.description}</p>
 
             <p className="text-gray-600 mb-1">
               <span className="font-semibold">Group:</span> {task.groupId?.groupName}
