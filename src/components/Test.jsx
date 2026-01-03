@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import api from "../utils/api";
 
@@ -72,6 +72,7 @@ const ExamPage = () => {
       setLoading(false);
     }
   };
+  const navigate = useNavigate()
 
   const finishExam = async () => {
     if (isFinished) return;
@@ -81,6 +82,7 @@ const ExamPage = () => {
       await api({ url: "/student-exam/finish", method: "POST", data: { sessionId: examSession } });
       setIsFinished(true);
       alert("✅ Imtihon yakunlandi!");
+      navigate('/')
     } catch (err) {
       console.error("Imtihonni yakunlashda xatolik", err);
     } finally {
