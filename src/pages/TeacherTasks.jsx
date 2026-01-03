@@ -62,7 +62,7 @@ const TeacherTasks = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 flex flex-col items-center space-y-6 bg-gray-50">
+    <div className="min-h-screen p-4 flex flex-col items-center space-y-6">
       <div className="w-full max-w-3xl flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold text-gray-700">Teacher Tasks</h2>
         <button className="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition">
