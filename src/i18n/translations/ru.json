@@ -38,25 +38,96 @@
       "commentMax": "Комментарий не должен превышать 50 символов"
     }
   },
-    "profile": {
-    "name": "Пользователь",
-    "joined": "Присоединился: 01 Января 2025",
-    "totalLessons": "Всего уроков",
-    "completedLessons": "Завершено",
-    "pendingLessons": "Ожидается",
+  "student_controller": "Student Controller",
+  "login_title": "Войдите в свой аккаунт",
+  "login_placeholder": "Введите логин",
+  "password_placeholder": "Введите пароль",
+  "login_button": "Войти",
+  "loading": "Загрузка...",
+  "no_account": "Нет аккаунта?",
+  "sign_up": "Регистрация",
+  "login_server_error": "Нет связи с сервером или ошибка CORS",
+    "dashboard": {
+    "hello": "Привет",
+    "total_points": "Общий балл",
+    "score": "Баллы",
+    "items": "шт",
+    "user_not_found": "Пользователь не найден"
+  },
+    "review": {
+    "refresh": "Обновить",
+    "empty": "Заданий нет",
+    "comment": "Комментарий",
+    "no_description": "Описание отсутствует",
+    "date": "Дата",
+    "status": "Статус",
+    "teacher_feedback": "Комментарий преподавателя",
+    "no_feedback": "Комментарий отсутствует",
+    "score": "Баллы"
+  },
+  
+  "teacherTasks": {
+    "title": "Задания преподавателя",
+    "empty": "Заданий нет",
+    "description": "Описание",
+    "group": "Группа",
+    "status": "Статус",
+    "start": "Начало",
+    "end": "Окончание",
+    "finished": "Завершено",
+    "start_exam": "Начать экзамен",
+    "view_result": "Посмотреть ответы"
+  },
+    "history": {
+    "exam_result": "результат экзамена",
+    "back": "Назад",
+    "status": "Статус",
+    "started_at": "Время начала",
+    "finished_at": "Время окончания",
+    "score": "Баллы",
+    "questions": "Вопросы и ответы",
+    "no_questions": "Вопросов нет",
+    "question": "Вопрос",
+    "your_answer": "Ваш ответ",
+    "correct_answer": "Правильный ответ",
+    "answer_score": "Баллы",
+    "no_result": "Результат не найден",
+    "no_question_text": "Текст вопроса отсутствует",
+    "not_found": "Не найдено"
+  },
+   "profile": {
+    "notFound": "Данные не найдены",
+    "role": "Роль",
+    "group": "Группа",
+    "noGroup": "У вас нет группы",
+    "joined": "Присоединился",
+    "progress": "Прогресс обучения",
     "overallProgress": "Общий прогресс",
     "recentSubmissions": "Последние задания",
-    "streak": "Серия",
-    "days": "дней подряд",
-    "achievements": "Достижения",
-    "first10": "Первые 10",
-    "first10Desc": "Сдать 10 уроков",
-    "fastLearner": "Быстрый ученик",
-    "fastLearnerDesc": "5 дней подряд",
-    "perfection": "Совершенство",
-    "perfectionDesc": "75% выполнения",
-    "status_good": "Сдано",
-    "status_ok": "В процессе"
+    "noSubmissions": "Заданий нет",
+    "noTitle": "Без названия",
+    "totalLessons": "Всего уроков",
+    "completedLessons": "Выполнено",
+    "pendingLessons": "В ожидании"
+  },
+  "status": {
+    "checked": "Проверено",
+    "pending": "В процессе"
+  },
+    "sidebar": {
+    "menu": "Меню",
+    "links": {
+      "home": "Главная",
+      "homework": "Домашнее задание",
+      "code": "Выполненные задания",
+      "tasks": "Задачи"
+    },
+    "footer": {
+      "version": "Версия 1.0.5",
+      "authors": "Рустамов & Ходжимурадов"
+    }
   }
+
+
 
 }

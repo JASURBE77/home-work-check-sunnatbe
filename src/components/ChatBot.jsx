@@ -21,25 +21,18 @@ export default function ChatBot() {
     if (!input.trim()) return;
 
     const text = input.trim();
-
-    // User message
     setMessages((prev) => [...prev, { from: "user", text }]);
     setInput("");
-
-    // Bot typing animation
     setTyping(true);
-    await new Promise((res) => setTimeout(res, 600));
+
+    const reply = await generateSmartReply(text);
+
     setTyping(false);
-
-    // Bot reply
-    const reply = generateSmartReply(text);
-
     setMessages((prev) => [...prev, { from: "bot", text: reply }]);
   }
 
   return (
     <div>
-      {/* Floating Button */}
       <button
         onClick={() => setOpen(!open)}
         className="fixed bottom-6 right-6 btn btn-primary btn-circle shadow-lg text-2xl"
@@ -47,19 +40,13 @@ export default function ChatBot() {
         {open ? "×" : "💬"}
       </button>
 
-      {/* Chat Box */}
       {open && (
         <div className="fixed bottom-24 right-6 w-80 bg-base-100 shadow-2xl rounded-2xl border">
-          {/* Header */}
           <div className="bg-primary text-primary-content p-3 font-semibold text-lg rounded-t-2xl">
             HelperBot 🤖
           </div>
 
-          {/* Messages */}
-          <div
-            ref={scrollRef}
-            className="h-80 overflow-y-auto p-3 space-y-3 bg-base-200"
-          >
+          <div ref={scrollRef} className="h-80 overflow-y-auto p-3 space-y-3 bg-base-200">
             {messages.map((m, i) => (
               <div
                 key={i}
@@ -70,7 +57,7 @@ export default function ChatBot() {
                     m.from === "user" ? "bg-primary text-white" : "bg-white text-gray-800"
                   }`}
                   dangerouslySetInnerHTML={{ __html: m.text }}
-                ></div>
+                />
               </div>
             ))}
 
@@ -83,7 +70,6 @@ export default function ChatBot() {
             )}
           </div>
 
-          {/* Input */}
           <div className="flex border-t p-2 gap-2">
             <input
               value={input}

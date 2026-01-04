@@ -4,7 +4,6 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import api from "../utils/api";
 import { logout } from "../app/slice/authSlice";
-
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -41,12 +40,11 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[#FFB608]">
-      <div className="navbar px-10 shadow-sm">
-        <div className="flex-1">
-          <a className="btn btn-ghost text-white text-xs md:text-xl">
-            EMIRHAN HUB
-          </a>
+    <header className="bg-[#FFB608] fixed top-0 z-[999] w-full ">
+      <div className="navbar px-10 flex items-center justify-between shadow-sm">
+        <div className="flex items-center ml-5 md:ml-0 gap-5">
+       <img className="w-16" src="/logo.png" alt="" />
+       <span className="text-2xl text-white font-bold hidden md:block">Student controller</span>
         </div>
 
         <div className="flex gap-5 items-center">

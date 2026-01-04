@@ -12,7 +12,7 @@
   "overall_progress": "Umumiy progress",
   "status_bad": "Juda past",
   "status_ok": "Yaxshi",
-  "status_good": "A'lo",
+  "status_good": "Topshirildi",
   
   "homework": {
     "title": "Uy Ishi Topshirish",
@@ -40,25 +40,96 @@
     }
   },
 
+  
+  "student_controller": "Student Controller",
+  "login_title": "Hisobingizga kiring",
+  "login_placeholder": "Login kiriting",
+  "password_placeholder": "Parol kiriting",
+  "login_button": "Kirish",
+  "loading": "Yuklanmoqda...",
+  "no_account": "Hisobingiz yo‘qmi?",
+  "sign_up": "Ro‘yxatdan o‘tish",
+  "login_server_error": "Server bilan aloqa yo‘q yoki CORS xatosi",
+
+    "dashboard": {
+    "hello": "Salom",
+    "total_points": "Jami ball",
+    "score": "Ball",
+    "items": "ta",
+    "user_not_found": "Foydalanuvchi topilmadi"
+  },
+    "review": {
+    "refresh": "Yangilash",
+    "empty": "Hech qanday topshiriq yo‘q",
+    "comment": "Izoh",
+    "no_description": "Hech qanday tavsif yo‘q",
+    "date": "Sana",
+    "status": "Holati",
+    "teacher_feedback": "O‘qituvchi izohi",
+    "no_feedback": "Izoh berilmagan",
+    "score": "Ball"
+  },
+    "teacherTasks": {
+    "title": "O‘qituvchi topshiriqlari",
+    "empty": "Topshiriqlar yo‘q",
+    "description": "Tavsif",
+    "group": "Guruh",
+    "status": "Holati",
+    "start": "Boshlanish",
+    "end": "Tugash",
+    "finished": "Yakunlangan",
+    "start_exam": "Imtihonni boshlash",
+    "view_result": "Yechilgan javoblarni ko‘rish"
+  },
+    "history": {
+    "exam_result": "imtihon natijasi",
+    "back": "Ortga qaytish",
+    "status": "Holati",
+    "started_at": "Boshlangan vaqti",
+    "finished_at": "Tugagan vaqti",
+    "score": "Ball",
+    "questions": "Savollar va javoblar",
+    "no_questions": "Savollar mavjud emas",
+    "question": "Savol",
+    "your_answer": "Sizning javobingiz",
+    "correct_answer": "To‘g‘ri javob",
+    "answer_score": "Ball",
+    "no_result": "Natija topilmadi",
+    "no_question_text": "Savol matni mavjud emas",
+    "not_found": "Topilmadi"
+  },
     "profile": {
-    "name": "Foydalanuvchi",
-    "joined": "Qo'shildi: 01 Yanvar 2025",
-    "totalLessons": "Jami dars",
+    "notFound": "Ma’lumot topilmadi",
+    "role": "Roli",
+    "group": "Guruh",
+    "noGroup": "Sizning guruhingiz yo‘q",
+    "joined": "Qo‘shildi",
+    "progress": "O‘qish jarayoni",
+    "overallProgress": "Umumiy jarayon",
+    "recentSubmissions": "So‘nggi topshiriqlar",
+    "noSubmissions": "Hech qanday topshiriq yo‘q",
+    "noTitle": "Sarlavha yo‘q",
+    "totalLessons": "Jami darslar",
     "completedLessons": "Topshirildi",
-    "pendingLessons": "Kutilmoqda",
-    "overallProgress": "Umumiy progress",
-    "recentSubmissions": "So'nggi topshiriqlar",
-    "streak": "Ketma-ketlik",
-    "days": "kun ketma-ket",
-    "achievements": "Yutuqlar",
-    "first10": "Birinchi 10 ta",
-    "first10Desc": "10 ta dars topshirish",
-    "fastLearner": "Tezkor o'quvchi",
-    "fastLearnerDesc": "5 kun ketma-ket",
-    "perfection": "Mukammallik",
-    "perfectionDesc": "75% bajarish",
-    "status_good": "Bajarildi",
-    "status_ok": "Jarayonda"
+    "pendingLessons": "Kutilmoqda"
+  },
+  "status": {
+    "checked": "Topshirildi",
+    "pending": "Jarayonda"
+  },
+    "sidebar": {
+    "menu": "Menyu",
+    "links": {
+      "home": "Bosh sahifa",
+      "homework": "Uyga vazifa",
+      "code": "Tugallangan vazifalar",
+      "tasks": "Vazifalar"
+    },
+    "footer": {
+      "version": "Version 1.0.5",
+      "authors": "Rustamov & Xojimurodov"
+    }
   }
 
 }
+

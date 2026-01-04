@@ -33,13 +33,12 @@ const App = () => {
 <div>
       <Header />
       <div className="container">
-        <div className="flex gap-10">
+        <div className="flex gap-10 mt-20">
         <Sidebar />
         <div className="max-h-screen overflow-auto w-full!">
           <Outlet />
         </div>
       </div>
-      <ChatBot />
     </div>
 </div>
   );

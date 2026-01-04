@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useTranslation } from 'react-i18next';
-import { User, BookOpen, CheckCircle, Trophy, Calendar, Target, TrendingUp } from 'lucide-react';
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
+import {
+  BookOpen,
+  CheckCircle,
+  Trophy,
+  Calendar,
+  Target,
+  TrendingUp,
+} from "lucide-react";
 import api from "../utils/api";
+import dayjs from "dayjs";
 
 export default function Profile() {
   const { t } = useTranslation();
@@ -11,9 +19,10 @@ export default function Profile() {
   const [user, setUser] = useState(storedUser || null);
   const [loading, setLoading] = useState(true);
 
-  const completionPercentage = user?.totalLessons > 0
-    ? Math.round((user.completedLessons / user.totalLessons) * 100)
-    : 0;
+  const completionPercentage =
+    user?.totalLessons > 0
+      ? Math.round((user.completedLessons / user.totalLessons) * 100)
+      : 0;
 
   const fetchProfile = async () => {
     try {
@@ -30,7 +39,7 @@ export default function Profile() {
     fetchProfile();
   }, [storedUser]);
 
-  // --- Skeleton loader ---
+  // ---------- OLD SKELETON LOADER ----------
   if (loading) {
     return (
       <div className="p-4 space-y-6">
@@ -67,133 +76,134 @@ export default function Profile() {
     );
   }
 
-  if (!user) return <p className="text-center mt-10 text-red-500">Ma’lumot topilmadi</p>;
+  if (!user) {
+    return (
+      <p className="text-center mt-10 text-red-500">{t("profile.notFound")}</p>
+    );
+  }
 
   return (
-    <div className="w-full bg-base-100 shadow-xl p-4 md:p-8 overflow-auto">
-      <div className="space-y-6">
-        {/* Profile Card */}
-        <div className="card bg-base-100 shadow-xl rounded-3xl p-6 md:p-8 border border-base-300 w-full">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-            <div className="relative">
-              <div className="w-32 h-32 md:w-40 md:h-40 flex items-center justify-center rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                <span className='text-black text-5xl'>
-                  {user.name[0].toUpperCase()}{user.surname[0].toUpperCase()}
+    <div className="w-full bg-base-100 shadow-xl p-4 md:p-8">
+      {/* ===== PROFILE CARD ===== */}
+      <div className="card bg-base-100 shadow-xl rounded-3xl p-6 border border-base-300">
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="relative">
+            <div className="w-32 h-32 rounded-full flex items-center justify-center ring ring-primary ring-offset-2">
+              <span className="text-5xl font-bold">
+                {user.name?.[0]}
+                {user.surname?.[0]}
+              </span>
+            </div>
+            <div className="badge badge-primary absolute -bottom-2 -right-2">
+              {user.level}
+            </div>
+          </div>
+
+          <div className="flex-1 text-center md:text-left">
+            <h1 className="text-3xl font-bold">
+              {user.name} {user.surname}
+            </h1>
+
+            <p className="text-xl mt-1">
+              {t("profile.role")}: {user.role}
+            </p>
+
+            <p className="text-xl">
+              {t("profile.group")}: {user.group?.name || t("profile.noGroup")}
+            </p>
+
+            <div className="flex flex-wrap gap-4 mt-3 text-sm opacity-70">
+              <div className="flex items-center gap-2">
+                <Calendar size={16} />
+                {user.joinDate &&
+                  `${t("profile.joined")}: ${dayjs(user.joinDate).format(
+                    "YYYY-MM-DD"
+                  )}`}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Trophy size={16} className="text-yellow-500" />
+                {user.points || 0} {t("rating")}
+              </div>
+            </div>
+
+            {/* STATS */}
+            <div className="stats stats-vertical md:stats-horizontal mt-4 bg-base-200 rounded-xl">
+              <div className="stat">
+                <div className="stat-title">{t("profile.totalLessons")}</div>
+                <div className="stat-value">{user.totalLessons}</div>
+              </div>
+
+              <div className="stat">
+                <div className="stat-title">{t("profile.completedLessons")}</div>
+                <div className="stat-value text-success">{user.completedLessons}</div>
+              </div>
+
+              <div className="stat">
+                <div className="stat-title">{t("profile.pendingLessons")}</div>
+                <div className="stat-value text-warning">{user.pendingLessons}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== PROGRESS ===== */}
+      <div className="card mt-6 bg-base-100 shadow-xl rounded-3xl p-6 ">
+        <div className="flex items-center gap-3 mb-3">
+          <Target className="text-primary" />
+          <h2 className="text-2xl font-bold">{t("profile.progress")}</h2>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className="p-4 rounded-xl bg-success/20">
+            <CheckCircle className="text-success mb-1" />
+            <p className="font-semibold">{t("status.checked")}</p>
+            <p className="text-2xl font-bold">{user.completedLessons}</p>
+          </div>
+
+          <div className="p-4 rounded-xl bg-warning/20">
+            <BookOpen className="text-warning mb-1" />
+            <p className="font-semibold">{t("status.pending")}</p>
+            <p className="text-2xl font-bold">{user.pendingLessons}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ===== RECENT SUBMISSIONS ===== */}
+      <div className="card mt-6 bg-base-100 shadow-xl rounded-3xl p-6 ">
+        <div className="flex items-center gap-3 mb-4">
+          <TrendingUp className="text-primary" />
+          <h2 className="text-2xl font-bold">{t("profile.recentSubmissions")}</h2>
+        </div>
+
+        {user.recentSubmissions?.length > 0 ? (
+          <div className="space-y-3">
+            {user.recentSubmissions.map((s, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl shadow-md  flex justify-between items-center"
+              >
+                <div>
+                  <p className="font-semibold">{s.description || t("profile.noTitle")}</p>
+                  <p className="text-sm opacity-60">{s.date}</p>
+                </div>
+
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                    s.status === "CHECKED"
+                      ? "bg-success/20 text-success"
+                      : "bg-warning/20 text-warning"
+                  }`}
+                >
+                  {s.status === "CHECKED" ? t("status.checked") : t("status.pending")}
                 </span>
               </div>
-              <div className="badge badge-primary absolute -bottom-2 -right-2 text-white font-bold">
-                {user.level}
-              </div>
-            </div>
-
-            {/* Profile Info */}
-            <div className="flex-1 text-center md:text-left">
-              <h1 className="text-3xl md:text-4xl font-bold text-base-content mb-2">{user.name}  {user.surname}</h1>
-              <h2 className='text-xl md:text-2xl mb-3'>Role: {user.role}</h2>
-              <h2 className='text-xl md:text-2xl mb-3'>Group name: {user.group.name}</h2>
-              <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-base-content/70 mb-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span className="text-sm">{user.joinDate && `Qo'shildi: ${user.joinDate}`}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Trophy className="w-4 h-4 text-yellow-400" />
-                  <span className="text-sm font-semibold">{user.points || 0} {t('rating')}</span>
-                </div>
-              </div>
-
-              {/* Stats Row */}
-              <div className="stats stats-vertical md:stats-horizontal shadow bg-base-200 rounded-xl w-full">
-                <div className="stat">
-                  <div className="stat-title">{t('profile.totalLessons', 'Jami dars')}</div>
-                  <div className="stat-value">{user.totalLessons}</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">{t('profile.completedLessons', 'Topshirildi')}</div>
-                  <div className="stat-value text-success">{user.completedLessons}</div>
-                </div>
-                <div className="stat">
-                  <div className="stat-title">{t('profile.pendingLessons', 'Kutilmoqda')}</div>
-                  <div className="stat-value text-warning">{user.pendingLessons}</div>
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-
-        {/* Progress + Recent Submissions */}
-        <div className="grid md:grid-cols-3 gap-6 w-full">
-          <div className="md:col-span-2 space-y-6">
-            {/* Progress Card */}
-            <div className="card bg-base-100 shadow-xl rounded-3xl border border-base-300 p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <Target className="w-6 h-6 text-primary" />
-                <h2 className="text-2xl font-bold text-base-content">{t('progress_title')}</h2>
-              </div>
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-base-content/70">{t('overall_progress')}</span>
-                  <span className="text-base-content font-bold text-lg">{completionPercentage}%</span>
-                </div>
-                <progress className="progress progress-primary w-full" value={completionPercentage} max="100"></progress>
-
-                <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div className="card bg-success/20 border border-success/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-success mb-2">
-                      <CheckCircle className="w-5 h-5" />
-                      <span className="font-semibold">{t('status_good', 'Bajarildi')}</span>
-                    </div>
-                    <div className="text-2xl font-bold">{user.completedLessons} ta</div>
-                  </div>
-                  <div className="card bg-warning/20 border border-warning/30 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-warning mb-2">
-                      <BookOpen className="w-5 h-5" />
-                      <span className="font-semibold">{t('status_ok', 'Qolgan')}</span>
-                    </div>
-                    <div className="text-2xl font-bold">{user.pendingLessons} ta</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Submissions */}
-            <div className="card bg-base-100 shadow-xl rounded-3xl border border-base-300 p-6 w-full">
-              <div className="flex items-center gap-3 mb-4">
-                <TrendingUp className="w-6 h-6 text-primary" />
-                <h2 className="text-2xl font-bold text-base-content">{t('profile.recentSubmissions', 'So\'nggi topshiriqlar')}</h2>
-              </div>
-
-              <div className="space-y-3 overflow-x-auto">
-                {user.recentSubmissions && user.recentSubmissions.length > 0 ? (
-                  user.recentSubmissions.map((submission, idx) => (
-                    <div key={submission.id || idx} className="card bg-base-100 border border-base-300 rounded-xl p-4 hover:bg-base-100 transition-all w-full">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                            submission.status === 'CHECKED' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'
-                          }`}>
-                            {submission.status === 'CHECKED' ? <CheckCircle className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
-                          </div>
-                          <div>
-                            <div className="text-base-content font-semibold">{submission.description || "No title"}</div>
-                            <div className="text-base-content/70 text-sm">{submission.date}</div>
-                          </div>
-                        </div>
-                        <div className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          submission.status === 'CHECKED' ? 'bg-success/20 text-success border border-success/30' : 'bg-warning/20 text-warning border border-warning/30'
-                        }`}>
-                          {submission.status === 'CHECKED' ? t('status_good', 'Topshirildi') : t('status_ok', 'Jarayonda')}
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-center text-gray-500">Hech qanday topshiriq yo'q</p>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
+        ) : (
+          <p className="text-center text-gray-500">{t("profile.noSubmissions")}</p>
+        )}
       </div>
     </div>
   );
