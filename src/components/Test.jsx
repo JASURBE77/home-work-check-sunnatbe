@@ -114,55 +114,77 @@ const ExamPage = () => {
     }
   };
 
-  // 🔹 oxirgi savolni yuborish va modal bilan ball ko‘rsatish
-  const submitLastAndFinish = async () => {
-    if (!selectedAnswer || isFinished || actionLoading) return;
-
-    const question = questions[currentIndex];
-    if (!question) return;
+  // 🔹 oxirgi savolni yuborish va yakunlash
+  const finishExam = async () => {
+    if (isFinished || actionLoading) return;
 
     try {
       setActionLoading(true);
 
-      // javobni yuborish
-      await api({
-        url: "/student-exam/answer",
-        method: "POST",
-        data: {
-          sessionId: examSession,
-          questionId: question._id,
-          selectedAnswerId: selectedAnswer,
-        },
-      });
+      // oxirgi javobni yuborish
+      if (selectedAnswer) {
+        const question = questions[currentIndex];
+        await api({
+          url: "/student-exam/answer",
+          method: "POST",
+          data: {
+            sessionId: examSession,
+            questionId: question._id,
+            selectedAnswerId: selectedAnswer,
+          },
+        });
+      }
 
-      // imtihonni yakunlash va jami ballni olish
+      // imtihonni yakunlash
       const finishRes = await api({
         url: "/student-exam/finish",
         method: "POST",
         data: { sessionId: examSession },
       });
 
-      // serverdan kelgan ballni set qilish
       setScore(finishRes.data.totalScore || 0);
       setIsFinished(true);
 
-      // 🔹 finish bo‘lganda localStorage tozalash
+      // 🔹 localStorage tozalash
       localStorage.removeItem(`exam-${examSession}-currentIndex`);
       localStorage.removeItem(`exam-${examSession}-page`);
       localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
     } catch (err) {
-      console.error("Oxirgi savolda xatolik", err);
+      console.error("Imtihonni finish qilishda xatolik", err);
     } finally {
       setActionLoading(false);
     }
   };
+
+  // 🔹 Browser tab close / vkladka o‘zgarsa examni finish qilish
+  useEffect(() => {
+    const handleBeforeUnload = async (e) => {
+      await finishExam();
+      e.preventDefault();
+      e.returnValue = "";
+    };
+
+    const handleVisibilityChange = async () => {
+      if (document.hidden) {
+        await finishExam();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, [selectedAnswer, questions, currentIndex]);
 
   // 🔹 modaldan keyin navigate qilish
   useEffect(() => {
     if (isFinished && score !== null) {
       const timer = setTimeout(() => {
         navigate("/tasks");
-      }, 3000); // 3 soniya modal ko‘rsatiladi
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [isFinished, score, navigate]);
@@ -228,7 +250,7 @@ const ExamPage = () => {
         </div>
 
         <button
-          onClick={isLastQuestion() ? submitLastAndFinish : postAnswer}
+          onClick={isLastQuestion() ? finishExam : postAnswer}
           disabled={!selectedAnswer || actionLoading || isFinished}
           className={`w-full py-2 rounded-lg font-semibold text-white transition
             ${selectedAnswer && !actionLoading && !isFinished ? "bg-[#FFB608] hover:bg-yellow-500" : "bg-gray-400 cursor-not-allowed"}`}

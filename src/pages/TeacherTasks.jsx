@@ -8,7 +8,7 @@ const TeacherTasks = () => {
   const [groupId, setGroupId] = useState("");
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [startingId, setStartingId] = useState(null);
+  const [startingId, setStartingId] = useState(null); // Loading spinner uchun
   const [showModal, setShowModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
@@ -46,7 +46,7 @@ const TeacherTasks = () => {
   // 🔹 examni boshlash
   const startexam = async (sessionId) => {
     try {
-      setStartingId(sessionId);
+      setStartingId(sessionId); // Loading spinner ochiladi
       const res = await api({
         url: "/student-exam/start",
         method: "POST",
@@ -57,7 +57,7 @@ const TeacherTasks = () => {
     } catch (error) {
       console.error("xatolik", error);
     } finally {
-      setStartingId(null);
+      setStartingId(null); // Loading spinner yopiladi
       setShowModal(false);
     }
   };
@@ -65,7 +65,7 @@ const TeacherTasks = () => {
   // 🔹 finished exam natijasini ko‘rish
   const viewResult = async (sessionId) => {
     try {
-      setStartingId(sessionId);
+      setStartingId(sessionId); // Loading spinner
       const res = await api({
         url: `/student-exam/status`,
         method: "GET",
@@ -93,26 +93,6 @@ const TeacherTasks = () => {
     setShowModal(true);
   };
 
-  // --- Browser tabni tark qilsa examni finish qilish
-  useEffect(() => {
-    const handleBeforeUnload = async (e) => {
-      if (!selectedSession) return;
-      e.preventDefault();
-      e.returnValue = ""; // Chrome uchun
-      try {
-        await api({
-          url: "/student-exam/finish",
-          method: "POST",
-          data: { sessionId: selectedSession },
-        });
-      } catch (err) {
-        console.error("Exam finish error on tab close:", err);
-      }
-    };
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [selectedSession]);
-
   if (loading && tasks.length === 0) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center p-4 space-y-6">
@@ -139,6 +119,7 @@ const TeacherTasks = () => {
       <div className="w-full max-w-3xl grid gap-4">
         {tasks.map((task) => {
           const isFinished = task.studentExam?.status === "finished";
+          const isDisabled = startingId === task._id || task.status === "pending";
 
           return (
             <div key={task._id} className="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
@@ -151,21 +132,26 @@ const TeacherTasks = () => {
 
               <button
                 onClick={() => isFinished ? viewResult(task._id) : handleStartClick(task._id)}
-                disabled={startingId === task._id}
+                disabled={isDisabled}
                 className={`w-full py-2 rounded-lg font-semibold transition flex items-center justify-center gap-2
                   ${isFinished
                     ? "bg-green-500 hover:bg-green-600 text-white"
-                    : startingId === task._id
+                    : isDisabled
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-[#FFB608] hover:bg-yellow-500 text-white"
                   }`}
               >
                 {startingId === task._id ? (
                   <>
+                    {/* Loading spinner */}
                     <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     {t("loading")}
                   </>
-                ) : isFinished ? t("teacherTasks.view_result") : t("teacherTasks.start_exam")}
+                ) : isFinished ? (
+                  t("teacherTasks.view_result")
+                ) : (
+                  t("teacherTasks.start_exam")
+                )}
               </button>
             </div>
           );
@@ -174,7 +160,7 @@ const TeacherTasks = () => {
 
       {/* ✅ Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-white bg-opacity-100 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-xl shadow-lg w-96 text-center space-y-4">
             <p className="text-gray-700 text-base">
               Xurmatli o'quvchi. Imtihonni boshlaganingizdan so'ng uni tark etsangiz imtihondan yiqilasiz! Brauzeringizda yangi oyna ochishga urinsangiz yoki platformamizni tark etsangiz, imtihon tugatiladi va o'sha paytgacha to'plangan ballingiz hisoblanadi! Boshlashga rozimisiz?
@@ -188,8 +174,11 @@ const TeacherTasks = () => {
               </button>
               <button
                 onClick={() => startexam(selectedSession)}
-                className="px-6 py-2 rounded-lg bg-[#FFB608] hover:bg-yellow-500 text-white"
+                className="px-6 py-2 rounded-lg bg-[#FFB608] hover:bg-yellow-500 text-white flex items-center justify-center gap-2"
               >
+                {startingId === selectedSession && (
+                  <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                )}
                 Boshlash
               </button>
             </div>
