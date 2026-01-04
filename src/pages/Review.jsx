@@ -101,8 +101,8 @@ const Review = () => {
                   }
                 >
                   {e.status === "CHECKED"
-                    ? t("profile.status_good")
-                    : t("profile.status_ok")}
+                    ? t("status.checked")
+                    : t("status.pending")}
                 </span>
               </p>
 

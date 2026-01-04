@@ -44,7 +44,7 @@ export default function Dashboard() {
 // 🔄 Loader
 if (loading) {
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-6 animate-pulse">
+    <div className="min-h-screen  p-6 space-y-6 animate-pulse">
       {/* Header skeleton */}
       <div className="h-10 w-72 bg-gray-300 rounded"></div>
 
@@ -95,7 +95,7 @@ if (loading) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6 space-y-8">
+    <div className="min-h-screen  p-6 space-y-8">
       {/* 👋 Header */}
       <h1 className="text-4xl font-bold">
         {t("dashboard.hello")}, {user.name} 👋
@@ -154,8 +154,8 @@ if (loading) {
                   }`}
                 >
                   {sub.status === "CHECKED"
-                    ? t("profile.status_good")
-                    : t("profile.status_ok")}
+                    ? t("status.checked")
+                    : t("status.pending")}
                 </span>
               </div>
 
