@@ -117,7 +117,7 @@ export default function Profile() {
                 <Calendar size={16} />
                 {user.joinDate &&
                   `${t("profile.joined")}: ${dayjs(user.joinDate).format(
-                    "YYYY-MM-DD"
+                    "DD.MM.YYYY"
                   )}`}
               </div>
 
@@ -186,7 +186,7 @@ export default function Profile() {
               >
                 <div>
                   <p className="font-semibold">{s.description || t("profile.noTitle")}</p>
-                  <p className="text-sm opacity-60">{s.date}</p>
+                  <p className="text-sm opacity-60">{dayjs(s.date).format("DD.MM.YYYY")}</p>
                 </div>
 
                 <span
