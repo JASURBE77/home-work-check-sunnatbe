@@ -7,7 +7,7 @@ import api from "../utils/api";
 import { useTranslation } from "react-i18next";
 import LoginImg from "../assets/LoginImg.svg";
 import Text from "../assets/text.svg";
-
+import Logo from "../assets/logo.png"
 export default function Login() {
   const [loginInput, setLoginInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
@@ -58,7 +58,7 @@ export default function Login() {
         <div className="w-1/2 relative">
           <img
             className="h-screen w-full object-cover"
-            src="/logo.png"
+            src={Logo}
             alt="login"
           />
 
