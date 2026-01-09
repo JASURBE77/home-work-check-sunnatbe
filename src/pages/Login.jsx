@@ -6,7 +6,6 @@ import { loginSuccess } from "../app/slice/authSlice";
 import api from "../utils/api";
 import { useTranslation } from "react-i18next";
 import LoginImg from "../assets/LoginImg.svg";
-import Logo from "/public/Logo.png";
 import Text from "../assets/text.svg";
 
 export default function Login() {
@@ -59,7 +58,7 @@ export default function Login() {
         <div className="w-1/2 relative">
           <img
             className="h-screen w-full object-cover"
-            src={LoginImg}
+            src="/logo.png"
             alt="login"
           />
 
