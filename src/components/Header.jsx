@@ -3,7 +3,7 @@ import LanguageSelector from "./LanguageSelector";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import api from "../utils/api";
-import Logo from "/public/logo.png";
+
 import { logout } from "../app/slice/authSlice";
 
 const Header = () => {
@@ -45,7 +45,7 @@ const Header = () => {
     <header className="z-999 w-full">
       <div className="navbar flex items-center justify-end md:justify-between">
         <div className="hidden md:flex justify-start items-center">
-          <img src={Logo} alt="logo" className="w-20 h-20" />
+          <img src="/logo.png" alt="logo" className="w-20 h-20" />
           <h2 className="text-2xl text-black font-bold">Student Control</h2>
         </div>
 
