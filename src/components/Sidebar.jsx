@@ -30,6 +30,8 @@ const Sidebar = () => {
               </NavLink>
             ))}
           </ul>
+
+          <span className="absolute bottom-4 text-xl">Rustamov & Xojimurodov</span>
         </nav>
 
         <div className="mt-auto text-gray-500 text-sm space-y-1">
@@ -55,7 +57,7 @@ const Sidebar = () => {
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-[260px] z-99999 bg-base-100 shadow-xl z-50 transform transition-transform duration-300
+        className={`fixed top-0 left-0 h-full w-[260px] z-99999 bg-base-100 shadow-xl transform transition-transform duration-300
         ${open ? "translate-x-0" : "-translate-x-full"}`}
       >
         <div className="flex items-center justify-between p-4 border-b">
