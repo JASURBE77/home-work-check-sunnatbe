@@ -3,7 +3,9 @@ import LanguageSelector from "./LanguageSelector";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import api from "../utils/api";
+import Logo from "/public/logo.png";
 import { logout } from "../app/slice/authSlice";
+
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -40,49 +42,49 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-[#FFB608] fixed top-0 z-[999] w-full ">
-      <div className="navbar px-10 flex items-center justify-between shadow-sm">
-        <div className="flex items-center ml-5 md:ml-0 gap-5">
-       <img className="w-16" src="/logo.png" alt="" />
-       <span className="text-2xl text-white font-bold hidden md:block">Student controller</span>
+    <header className="z-999 w-full">
+      <div className="navbar flex items-center justify-end md:justify-between">
+        <div className="hidden md:flex justify-start items-center">
+          <img src={Logo} alt="logo" className="w-20 h-20" />
+          <h2 className="text-2xl text-black font-bold">Student Control</h2>
         </div>
 
         <div className="flex gap-5 items-center">
           <LanguageSelector />
 
           {loading ? (
-            // Skeleton loader
             <div className="flex items-center gap-2">
               <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
             </div>
           ) : (
-            <div className="dropdown dropdown-end">
-              <div
-                tabIndex={0}
-                role="button"
-                className="btn btn-ghost btn-circle bg-gray-300"
-              >
-                <div className="w-10 flex items-center justify-center rounded-full">
-                  <span className="text-2xl text-white">
-                    {user?.name?.[0]?.toUpperCase()}
-                    {user?.surname?.[0]?.toUpperCase()}
-                  </span>
+            <div className="flex justify-center items-center gap-2">
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost btn-circle bg-gray-800">
+                  <div className="w-10 flex items-center justify-center rounded-full">
+                    <span className="text-xl text-white">
+                      {user?.name?.[0]?.toUpperCase()}
+                      {user?.surname?.[0]?.toUpperCase()}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <ul
-                tabIndex={0}
-                className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-              >
-                <li>
-                  <Link to="/profile">
-                    Profile <span className="badge">New</span>
-                  </Link>
-                </li>
-                <li>
-                  <button onClick={checkout}>Logout</button>
-                </li>
-              </ul>
+                <ul
+                  tabIndex={0}
+                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
+                  <li className="text-xl font-semibold">
+                    <Link to="/profile">Hisobingiz</Link>
+                  </li>
+                  <li className="text-xl font-semibold">
+                    <button onClick={checkout}>Chiqish</button>
+                  </li>
+                </ul>
+              </div>
+              <span className="text-black text-[19px]">
+                {user?.name} {user?.surname}
+              </span>
             </div>
           )}
         </div>

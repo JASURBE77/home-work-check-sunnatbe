@@ -4,7 +4,10 @@ import LanguageSelector from "../components/LanguageSelector";
 import { useDispatch } from "react-redux";
 import { loginSuccess } from "../app/slice/authSlice";
 import api from "../utils/api";
-import { useTranslation } from "react-i18next"; // i18n hook
+import { useTranslation } from "react-i18next";
+import LoginImg from "../assets/LoginImg.svg";
+import Logo from "/public/Logo.png";
+import Text from "../assets/text.svg";
 
 export default function Login() {
   const [loginInput, setLoginInput] = useState("");
@@ -14,7 +17,7 @@ export default function Login() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { t } = useTranslation(); // i18n
+  const { t } = useTranslation();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -52,68 +55,108 @@ export default function Login() {
 
   return (
     <div>
-      <div className="flex items-center bg-[#FFB608] justify-around">
-      <div className="flex items-center gap-2">
-          <img className="w-16" src="/logo.png" alt="" />
-        <h1 className="font-bold text-xl hidden md:block md:text-3xl  text-white">
-          {t("student_controller")}
-        </h1>
-      </div>
-        <LanguageSelector />
-      </div>
+      <div className="flex h-screen w-full">
+        <div className="w-1/2 relative">
+          <img
+            className="h-screen w-full object-cover"
+            src={LoginImg}
+            alt="login"
+          />
 
-      <div className="min-h-screen loginBG flex items-center bg-base-200 p-4">
-        <div className="container_login">
-          <form
-            className="card w-full max-w-sm bg-base-100 shadow-xl p-6"
-            onSubmit={handleLogin}
-          >
-            <p className="text-xl font-semibold text-[#FFB608] text-center mb-4">
-              {t("login_title")}
+          <img
+            src={Text}
+            alt="text"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          />
+        </div>
+
+        <div className="w-1/2 flex items-center justify-center relative bg-[#F7F9FC]">
+          <div className="absolute top-0 right-0">
+            <img className="w-35 h-35 object-contain" src={Logo} alt="logo" />
+          </div>
+
+          <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+            <h2 className="text-[#1935CA] font-bold text-3xl mb-2">
+              Tizimga kirish
+            </h2>
+            <p className="text-[#1935CA] text-sm mb-6">
+              Login va parolingiz bilan tizimga kiring
             </p>
 
-            <label className="form-control w-full mb-4">
-              <span className="text-[#FFB608]">login</span>
-              <input
-                type="text"
-                placeholder={t("login_placeholder")}
-                className="input border border-[#FFB608] w-full outline-none"
-                value={loginInput}
-                onChange={(e) => setLoginInput(e.target.value)}
-                required
-              />
-            </label>
+            <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+              <label className="flex flex-col gap-2">
+                <span className="text-[#696F79] font-semibold text-sm">
+                  {t("login_placeholder")}
+                </span>
+                <input
+                  type="text"
+                  placeholder={t("login_placeholder")}
+                  className="
+            px-5 py-3 rounded-lg shadow-sm
+            border border-transparent
+            outline-none
+            placeholder-[#1935CA]
+            focus:border-[#1935CA]
+            focus:ring-2 focus:ring-[#1935CA]/30
+            transition
+          "
+                  value={loginInput}
+                  onChange={(e) => setLoginInput(e.target.value)}
+                  required
+                />
+              </label>
 
-            <label className="form-control w-full mb-4">
-              <span className="text-[#FFB608]">password</span>
-              <input
-                type="password"
-                placeholder={t("password_placeholder")}
-                className="input border border-[#FFB608] outline-none w-full"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                required
-              />
-            </label>
+              <label className="flex flex-col gap-2">
+                <span className="text-[#696F79] font-semibold text-sm">
+                  {t("password_placeholder")}
+                </span>
+                <input
+                  type="password"
+                  placeholder={t("password_placeholder")}
+                  className="
+            px-5 py-3 rounded-lg shadow-sm
+            border border-transparent
+            outline-none
+            placeholder-[#1935CA]
+            focus:border-[#1935CA]
+            focus:ring-2 focus:ring-[#1935CA]/30
+            transition
+          "
+                  value={passwordInput}
+                  onChange={(e) => setPasswordInput(e.target.value)}
+                  required
+                />
+              </label>
 
-            {error && <p className="text-red-500 mb-2">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn bg-[#FFB608] text-white w-full uppercase tracking-wide mb-2"
-            >
-              {loading ? (
-                <>
-                  <span className="loading-spinner loading text-white"></span>
-                </>
-              ) : (
-                t("login_button")
+              {error && (
+                <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">
+                  {error}
+                </p>
               )}
-            </button>
 
-          
-          </form>
+              <button
+                type="submit"
+                disabled={loading}
+                className="
+          bg-[#1935CA]
+          text-white
+          py-4 rounded-xl
+          font-semibold
+          uppercase tracking-wide
+          transition
+          hover:opacity-90
+          disabled:opacity-60
+          disabled:cursor-not-allowed
+          flex items-center justify-center
+        ">
+                {loading ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  t("login_button")
+                )}
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

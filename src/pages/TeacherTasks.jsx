@@ -8,13 +8,12 @@ const TeacherTasks = () => {
   const [groupId, setGroupId] = useState("");
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [startingId, setStartingId] = useState(null); // Loading spinner uchun
+  const [startingId, setStartingId] = useState(null); 
   const [showModal, setShowModal] = useState(false);
   const [selectedSession, setSelectedSession] = useState(null);
 
   const navigate = useNavigate();
 
-  // 🔹 teacher ma'lumotini olish
   const getme = async () => {
     try {
       const res = await api({ url: "/me", method: "GET" });
@@ -24,7 +23,6 @@ const TeacherTasks = () => {
     }
   };
 
-  // 🔹 group bo‘yicha exam sessionlar
   const fetchTasks = async () => {
     if (!groupId) return;
 
@@ -43,10 +41,9 @@ const TeacherTasks = () => {
     }
   };
 
-  // 🔹 examni boshlash
   const startexam = async (sessionId) => {
     try {
-      setStartingId(sessionId); // Loading spinner ochiladi
+      setStartingId(sessionId); 
       const res = await api({
         url: "/student-exam/start",
         method: "POST",
@@ -57,12 +54,11 @@ const TeacherTasks = () => {
     } catch (error) {
       console.error("xatolik", error);
     } finally {
-      setStartingId(null); // Loading spinner yopiladi
+      setStartingId(null); 
       setShowModal(false);
     }
   };
 
-  // 🔹 finished exam natijasini ko‘rish
   const viewResult = async (sessionId) => {
     try {
       setStartingId(sessionId); // Loading spinner
@@ -107,14 +103,12 @@ const TeacherTasks = () => {
   }
 
   return (
-    <div className="min-h-screen p-4 flex flex-col items-center space-y-6">
-      <div className="w-full max-w-3xl flex justify-between items-center mb-4">
-        <h2 className="text-2xl font-bold text-gray-700">
-          {t("teacherTasks.title")}
-        </h2>
+    <div className="flex flex-col items-center space-y-6">
+      <div className="w-full mb-4">
+        <h2 className="text-4xl font-bold">Imtihonlar</h2>
       </div>
 
-      {tasks.length === 0 && !loading && <p className="text-gray-500">{t("teacherTasks.empty")}</p>}
+      {tasks.length === 0 && !loading && <p className="text-gray-500">Imtihonlar yo'q</p>}
 
       <div className="w-full max-w-3xl grid gap-4">
         {tasks.map((task) => {

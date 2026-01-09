@@ -83,10 +83,10 @@ export default function Profile() {
   }
 
   return (
-    <div className="w-full bg-base-100 shadow-xl p-4 md:p-8">
+    <div className="w-full bg-base-100 p-4 md:p-8">
       {/* ===== PROFILE CARD ===== */}
-      <div className="card bg-base-100 shadow-xl rounded-3xl p-6 border border-base-300">
-        <div className="flex flex-col md:flex-row items-center gap-6">
+      <div className="shadow-md rounded-3xl p-6">
+        <div className="flex flex-col md:flex-row items-start gap-6">
           <div className="relative">
             <div className="w-32 h-32 rounded-full flex items-center justify-center ring ring-primary ring-offset-2">
               <span className="text-5xl font-bold">
@@ -149,7 +149,7 @@ export default function Profile() {
       </div>
 
       {/* ===== PROGRESS ===== */}
-      <div className="card mt-6 bg-base-100 shadow-xl rounded-3xl p-6 ">
+      <div className="mt-6 shadow-md rounded-3xl p-6 ">
         <div className="flex items-center gap-3 mb-3">
           <Target className="text-primary" />
           <h2 className="text-2xl font-bold">{t("profile.progress")}</h2>
@@ -171,7 +171,7 @@ export default function Profile() {
       </div>
 
       {/* ===== RECENT SUBMISSIONS ===== */}
-      <div className="card mt-6 bg-base-100 shadow-xl rounded-3xl p-6 ">
+      <div className="mt-6 shadow-md rounded-3xl p-6 ">
         <div className="flex items-center gap-3 mb-4">
           <TrendingUp className="text-primary" />
           <h2 className="text-2xl font-bold">{t("profile.recentSubmissions")}</h2>
@@ -182,7 +182,7 @@ export default function Profile() {
             {user.recentSubmissions.map((s, i) => (
               <div
                 key={i}
-                className="p-4 rounded-xl shadow-md  flex justify-between items-center"
+                className="p-4 rounded-xl  flex justify-between items-center"
               >
                 <div>
                   <p className="font-semibold">{s.description || t("profile.noTitle")}</p>

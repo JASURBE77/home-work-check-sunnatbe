@@ -122,8 +122,8 @@
     "links": {
       "home": "Bosh sahifa",
       "homework": "Uyga vazifa",
-      "code": "Tugallangan vazifalar",
-      "tasks": "Imtihomlar"
+      "code": "Vazifalar",
+      "tasks": "Imtihonlar"
     },
     "footer": {
       "version": "Version 1.0.5",
