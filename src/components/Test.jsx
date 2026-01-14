@@ -10,53 +10,56 @@ const ExamPage = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-  const [fetchLoading, setFetchLoading] = useState(false);   // savollar uchun
-  const [actionLoading, setActionLoading] = useState(false); // javob/finish uchun
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [questionChanging, setQuestionChanging] = useState(false);
 
   const [isFinished, setIsFinished] = useState(false);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
+  const [score, setScore] = useState(null);
 
-  const [score, setScore] = useState(null); // jami ball
+  const [errorMessage, setErrorMessage] = useState("");
 
-  // 🔹 localStorage dan yuklash
   useEffect(() => {
     const savedIndex = localStorage.getItem(`exam-${examSession}-currentIndex`);
     const savedPage = localStorage.getItem(`exam-${examSession}-page`);
-    const savedAnswer = localStorage.getItem(`exam-${examSession}-selectedAnswer`);
+    const savedAnswer = localStorage.getItem(
+      `exam-${examSession}-selectedAnswer`
+    );
 
     if (savedIndex) setCurrentIndex(Number(savedIndex));
     if (savedPage) setPage(Number(savedPage));
     if (savedAnswer) setSelectedAnswer(savedAnswer);
   }, [examSession]);
 
-  // 🔹 state o‘zgarganda saqlash
   useEffect(() => {
     localStorage.setItem(`exam-${examSession}-currentIndex`, currentIndex);
   }, [currentIndex, examSession]);
 
   useEffect(() => {
     localStorage.setItem(`exam-${examSession}-page`, page);
-    setCurrentIndex(0); // har safar page o'zgarganda index 0 ga
+    setCurrentIndex(0);
   }, [page, examSession]);
 
   useEffect(() => {
     if (selectedAnswer)
-      localStorage.setItem(`exam-${examSession}-selectedAnswer`, selectedAnswer);
-    else
-      localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
+      localStorage.setItem(
+        `exam-${examSession}-selectedAnswer`,
+        selectedAnswer
+      );
+    else localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
   }, [selectedAnswer, examSession]);
 
-  // 🔹 savollarni olish
   useEffect(() => {
-    if (examSession) {
-      fetchQuestions(page);
-    }
+    if (examSession) fetchQuestions(page);
   }, [examSession, page]);
 
   const fetchQuestions = async (pageNumber) => {
     try {
       setFetchLoading(true);
+      setErrorMessage("");
+
       const res = await api({
         url: `/question/exams/${examSession}/questions?page=${pageNumber}`,
         method: "GET",
@@ -65,11 +68,12 @@ const ExamPage = () => {
       setQuestions(Array.isArray(res.data.data) ? res.data.data : []);
       setTotalPages(res.data.totalPages || 1);
 
-      if (!localStorage.getItem(`exam-${examSession}-currentIndex`)) {
-        setCurrentIndex(0);
-      }
+      setSelectedAnswer(null);
+      setQuestionChanging(false);
     } catch (err) {
-      console.error("Savollarni olishda xatolik", err);
+      setErrorMessage(
+        err?.response?.data?.message || "Savollarni olishda xatolik"
+      );
       setQuestions([]);
     } finally {
       setFetchLoading(false);
@@ -89,6 +93,8 @@ const ExamPage = () => {
 
     try {
       setActionLoading(true);
+      setQuestionChanging(true);
+      setErrorMessage("");
 
       await api({
         url: "/student-exam/answer",
@@ -108,20 +114,23 @@ const ExamPage = () => {
         setPage((prev) => prev + 1);
       }
     } catch (err) {
-      console.error("Javob yuborishda xatolik", err);
+      setErrorMessage(
+        err?.response?.data?.message || "Javob yuborishda xatolik"
+      );
+      setQuestionChanging(false);
     } finally {
       setActionLoading(false);
     }
   };
 
-  // 🔹 oxirgi savolni yuborish va yakunlash
   const finishExam = async () => {
     if (isFinished || actionLoading) return;
 
     try {
       setActionLoading(true);
+      setQuestionChanging(true);
+      setErrorMessage("");
 
-      // oxirgi javobni yuborish
       if (selectedAnswer) {
         const question = questions[currentIndex];
         await api({
@@ -135,72 +144,61 @@ const ExamPage = () => {
         });
       }
 
-      // imtihonni yakunlash
       const finishRes = await api({
         url: "/student-exam/finish",
         method: "POST",
         data: { sessionId: examSession },
       });
 
-      setScore(finishRes.data.totalScore || 0);
+      setScore(finishRes.data.totalScore.toFixed(1) || 0);
       setIsFinished(true);
 
-      // 🔹 localStorage tozalash
       localStorage.removeItem(`exam-${examSession}-currentIndex`);
       localStorage.removeItem(`exam-${examSession}-page`);
       localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
     } catch (err) {
-      console.error("Imtihonni finish qilishda xatolik", err);
+      setErrorMessage(
+        err?.response?.data?.message || "Imtihonni yakunlashda xatolik"
+      );
+      setQuestionChanging(false);
     } finally {
       setActionLoading(false);
     }
   };
 
-  // 🔹 Browser tab close / vkladka o‘zgarsa examni finish qilish
   useEffect(() => {
-    const handleBeforeUnload = async (e) => {
-      await finishExam();
-      e.preventDefault();
-      e.returnValue = "";
+    const handleVisibilityChange = () => {
+      if (document.hidden) finishExam();
     };
 
-    const handleVisibilityChange = async () => {
-      if (document.hidden) {
-        await finishExam();
-      }
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("beforeunload", finishExam);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("beforeunload", finishExam);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, [selectedAnswer, questions, currentIndex]);
 
-  // 🔹 modaldan keyin navigate qilish
   useEffect(() => {
     if (isFinished && score !== null) {
-      const timer = setTimeout(() => {
-        navigate("/tasks");
-      }, 5000);
+      const timer = setTimeout(() => navigate("/tasks"), 5000);
       return () => clearTimeout(timer);
     }
   }, [isFinished, score, navigate]);
 
   if (fetchLoading && questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="flex items-center justify-center">
         <p className="text-gray-500">Yuklanmoqda...</p>
       </div>
     );
   }
 
-  if (questions.length === 0) {
+  if (!fetchLoading && questions.length === 0) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Savollar topilmadi</p>
+      <div>
+        <p className="text-gray-500 text-center">Savollar topilmadi</p>
       </div>
     );
   }
@@ -208,54 +206,77 @@ const ExamPage = () => {
   const question = questions[currentIndex];
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 flex flex-col items-center">
-      {/* ✅ Modal */}
+    <div className="p-4 flex flex-col justify-center items-center">
+      {errorMessage && (
+        <div className="w-full max-w-xl mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm">
+          {errorMessage}
+        </div>
+      )}
+
       {isFinished && score !== null && (
-        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl shadow-lg w-80 text-center">
-            <h2 className="text-xl font-bold mb-4">Imtihon yakunlandi!</h2>
-            <p className="text-gray-700 text-lg">Sizning ballingiz: <span className="font-bold">{score}</span></p>
-            <p className="text-sm text-gray-500 mt-2">3 soniyadan so‘ng vazifalar sahifasiga qaytasiz...</p>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl text-center w-80">
+            <h2 className="text-xl font-bold mb-3">Imtihon yakunlandi!</h2>
+            <p className="text-lg">
+              Ball: <b>{score}</b>
+            </p>
+            <p className="text-sm text-gray-500 mt-2">
+              5 soniyadan so‘ng Imtihonlar sahifasiga qaytarilasiz. To'liq natijani Imtihonlar sahifasida ko'rishingiz mumkin
+            </p>
           </div>
         </div>
       )}
 
-      <div className="w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 space-y-4">
-        <div className="flex justify-between text-[16px] text-gray-500">
-          <span>
-            Savol {page + 1}/{totalPages}
-          </span>
-        </div>
+      <div
+        key={question._id}
+        className="relative w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 space-y-4 transition-opacity duration-300">
+        {(questionChanging || actionLoading) && (
+          <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-2xl z-10">
+            <span className="text-gray-500">Kuting...</span>
+          </div>
+        )}
 
-        <h2 className="text-purple-700 font-bold text-lg">{question.question}</h2>
+        <h2 className="text-[#1935CA] font-bold text-lg">
+          {question.question}
+        </h2>
         <p className="text-gray-500 text-sm">{question.description}</p>
 
         <div className="space-y-3">
           {question.answers.map((ans) => (
             <label
               key={ans._id}
-              className={`flex items-center p-3 border rounded-lg cursor-pointer transition
-                ${selectedAnswer === ans._id ? "border-purple-500 bg-purple-50" : "border-gray-300 hover:border-purple-300"}`}
-            >
+              className={`flex items-center p-3 border rounded-lg transition
+                ${
+                  selectedAnswer === ans._id
+                    ? "border-[#1935CA] bg-blue-50"
+                    : "border-gray-100"
+                }`}>
               <input
                 type="radio"
+                disabled={actionLoading || questionChanging || isFinished}
                 checked={selectedAnswer === ans._id}
                 onChange={() => setSelectedAnswer(ans._id)}
-                className="mr-3 accent-purple-600"
-                disabled={actionLoading || isFinished}
+                className="mr-3 accent-[#1935CA]"
               />
-              <span>{ans.value}</span>
+              {ans.value}
             </label>
           ))}
         </div>
 
         <button
           onClick={isLastQuestion() ? finishExam : postAnswer}
-          disabled={!selectedAnswer || actionLoading || isFinished}
-          className={`w-full py-2 rounded-lg font-semibold text-white transition
-            ${selectedAnswer && !actionLoading && !isFinished ? "bg-[#FFB608] hover:bg-yellow-500" : "bg-gray-400 cursor-not-allowed"}`}
-        >
-          {actionLoading ? "Kuting..." : isLastQuestion() ? "Yakunlash" : "Keyingi savol"}
+          disabled={!selectedAnswer || actionLoading || questionChanging}
+          className={`w-full py-2 rounded-lg font-semibold text-white
+            ${
+              selectedAnswer && !actionLoading && !questionChanging
+                ? "bg-[#1935CA] cursor-pointer"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}>
+          {actionLoading || questionChanging
+            ? "Kuting..."
+            : isLastQuestion()
+            ? "Yakunlash"
+            : "Keyingi savol"}
         </button>
       </div>
     </div>

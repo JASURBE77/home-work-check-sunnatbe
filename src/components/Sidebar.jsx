@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Code, LampDesk, Backpack, CodeXml, Menu, X } from "lucide-react";
+import { Code, LampDesk, Backpack, Menu, X } from "lucide-react";
 import IconClipboard from "./icons/line/IconClipboard";
+import IconQuestion from "./icons/line/IconQuestion";
 
 const Sidebar = () => {
   const { t } = useTranslation();
@@ -16,8 +17,12 @@ const Sidebar = () => {
   ];
 
   const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 py-2 px-3 rounded-xl transition-all duration-400
-     ${isActive ? "bg-[#1935CA] text-white" : "hover:bg-[#1935CA] hover:text-white"}`;
+    `flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-400
+     ${
+       isActive
+         ? "bg-[#1935CA] text-white"
+         : "hover:bg-[#1935CA] hover:text-white"
+     }`;
 
   return (
     <>
@@ -30,8 +35,9 @@ const Sidebar = () => {
               </NavLink>
             ))}
           </ul>
-
-          <span className="absolute bottom-4 text-xl">Rustamov & Xojimurodov</span>
+          <div className="flex justify-center items-center absolute bottom-4 gap-4">
+            <span className="text-red-500 font-bold text-xl">BETA VERSION 0.0.2</span>
+          </div>
         </nav>
 
         <div className="mt-auto text-gray-500 text-sm space-y-1">
@@ -43,8 +49,7 @@ const Sidebar = () => {
       <div className="md:hidden fixed top-4 left-4 z-999">
         <button
           onClick={() => setOpen(true)}
-          className="px-2 py-1 bg-[#1935CA] text-white rounded-xl"
-        >
+          className="px-2 py-1 bg-[#1935CA] text-white rounded-xl">
           <Menu />
         </button>
       </div>
@@ -58,8 +63,7 @@ const Sidebar = () => {
 
       <aside
         className={`fixed top-0 left-0 h-full w-[260px] z-99999 bg-base-100 shadow-xl transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"}`}
-      >
+        ${open ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="font-bold text-lg">{t("sidebar.menu")}</h2>
           <button onClick={() => setOpen(false)} className="p-1">
@@ -74,8 +78,7 @@ const Sidebar = () => {
                 key={to}
                 to={to}
                 className={linkClass}
-                onClick={() => setOpen(false)}
-              >
+                onClick={() => setOpen(false)}>
                 {icon} {label}
               </NavLink>
             ))}

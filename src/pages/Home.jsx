@@ -36,13 +36,11 @@ export default function Dashboard() {
     if (token) fetchData();
   }, [token]);
 
-  // 🔄 Loader
-  // 🔄 Loader
   if (loading) {
     return (
       <div className="animate-pulse">
         <div className="h-10 w-72 bg-gray-300 rounded"></div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-4!">
           {[1, 2, 3].map((i) => (
             <div
               key={i}
@@ -53,9 +51,9 @@ export default function Dashboard() {
             </div>
           ))}
         </div>
-        <div className="h-7 w-56 bg-gray-300 rounded"></div>
+        <div className="h-7 w-56 bg-gray-300 rounded mt-4!"></div>
 
-        <div className="grid md:grid-cols-2 gap-4">
+        <div className="grid md:grid-cols-2 gap-4 mt-4!">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-white rounded-xl shadow p-4 space-y-3">
               <div className="flex justify-between">
@@ -150,6 +148,10 @@ export default function Dashboard() {
               )}
             </div>
           ))}
+
+          {user.recentSubmissions?.length == 0 && (
+            <p className="text-gray-500">Topshiriqlar joylanmagan</p>
+          )}
         </div>
       </div>
     </div>

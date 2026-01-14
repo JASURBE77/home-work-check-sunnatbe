@@ -34,12 +34,12 @@ const HistoryTest = () => {
     <div className="min-h-screen p-6 flex flex-col items-center">
       <div className="w-full max-w-3xl bg-white shadow-lg rounded-2xl p-6 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-purple-700">
+          <h2 className="text-2xl font-bold">
             {result.student?.name} {result.student?.surname}{" "}
             {t("history.exam_result")}
           </h2>
 
-          <Link to="/tasks" className="btn bg-[#FFB608] text-white">
+          <Link to="/tasks" className="btn bg-[#1935CA] text-white rounded-sm">
             {t("history.back")}
           </Link>
         </div>
@@ -51,9 +51,7 @@ const HistoryTest = () => {
 
         <p>
           <span className="font-semibold">{t("history.started_at")}:</span>{" "}
-          {result.startedAt
-            ? new Date(result.startedAt).toLocaleString()
-            : "-"}
+          {result.startedAt ? new Date(result.startedAt).toLocaleString() : "-"}
         </p>
 
         <p>
@@ -65,24 +63,22 @@ const HistoryTest = () => {
 
         <p>
           <span className="font-semibold">{t("history.score")}:</span>{" "}
-          {result.totalScore} / {result.maxScore}
+          {result.totalScore < 99
+            ? result.totalScore.toFixed(1)
+            : Math.ceil(result.maxScore)}{" "}
+          / {Math.ceil(result.maxScore)}
         </p>
 
-        <h3 className="text-xl font-semibold mt-4">
-          {t("history.questions")}
-        </h3>
+        <h3 className="text-xl font-semibold mt-4">{t("history.questions")}</h3>
 
         {result.answers.length === 0 ? (
-          <p className="text-gray-500">
-            {t("history.no_questions")}
-          </p>
+          <p className="text-gray-500">{t("history.no_questions")}</p>
         ) : (
           <div className="space-y-3">
             {result.answers.map((ans, index) => (
               <div
                 key={ans.questionId}
-                className="p-3 border rounded-lg bg-gray-50 space-y-1"
-              >
+                className="p-3 border rounded-lg bg-gray-50 space-y-1">
                 <p>
                   <span className="font-semibold">
                     {index + 1}. {t("history.question")}:
@@ -96,8 +92,7 @@ const HistoryTest = () => {
                   <span className="font-semibold">
                     {t("history.your_answer")}:
                   </span>{" "}
-                  {ans.selectedAnswer?.value ||
-                    t("history.not_found")}
+                  {ans.selectedAnswer?.value || t("history.not_found")}
                 </p>
 
                 <p>
