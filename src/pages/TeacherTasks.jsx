@@ -102,7 +102,7 @@ const TeacherTasks = () => {
         </div>
       )}
 
-      {!loading && groupId && tasks.length === 0 && (
+      {!loading && tasks.length === 0 && (
         <div className="flex justify-center items-center py-20">
           <p className="text-gray-500 text-lg">Imtihonlar yo‘q</p>
         </div>
