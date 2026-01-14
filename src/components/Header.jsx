@@ -3,7 +3,7 @@ import LanguageSelector from "./LanguageSelector";
 import { Link, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import api from "../utils/api";
-import Logo from "/public/logo.png";
+import Logo from "../assets/logo.png"
 import { logout } from "../app/slice/authSlice";
 
 const Header = () => {

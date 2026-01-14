@@ -6,7 +6,7 @@ import { loginSuccess } from "../app/slice/authSlice";
 import api from "../utils/api";
 import { useTranslation } from "react-i18next";
 import LoginImg from "../assets/LoginImg.svg";
-import Logo from "/public/Logo.png";
+import Logo from "../assets/logo.png";
 import Text from "../assets/text.svg";
 
 export default function Login() {
