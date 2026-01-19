@@ -90,7 +90,7 @@ export default function Dashboard() {
             {t("profile.completedLessons")}
           </span>
           <span className="text-2xl font-bold">
-            {user.completedLessons} {t("dashboard.items")}
+            {user.completedLessons || 0} {t("dashboard.items")}
           </span>
         </div>
 
@@ -100,7 +100,7 @@ export default function Dashboard() {
             {t("profile.pendingLessons")}
           </span>
           <span className="text-2xl font-bold">
-            {user.pendingLessons} {t("dashboard.items")}
+            {user.pendingLessons || 0} {t("dashboard.items")}
           </span>
         </div>
 
@@ -109,7 +109,7 @@ export default function Dashboard() {
           <span className="text-lg font-semibold">
             {t("dashboard.total_points")}
           </span>
-          <span className="text-2xl font-bold">{totalPoints}</span>
+          <span className="text-2xl font-bold">{totalPoints || 0}</span>
         </div>
       </div>
 

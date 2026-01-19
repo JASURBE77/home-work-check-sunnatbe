@@ -56,7 +56,7 @@ export default function Login() {
   return (
     <div>
       <div className="flex h-screen w-full">
-        <div className="w-1/2 relative">
+        <div className="hidden md:block  w-1/2 relative">
           <img
             className="h-screen w-full object-cover"
             src={LoginImg}
@@ -70,9 +70,9 @@ export default function Login() {
           />
         </div>
 
-        <div className="w-1/2 flex items-center justify-center relative bg-[#F7F9FC]">
+        <div className="w-full px-4 md:px-0 md:w-1/2 flex items-center justify-center relative bg-[#F7F9FC]">
           <div className="absolute top-0 right-0">
-            <img className="w-35 h-35 object-contain" src={Logo} alt="logo" />
+            <img className="w-25 h-25 md:w-35 md:h-35 object-contain" src={Logo} alt="logo" />
           </div>
 
           <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
