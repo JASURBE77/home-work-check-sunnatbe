@@ -36,7 +36,7 @@ const Sidebar = () => {
             ))}
           </ul>
           <div className="flex justify-center items-center absolute bottom-4 gap-4">
-            <span className="font-bold text-xl">Version 0.0.3</span>
+            <span className="font-bold text-xl">Version 0.0.4</span>
           </div>
         </nav>
 
