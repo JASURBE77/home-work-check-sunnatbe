@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import {
   Mail,
-  Phone,
   MapPin,
   Edit,
   Trophy,
@@ -11,27 +10,38 @@ import {
   Calendar,
   Target,
 } from "lucide-react";
-
+import { fetchProfile } from "../app/slice/Profilestore";
 import api from "../utils/api";
 import dayjs from "dayjs";
 
 export default function Profile() {
   const { t } = useTranslation();
   const token = useSelector((state) => state.auth.token);
+  const profile = useSelector((state) => state.profile.data);
+  const dispatch = useDispatch();
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async () => {
-    if (!token) return;
+  // Redux orqali profile fetch qilish
+  useEffect(() => {
+    if (token) dispatch(fetchProfile());
+  }, [token, dispatch]);
+
+  // API orqali submissions fetch qilish
+  const ProfileFetch = async () => {
+    if (!token || !profile?._id) return;
 
     try {
       const res = await api({ 
-        url: "/submissions", 
+        url:`/submissions/${profile._id}`,
         method: "GET",
         headers: { Authorization: `Bearer ${token}` }
       });
-      setSubmissions(res.data.data || []);
+
+      // Response data structurega moslash
+      const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
+      setSubmissions(data);
     } catch (err) {
       console.error("Profile fetch error:", err);
     } finally {
@@ -40,32 +50,30 @@ export default function Profile() {
   };
 
   useEffect(() => {
-    fetchProfile();
-  }, [token]);
+    ProfileFetch();
+  }, [token, profile]);
 
   // Ma'lumotlarni hisoblash
   const user = submissions.length > 0 ? submissions[0] : null;
-  
+
   const stats = {
     total: submissions.length,
     completed: submissions.filter(s => 
-      s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
+      s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED"
     ).length,
-    pending: submissions.filter(s => s.submission.status === "PENDING").length,
+    pending: submissions.filter(s => s.submission?.status === "PENDING").length,
     totalScore: submissions
-      .filter(s => s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED")
-      .reduce((sum, s) => sum + (s.submission.score || 0), 0)
+      .filter(s => s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED")
+      .reduce((sum, s) => sum + (s.submission?.score || 0), 0)
   };
 
   // Progress hisobi (har bir kurs uchun)
   const courses = submissions.reduce((acc, item) => {
-    if (item.group && item.group.name) {
+    if (item.group?.name) {
       const groupName = item.group.name;
-      if (!acc[groupName]) {
-        acc[groupName] = { total: 0, completed: 0 };
-      }
+      if (!acc[groupName]) acc[groupName] = { total: 0, completed: 0 };
       acc[groupName].total++;
-      if (item.submission.status === "CHECKED" || item.submission.status === "AGAIN CHECKED") {
+      if (item.submission?.status === "CHECKED" || item.submission?.status === "AGAIN CHECKED") {
         acc[groupName].completed++;
       }
     }
@@ -120,7 +128,6 @@ export default function Profile() {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-6">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -211,7 +218,7 @@ export default function Profile() {
                 <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
                   <User className="text-gray-400" size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm mb-1">Username</p>
                   <p className="font-medium">{user.name} {user.surname}</p>
                 </div>
@@ -221,7 +228,7 @@ export default function Profile() {
                 <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Mail className="text-gray-400" size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm mb-1">User ID</p>
                   <p className="font-medium text-xs break-all">{user.userId}</p>
                 </div>
@@ -232,7 +239,7 @@ export default function Profile() {
                   <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
                     <MapPin className="text-gray-400" size={20} />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-gray-400 text-sm mb-1">Guruh</p>
                     <p className="font-medium">{user.group.name}</p>
                   </div>
@@ -243,7 +250,7 @@ export default function Profile() {
                 <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
                   <Calendar className="text-gray-400" size={20} />
                 </div>
-                <div>
+                <div className="flex-1 min-w-0">
                   <p className="text-gray-400 text-sm mb-1">Oxirgi topshiriq</p>
                   <p className="font-medium">
                     {submissions[0]?.submission?.date 
@@ -265,22 +272,36 @@ export default function Profile() {
             <div className="space-y-6">
               {courseProgress.length > 0 ? (
                 courseProgress.map((course, idx) => {
-                  const color = 
-                    course.percentage >= 80 ? "green" :
-                    course.percentage >= 50 ? "blue" : "amber";
+                  // Inline styles ishlatish (Tailwind dynamic classes muammosi uchun)
+                  let bgColor = "#10b981"; // green-500
+                  let textColor = "text-green-400";
+                  
+                  if (course.percentage >= 80) {
+                    bgColor = "#10b981"; // green-500
+                    textColor = "text-green-400";
+                  } else if (course.percentage >= 50) {
+                    bgColor = "#3b82f6"; // blue-500
+                    textColor = "text-blue-400";
+                  } else {
+                    bgColor = "#f59e0b"; // amber-500
+                    textColor = "text-amber-400";
+                  }
                   
                   return (
                     <div key={idx}>
                       <div className="flex justify-between mb-2">
                         <span className="font-medium truncate pr-4">{course.name}</span>
-                        <span className={`text-${color}-400 font-bold`}>
+                        <span className={`${textColor} font-bold`}>
                           {course.percentage}%
                         </span>
                       </div>
                       <div className="w-full bg-gray-800 rounded-full h-3">
                         <div 
-                          className={`bg-${color}-500 h-3 rounded-full transition-all duration-500`}
-                          style={{ width: `${course.percentage}%` }}
+                          className="h-3 rounded-full transition-all duration-500"
+                          style={{ 
+                            width: `${course.percentage}%`,
+                            backgroundColor: bgColor
+                          }}
                         />
                       </div>
                     </div>

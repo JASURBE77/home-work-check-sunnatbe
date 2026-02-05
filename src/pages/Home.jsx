@@ -1,33 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import {
-  CheckCircle2,
-  Clock,
-  Trophy,
-  ArrowUpRight,
-  GitBranch,
-  AlertCircle,
-} from "lucide-react";
+import { useSelector, useDispatch } from "react-redux";
+import { CheckCircle2, Clock, Trophy, ArrowUpRight } from "lucide-react";
 import api from "../utils/api";
 import { useTranslation } from "react-i18next";
+import { fetchProfile } from "../app/slice/Profilestore"; // profile slice import
 
 export default function Dashboard() {
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+
+  const profile = useSelector((state) => state.profile.data);
+  const profileLoading = useSelector((state) => state.profile.loading);
   const token = useSelector((state) => state.auth.token);
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Profile ma'lumotlarini olish
+  useEffect(() => {
+    if (token) dispatch(fetchProfile());
+  }, [token, dispatch]);
+
   const fetchData = async () => {
-    if (!token) return;
+    if (!token || !profile) return;
 
     setLoading(true);
     setError(null);
 
     try {
+      const userId = profile._id;
       const res = await api({
-        url: "/submissions",
+        url: `/submissions/${userId}`,
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -41,24 +45,20 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, [token]);
+    if (profile) fetchData();
+  }, [token, profile]);
 
-  // Backend ma'lumotlaridan hisoblash
   const completed = submissions.filter(s => 
     s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
   ).length;
-  
-  const pending = submissions.filter(s => 
-    s.submission.status === "PENDING"
-  ).length;
-  
+
+  const pending = submissions.filter(s => s.submission.status === "PENDING").length;
+
   const totalPoints = submissions
     .filter(s => s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED")
     .reduce((sum, s) => sum + (s.submission.score || 0), 0);
-  
+
   const ranking = "?";
-  
   const recentSubmissions = submissions.slice(0, 5).map(s => ({
     description: s.submission.description,
     date: s.submission.date,
@@ -66,40 +66,28 @@ export default function Dashboard() {
     status: s.submission.status
   }));
 
-  const userName = submissions.length > 0 ? submissions[0].name : "Talaba";
+  const userName = profile?.name || "Talaba";
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] p-6 space-y-8 animate-pulse">
-        <div className="h-12 w-80 bg-gray-700 rounded-xl"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-40 bg-gray-800 rounded-2xl"></div>
-          ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-48 bg-gray-800 rounded-2xl"></div>
-          ))}
-        </div>
+  if (loading || profileLoading) return (
+    <div className="min-h-screen bg-[#0A0A0A] p-6 space-y-8 animate-pulse">
+      <div className="h-12 w-80 bg-gray-700 rounded-xl"></div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[...Array(4)].map((_, i) => <div key={i} className="h-40 bg-gray-800 rounded-2xl"></div>)}
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] p-6 text-center text-red-400 py-20">
-        {error}
-        <button
-          onClick={fetchData}
-          className="mt-4 bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-white"
-        >
-          Qayta urinib ko'rish
-        </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {[...Array(3)].map((_, i) => <div key={i} className="h-48 bg-gray-800 rounded-2xl"></div>)}
       </div>
-    );
-  }
+    </div>
+  );
 
+  if (error) return (
+    <div className="min-h-screen bg-[#0A0A0A] p-6 text-center text-red-400 py-20">
+      {error}
+      <button onClick={fetchData} className="mt-4 bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg text-white">
+        Qayta urinib ko'rish
+      </button>
+    </div>
+  );
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-6 space-y-8">
       {/* Salomlashuv */}

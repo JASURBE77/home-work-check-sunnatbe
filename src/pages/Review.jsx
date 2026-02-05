@@ -1,26 +1,53 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import api from "../utils/api";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { CheckCircle2, Star, Download, ExternalLink, RefreshCw } from "lucide-react";
+import { fetchProfile } from "../app/slice/Profilestore"; 
 
 const Review = () => {
   const { t } = useTranslation();
-  const token = useSelector((state) => state.auth.token);
+  const dispatch = useDispatch();
 
-  const [submissions, setSubmissions] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const token = useSelector((state) => state.auth.token);
+  const profile = useSelector((state) => state.profile.data);
+
+  // ---------- Dastlabki test ma'lumotini shu yerga qo‘shamiz ----------
+  const [submissions, setSubmissions] = useState([
+    {
+      "name": "Humoyun",
+      "surname": "Shuhratov",
+      "userId": "6959265eef6c2dfad120db68",
+      "submission": {
+          "HwLink": "https://jasurbe77.github.io/magazin/",
+          "description": "sdevrf",
+          "date": "2026-02-05T00:00:00.000Z",
+          "status": "PENDING",
+          "score": 0,
+          "teacherDescription": "",
+          "_id": "6984a2017fffa87cb67fbe48"
+      }
+    }
+  ]);
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (token) dispatch(fetchProfile());
+  }, [token, dispatch]);
 
   const fetchSubmissions = async () => {
-    if (!token) return;
-    
+    if (!token || !profile?._id) return;
+
     setLoading(true);
     try {
-      const res = await api({ 
-        url: "/submissions", 
+      const userId = profile._id;
+
+      const res = await api({
+        url: `/submissions/${userId}`,
         method: "GET",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
       setSubmissions(res.data.data || []);
     } catch (err) {
@@ -32,18 +59,19 @@ const Review = () => {
 
   useEffect(() => {
     fetchSubmissions();
-  }, [token]);
+  }, [token, profile?._id]);
 
   const handleRefresh = () => {
     fetchSubmissions();
   };
 
-  // Faqat tekshirilgan topshiriqlarni olish
+  // ---------- Faqat tekshirilgan topshiriqlarni olish (PENDINGni ham qo‘shdik) ----------
   const checkedSubmissions = submissions.filter(s => 
-    s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
+    s.submission.status === "CHECKED" || 
+    s.submission.status === "AGAIN CHECKED" ||
+    s.submission.status === "PENDING"
   );
 
-  // Calculate statistics
   const stats = checkedSubmissions.length > 0
     ? {
         total: checkedSubmissions.length,
@@ -66,11 +94,7 @@ const Review = () => {
         {[...Array(maxStars)].map((_, i) => (
           <Star
             key={i}
-            className={`w-4 h-4 ${
-              i < filledStars
-                ? "fill-yellow-500 text-yellow-500"
-                : "text-gray-600"
-            }`}
+            className={`w-4 h-4 ${i < filledStars ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`}
           />
         ))}
       </div>
@@ -87,27 +111,16 @@ const Review = () => {
     return (
       <div className="min-h-screen bg-black text-white p-6">
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Header skeleton */}
           <div className="h-12 w-64 bg-zinc-800 rounded-lg animate-pulse"></div>
           <div className="h-6 w-96 bg-zinc-800 rounded-lg animate-pulse"></div>
-
-          {/* Stats skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-28 animate-pulse"
-              ></div>
+              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-28 animate-pulse"></div>
             ))}
           </div>
-
-          {/* Cards skeleton */}
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-40 animate-pulse"
-              ></div>
+              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-40 animate-pulse"></div>
             ))}
           </div>
         </div>
@@ -134,27 +147,13 @@ const Review = () => {
     <div className="min-h-screen text-white p-6">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
-        >
-          <h1 className="text-4xl md:text-5xl font-bold mb-2">
-            Bajarilgan topshiriqlar
-          </h1>
-          <p className="text-gray-400 text-lg">
-            Tekshirilgan va baholangan barcha topshiriqlaringiz
-          </p>
+        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <h1 className="text-4xl md:text-5xl font-bold mb-2">Bajarilgan topshiriqlar</h1>
+          <p className="text-gray-400 text-lg">Tekshirilgan va baholangan barcha topshiriqlaringiz</p>
         </motion.div>
 
-        {/* Statistics Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8"
-        >
-          {/* Total Submissions */}
+        {/* Statistics */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center">
@@ -166,8 +165,6 @@ const Review = () => {
               </div>
             </div>
           </div>
-
-          {/* Average Score */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center">
@@ -179,8 +176,6 @@ const Review = () => {
               </div>
             </div>
           </div>
-
-          {/* Total Points */}
           <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-yellow-600/20 rounded-xl flex items-center justify-center">
@@ -199,105 +194,48 @@ const Review = () => {
           {checkedSubmissions.map((item, idx) => {
             const submission = item.submission;
             return (
-              <motion.div
-                key={submission._id || idx}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: idx * 0.05 }}
-                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all group"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  {/* Left Section - Icon and Content */}
-                  <div className="flex items-start gap-4 flex-1">
-                    {/* Icon */}
+              <motion.div key={submission._id || idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all group">
+                <div className="flex items-start justify-between gap-4 flex-wrap md:flex-nowrap">
+                  <div className="flex items-start gap-4 flex-1 min-w-0">
                     <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
                       <CheckCircle2 className="w-6 h-6 text-green-500" />
                     </div>
-
-                    {/* Content */}
                     <div className="flex-1 min-w-0">
-                      {/* Title */}
                       <h3 className="text-xl font-semibold mb-1 truncate">
                         {submission.HwLink.includes("github.com")
                           ? submission.HwLink.split("/").slice(-1)[0]
                           : submission.description || "Loyiha"}
                       </h3>
-
-                      {/* Date */}
                       <p className="text-sm text-gray-400 mb-3">
-                        {new Date(submission.date).toLocaleDateString("uz-UZ", {
-                          day: "numeric",
-                          month: "long",
-                          year: "numeric",
-                        })}
+                        {new Date(submission.date).toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" })}
                         {submission.checkedDate && (
                           <span className="ml-2">
-                            • Tekshirildi: {new Date(submission.checkedDate).toLocaleDateString("uz-UZ", {
-                              day: "numeric",
-                              month: "long",
-                            })}
+                            • Tekshirildi: {new Date(submission.checkedDate).toLocaleDateString("uz-UZ", { day: "numeric", month: "long" })}
                           </span>
                         )}
                       </p>
-
-                      {/* Comment */}
                       <div className="mb-3">
                         <p className="text-sm text-gray-300">
-                          <span className="font-medium">Izoh:</span>{" "}
-                          {submission.description ||
-                            t("review.no_description") ||
-                            "Izoh yo'q"}
+                          <span className="font-medium">Izoh:</span> {submission.description || t("review.no_description") || "Izoh yo'q"}
                         </p>
                       </div>
-
-                      {/* Group Info */}
-                      {item.group && (
-                        <p className="text-xs text-gray-500 mb-2">
-                          Guruh: {item.group.name}
-                        </p>
-                      )}
-
-                      {/* Stars */}
+                      {item.group && <p className="text-xs text-gray-500 mb-2">Guruh: {item.group.name}</p>}
                       <div>{renderStars(submission.score || 0)}</div>
                     </div>
                   </div>
-
-                  {/* Right Section - Score and Link */}
-                  <div className="flex flex-col items-end gap-3">
-                    {/* Score */}
+                  <div className="flex flex-col items-end gap-3 flex-shrink-0">
                     <div className="text-right">
-                      <p
-                        className={`text-4xl font-bold ${getScoreColor(
-                          submission.score || 0
-                        )}`}
-                      >
-                        {submission.score || 0}
-                      </p>
+                      <p className={`text-4xl font-bold ${getScoreColor(submission.score || 0)}`}>{submission.score || 0}</p>
                       <p className="text-sm text-gray-400">/ 100</p>
                     </div>
-
-                    {/* Status Badge */}
-                    <span className={`text-xs px-3 py-1 rounded-full ${
-                      submission.status === "AGAIN CHECKED" 
-                        ? "bg-purple-600/20 text-purple-400" 
-                        : "bg-green-600/20 text-green-400"
-                    }`}>
+                    <span className={`text-xs px-3 py-1 rounded-full ${submission.status === "AGAIN CHECKED" ? "bg-purple-600/20 text-purple-400" : "bg-green-600/20 text-green-400"}`}>
                       {submission.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Tekshirildi"}
                     </span>
-
-                    {/* External Link */}
-                    <a
-                      href={submission.HwLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-                    >
+                    <a href={submission.HwLink} target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
                       <ExternalLink className="w-5 h-5 text-gray-400" />
                     </a>
                   </div>
                 </div>
-
-                {/* Teacher Feedback */}
                 {submission.teacherDescription && (
                   <div className="mt-4 pt-4 border-t border-zinc-800">
                     <p className="text-sm text-gray-400 mb-1">
@@ -311,18 +249,9 @@ const Review = () => {
           })}
         </div>
 
-        {/* Refresh Button (Fixed at bottom right) */}
-        <motion.button
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3 }}
-          onClick={handleRefresh}
-          disabled={loading}
-          className="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white p-4 rounded-full shadow-2xl shadow-indigo-500/30 transition-all hover:scale-110 disabled:cursor-not-allowed z-50"
-        >
-          <RefreshCw
-            className={`w-6 h-6 ${loading ? "animate-spin" : ""}`}
-          />
+        {/* Refresh Button */}
+        <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} onClick={handleRefresh} disabled={loading} className="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white p-4 rounded-full shadow-2xl shadow-indigo-500/30 transition-all hover:scale-110 disabled:cursor-not-allowed z-50">
+          <RefreshCw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
         </motion.button>
       </div>
     </div>
