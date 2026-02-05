@@ -1,97 +1,67 @@
-import React, { useState } from "react";
+import React from "react";
+import {
+  Home,
+  BookOpen,
+  CheckSquare,
+  FileText,
+  User,
+  LogOut,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
-import { useTranslation } from "react-i18next";
-import { Code, LampDesk, Backpack, Menu, X } from "lucide-react";
-import IconClipboard from "./icons/line/IconClipboard";
-import IconQuestion from "./icons/line/IconQuestion";
 
-const Sidebar = () => {
-  const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
+const navItems = [
+  { name: "Bosh sahifa", icon: Home, path: "/" },
+  { name: "Uy vazifasi", icon: BookOpen, path: "/homework" },
+  { name: "Bajarilganlar", icon: CheckSquare, path: "/reviews" },
+  { name: "Topshiriqlar", icon: FileText, path: "/tasks" },
+  { name: "Profil", icon: User, path: "/profile" },
+];
 
-  const links = [
-    { to: "/", icon: <LampDesk />, label: t("sidebar.links.home") },
-    { to: "/homework", icon: <Backpack />, label: t("sidebar.links.homework") },
-    { to: "/reviews", icon: <Code />, label: t("sidebar.links.code") },
-    { to: "/tasks", icon: <IconClipboard />, label: t("sidebar.links.tasks") },
-  ];
-
-  const linkClass = ({ isActive }) =>
-    `flex items-center gap-3 py-3 px-4 rounded-xl transition-all duration-400
-     ${
-       isActive
-         ? "bg-[#1935CA] text-white"
-         : "hover:bg-[#1935CA] hover:text-white"
-     }`;
-
+export default function Sidebar({ isOpen, onClose }) {
   return (
     <>
-      <aside className="hidden md:flex flex-col h-screen w-[300px]">
-        <nav className="flex-1 overflow-y-auto mt-4">
-          <ul className="flex flex-col gap-4">
-            {links.map(({ to, icon, label }) => (
-              <NavLink key={to} to={to} className={linkClass}>
-                {icon} {label}
-              </NavLink>
-            ))}
-          </ul>
-          <div className="flex justify-center items-center absolute bottom-4 gap-4">
-            <span className="font-bold text-xl">Version 0.0.4</span>
-          </div>
-        </nav>
-
-        <div className="mt-auto text-gray-500 text-sm space-y-1">
-          <div>{t("sidebar.footer.version")}</div>
-          <div>{t("sidebar.footer.authors")}</div>
-        </div>
-      </aside>
-
-      <div className="md:hidden fixed top-4 left-4 z-999">
-        <button
-          onClick={() => setOpen(true)}
-          className="px-2 py-1 bg-[#1935CA] text-white rounded-xl">
-          <Menu />
-        </button>
-      </div>
-
-      {open && (
+      {/* Mobile overlay */}
+      {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40"
-          onClick={() => setOpen(false)}
+          className="lg:hidden fixed inset-0 bg-black/60 z-30"
+          onClick={onClose}
         />
       )}
 
       <aside
-        className={`fixed top-0 left-0 h-full w-[260px] z-99999 bg-base-100 shadow-xl transform transition-transform duration-300
-        ${open ? "translate-x-0" : "-translate-x-full"}`}>
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="font-bold text-lg">{t("sidebar.menu")}</h2>
-          <button onClick={() => setOpen(false)} className="p-1">
-            <X />
-          </button>
+        className={`
+          fixed lg:static inset-y-0  z-40 w-72 bg-[#0A0A0A] 
+          transform transition-transform duration-300 lg:translate-x-0
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          flex flex-col border-r border-gray-800
+        `}
+      >
+        <div className="flex-1 py-6 px-3 space-y-1.5">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.path === "/"}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-5 py-3.5 rounded-xl text-[15px] transition-all duration-200
+                ${
+                  isActive
+                    ? "bg-[#1E3A8A] text-white font-medium"
+                    : "text-gray-400 hover:bg-[#1E3A8A]/60 hover:text-white"
+                }`
+              }
+              onClick={() => window.innerWidth < 1024 && onClose?.()}
+            >
+              <item.icon size={22} />
+              <span>{item.name}</span>
+            </NavLink>
+          ))}
         </div>
 
-        <nav className="flex flex-col justify-between h-full p-4">
-          <ul className="flex flex-col gap-4">
-            {links.map(({ to, icon, label }) => (
-              <NavLink
-                key={to}
-                to={to}
-                className={linkClass}
-                onClick={() => setOpen(false)}>
-                {icon} {label}
-              </NavLink>
-            ))}
-          </ul>
-
-          <div className="mt-auto text-gray-500 text-sm space-y-1">
-            <div>{t("sidebar.footer.version")}</div>
-            <div>{t("sidebar.footer.authors")}</div>
-          </div>
-        </nav>
+        <div className="p-5 text-xs text-gray-600 mt-auto border-t border-gray-800">
+          Version 1.0.0
+        </div>
       </aside>
     </>
   );
-};
-
-export default Sidebar;
+}

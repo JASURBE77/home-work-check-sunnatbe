@@ -14,7 +14,7 @@ const LanguageSelector = () => {
 
   return (
     <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn btn-ghost rounded-xl text-black gap-2">
+      <div tabIndex={0} role="button" className="btn btn-ghost rounded-xl text-white gap-2">
         <FiGlobe className="text-lg" />
         {currentLang === "uz" ? "O'zbekcha" : "Русский"}
       </div>

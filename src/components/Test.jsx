@@ -1,6 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
 import api from "../utils/api";
+import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 
 const ExamPage = () => {
   const { examSession } = useParams();
@@ -21,12 +22,11 @@ const ExamPage = () => {
 
   const [errorMessage, setErrorMessage] = useState("");
 
+  // LocalStorage bilan sinxronizatsiya
   useEffect(() => {
     const savedIndex = localStorage.getItem(`exam-${examSession}-currentIndex`);
     const savedPage = localStorage.getItem(`exam-${examSession}-page`);
-    const savedAnswer = localStorage.getItem(
-      `exam-${examSession}-selectedAnswer`
-    );
+    const savedAnswer = localStorage.getItem(`exam-${examSession}-selectedAnswer`);
 
     if (savedIndex) setCurrentIndex(Number(savedIndex));
     if (savedPage) setPage(Number(savedPage));
@@ -43,12 +43,11 @@ const ExamPage = () => {
   }, [page, examSession]);
 
   useEffect(() => {
-    if (selectedAnswer)
-      localStorage.setItem(
-        `exam-${examSession}-selectedAnswer`,
-        selectedAnswer
-      );
-    else localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
+    if (selectedAnswer) {
+      localStorage.setItem(`exam-${examSession}-selectedAnswer`, selectedAnswer);
+    } else {
+      localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
+    }
   }, [selectedAnswer, examSession]);
 
   useEffect(() => {
@@ -65,15 +64,14 @@ const ExamPage = () => {
         method: "GET",
       });
 
-      setQuestions(Array.isArray(res.data.data) ? res.data.data : []);
+      const data = res.data.data || [];
+      setQuestions(Array.isArray(data) ? data : []);
       setTotalPages(res.data.totalPages || 1);
 
       setSelectedAnswer(null);
       setQuestionChanging(false);
     } catch (err) {
-      setErrorMessage(
-        err?.response?.data?.message || "Savollarni olishda xatolik"
-      );
+      setErrorMessage(err?.response?.data?.message || "Savollarni olishda xatolik");
       setQuestions([]);
     } finally {
       setFetchLoading(false);
@@ -114,12 +112,10 @@ const ExamPage = () => {
         setPage((prev) => prev + 1);
       }
     } catch (err) {
-      setErrorMessage(
-        err?.response?.data?.message || "Javob yuborishda xatolik"
-      );
-      setQuestionChanging(false);
+      setErrorMessage(err?.response?.data?.message || "Javob yuborishda xatolik");
     } finally {
       setActionLoading(false);
+      setQuestionChanging(false);
     }
   };
 
@@ -131,6 +127,7 @@ const ExamPage = () => {
       setQuestionChanging(true);
       setErrorMessage("");
 
+      // Oxirgi savolga javob yuborish
       if (selectedAnswer) {
         const question = questions[currentIndex];
         await api({
@@ -150,36 +147,44 @@ const ExamPage = () => {
         data: { sessionId: examSession },
       });
 
-      setScore(finishRes.data.totalScore.toFixed(1) || 0);
+      setScore(finishRes.data.totalScore?.toFixed(1) || "0");
       setIsFinished(true);
 
+      // LocalStorage tozalash
       localStorage.removeItem(`exam-${examSession}-currentIndex`);
       localStorage.removeItem(`exam-${examSession}-page`);
       localStorage.removeItem(`exam-${examSession}-selectedAnswer`);
     } catch (err) {
-      setErrorMessage(
-        err?.response?.data?.message || "Imtihonni yakunlashda xatolik"
-      );
-      setQuestionChanging(false);
+      setErrorMessage(err?.response?.data?.message || "Imtihonni yakunlashda xatolik");
     } finally {
       setActionLoading(false);
+      setQuestionChanging(false);
     }
   };
 
+  // Sahifa yopilganda / tab o'zgarganda imtihonni yakunlash
   useEffect(() => {
     const handleVisibilityChange = () => {
-      if (document.hidden) finishExam();
+      if (document.hidden && !isFinished) finishExam();
     };
 
-    window.addEventListener("beforeunload", finishExam);
+    const handleBeforeUnload = (e) => {
+      if (!isFinished) {
+        e.preventDefault();
+        finishExam();
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
-      window.removeEventListener("beforeunload", finishExam);
+      window.removeEventListener("beforeunload", handleBeforeUnload);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [selectedAnswer, questions, currentIndex]);
+  }, [isFinished, selectedAnswer, questions, currentIndex, examSession]);
 
+  // Yakunlangandan keyin avto-redirect
   useEffect(() => {
     if (isFinished && score !== null) {
       const timer = setTimeout(() => navigate("/tasks"), 5000);
@@ -187,18 +192,25 @@ const ExamPage = () => {
     }
   }, [isFinished, score, navigate]);
 
+  // Loading skeleton
   if (fetchLoading && questions.length === 0) {
     return (
-      <div className="flex items-center justify-center">
-        <p className="text-gray-500">Yuklanmoqda...</p>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+          <p className="text-gray-400 text-lg">Savollar yuklanmoqda...</p>
+        </div>
       </div>
     );
   }
 
-  if (!fetchLoading && questions.length === 0) {
+  if (questions.length === 0 && !fetchLoading) {
     return (
-      <div>
-        <p className="text-gray-500 text-center">Savollar topilmadi</p>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <div className="text-center text-gray-500">
+          <AlertCircle className="w-16 h-16 mx-auto mb-4 opacity-70" />
+          <p className="text-xl">Savollar topilmadi</p>
+        </div>
       </div>
     );
   }
@@ -206,78 +218,119 @@ const ExamPage = () => {
   const question = questions[currentIndex];
 
   return (
-    <div className="p-4 flex flex-col justify-center items-center">
-      {errorMessage && (
-        <div className="w-full max-w-xl mb-4 p-3 rounded-lg bg-red-100 text-red-700 text-sm">
-          {errorMessage}
-        </div>
-      )}
-
-      {isFinished && score !== null && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-xl text-center w-80">
-            <h2 className="text-xl font-bold mb-3">Imtihon yakunlandi!</h2>
-            <p className="text-lg">
-              Ball: <b>{score}</b>
-            </p>
-            <p className="text-sm text-gray-500 mt-2">
-              5 soniyadan so‘ng Imtihonlar sahifasiga qaytarilasiz. To'liq natijani Imtihonlar sahifasida ko'rishingiz mumkin
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div
-        key={question._id}
-        className="relative w-full max-w-xl bg-white shadow-lg rounded-2xl p-6 space-y-4 transition-opacity duration-300">
-        {(questionChanging || actionLoading) && (
-          <div className="absolute inset-0 bg-white/70 flex items-center justify-center rounded-2xl z-10">
-            <span className="text-gray-500">Kuting...</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-4 md:p-6">
+      <div className="max-w-3xl mx-auto">
+        {errorMessage && (
+          <div className="mb-6 p-4 bg-red-900/40 border border-red-800 rounded-xl text-red-300 flex items-center gap-3">
+            <AlertCircle size={20} />
+            {errorMessage}
           </div>
         )}
 
-        <h2 className="text-[#1935CA] font-bold text-lg">
-          {question.question}
-        </h2>
-        <p className="text-gray-500 text-sm">{question.description}</p>
+        {/* Yakunlash modal */}
+        {isFinished && score !== null && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 backdrop-blur-sm">
+            <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-2xl p-8 max-w-md w-full mx-4 text-center shadow-2xl">
+              <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto mb-6" />
+              <h2 className="text-3xl font-bold mb-4">Imtihon yakunlandi!</h2>
+              <p className="text-4xl font-bold text-green-400 mb-2">
+                Ball: {score}
+              </p>
+              <p className="text-gray-400 mt-4">
+                5 soniyadan so‘ng Imtihonlar sahifasiga qaytarilasiz...
+              </p>
+            </div>
+          </div>
+        )}
 
-        <div className="space-y-3">
-          {question.answers.map((ans) => (
-            <label
-              key={ans._id}
-              className={`flex items-center p-3 border rounded-lg transition
-                ${
-                  selectedAnswer === ans._id
-                    ? "border-[#1935CA] bg-blue-50"
-                    : "border-gray-100"
-                }`}>
-              <input
-                type="radio"
-                disabled={actionLoading || questionChanging || isFinished}
-                checked={selectedAnswer === ans._id}
-                onChange={() => setSelectedAnswer(ans._id)}
-                className="mr-3 accent-[#1935CA]"
+        {/* Savol kartasi */}
+        <div
+          key={question?._id}
+          className="relative bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-800 rounded-2xl p-6 md:p-8 shadow-xl"
+        >
+          {/* Overlay loader */}
+          {(questionChanging || actionLoading || fetchLoading) && (
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center rounded-2xl z-10">
+              <div className="text-center">
+                <Loader2 className="w-12 h-12 text-blue-500 animate-spin mx-auto mb-4" />
+                <p className="text-gray-300">Kuting...</p>
+              </div>
+            </div>
+          )}
+
+          {/* Savol matni */}
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-4 leading-tight">
+            {question?.question || "Savol yuklanmoqda..."}
+          </h2>
+
+          {question?.description && (
+            <p className="text-gray-400 mb-8 text-lg">{question.description}</p>
+          )}
+
+          {/* Javob variantlari */}
+          <div className="space-y-4 mb-8">
+            {question?.answers?.map((ans) => (
+              <label
+                key={ans._id}
+                className={`flex items-center p-4 border rounded-xl cursor-pointer transition-all duration-200
+                  ${
+                    selectedAnswer === ans._id
+                      ? "border-blue-500 bg-blue-950/40"
+                      : "border-gray-700 hover:border-gray-500 bg-gray-900/50"
+                  }`}
+              >
+                <input
+                  type="radio"
+                  name="answer"
+                  disabled={actionLoading || questionChanging || isFinished}
+                  checked={selectedAnswer === ans._id}
+                  onChange={() => setSelectedAnswer(ans._id)}
+                  className="w-5 h-5 accent-blue-500 mr-4 flex-shrink-0"
+                />
+                <span className="text-lg text-gray-200">{ans.value}</span>
+              </label>
+            ))}
+          </div>
+
+          {/* Tugma */}
+          <button
+            onClick={isLastQuestion() ? finishExam : postAnswer}
+            disabled={!selectedAnswer || actionLoading || questionChanging || isFinished}
+            className={`w-full py-4 rounded-xl font-semibold text-lg transition-all duration-300 flex items-center justify-center gap-3
+              ${
+                selectedAnswer && !actionLoading && !questionChanging && !isFinished
+                  ? "bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg shadow-blue-900/30"
+                  : "bg-gray-800 text-gray-500 cursor-not-allowed"
+              }`}
+          >
+            {actionLoading || questionChanging ? (
+              <>
+                <Loader2 className="w-6 h-6 animate-spin" />
+                Kuting...
+              </>
+            ) : isLastQuestion() ? (
+              "Imtihonni yakunlash"
+            ) : (
+              "Keyingi savol"
+            )}
+          </button>
+
+          {/* Progress bar */}
+          <div className="mt-8">
+            <div className="flex justify-between text-sm text-gray-400 mb-2">
+              <span>Savol {currentIndex + 1} / {questions.length}</span>
+              <span>Sahifa {page + 1} / {totalPages}</span>
+            </div>
+            <div className="w-full bg-gray-800 rounded-full h-2">
+              <div
+                className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                style={{
+                  width: `${((currentIndex + 1) / questions.length) * 100}%`,
+                }}
               />
-              {ans.value}
-            </label>
-          ))}
+            </div>
+          </div>
         </div>
-
-        <button
-          onClick={isLastQuestion() ? finishExam : postAnswer}
-          disabled={!selectedAnswer || actionLoading || questionChanging}
-          className={`w-full py-2 rounded-lg font-semibold text-white
-            ${
-              selectedAnswer && !actionLoading && !questionChanging
-                ? "bg-[#1935CA] cursor-pointer"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}>
-          {actionLoading || questionChanging
-            ? "Kuting..."
-            : isLastQuestion()
-            ? "Yakunlash"
-            : "Keyingi savol"}
-        </button>
       </div>
     </div>
   );

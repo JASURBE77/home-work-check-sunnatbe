@@ -2,13 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
 import {
-  BookOpen,
-  CheckCircle,
+  Mail,
+  Phone,
+  MapPin,
+  Edit,
   Trophy,
+  User,
   Calendar,
   Target,
-  TrendingUp,
 } from "lucide-react";
+
 import api from "../utils/api";
 import dayjs from "dayjs";
 
@@ -18,11 +21,6 @@ export default function Profile() {
 
   const [user, setUser] = useState(storedUser || null);
   const [loading, setLoading] = useState(true);
-
-  const completionPercentage =
-    user?.totalLessons > 0
-      ? Math.round((user.completedLessons / user.totalLessons) * 100)
-      : 0;
 
   const fetchProfile = async () => {
     try {
@@ -37,40 +35,39 @@ export default function Profile() {
 
   useEffect(() => {
     fetchProfile();
-  }, [storedUser]);
+  }, []);
 
-  // ---------- OLD SKELETON LOADER ----------
   if (loading) {
     return (
-      <div className="p-4 space-y-6">
-        {/* Profile Card Skeleton */}
-        <div className="w-full max-w-4xl bg-gray-100 rounded-3xl p-6 space-y-4 shadow animate-pulse">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gray-300" />
-            <div className="flex-1 space-y-4 w-full">
-              <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
-              <div className="h-4 w-2/3 bg-gray-300 rounded"></div>
-              <div className="h-20 bg-gray-300 rounded"></div>
+      <div className="min-h-screen bg-[#0A0A0A] p-6 space-y-8 animate-pulse">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-800 p-8">
+          <div className="flex flex-col md:flex-row items-center gap-8">
+            <div className="w-40 h-40 rounded-full bg-gray-700" />
+            <div className="flex-1 space-y-4">
+              <div className="h-10 w-3/4 bg-gray-700 rounded-xl" />
+              <div className="h-6 w-1/2 bg-gray-700 rounded" />
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="h-28 bg-gray-700 rounded-xl" />
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Progress Skeleton */}
-        <div className="w-full max-w-4xl bg-gray-100 rounded-3xl p-6 space-y-4 shadow animate-pulse">
-          <div className="h-6 w-1/2 bg-gray-300 rounded"></div>
-          <div className="h-4 w-full bg-gray-300 rounded"></div>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="h-20 bg-gray-300 rounded-xl"></div>
-            <div className="h-20 bg-gray-300 rounded-xl"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
+            <div className="h-8 w-1/2 bg-gray-700 rounded mb-6" />
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-800 rounded-xl mb-4" />
+            ))}
           </div>
-        </div>
-
-        {/* Recent Submissions Skeleton */}
-        <div className="w-full max-w-4xl bg-gray-100 rounded-3xl p-6 space-y-4 shadow animate-pulse">
-          <div className="h-6 w-1/3 bg-gray-300 rounded"></div>
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 bg-gray-300 rounded-xl w-full"></div>
-          ))}
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
+            <div className="h-8 w-1/2 bg-gray-700 rounded mb-6" />
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-12 bg-gray-800 rounded-xl mb-4" />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -78,132 +75,166 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <p className="text-center mt-10 text-red-500">{t("profile.notFound")}</p>
+      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
+        <p className="text-red-400 text-xl">Profil topilmadi</p>
+      </div>
     );
   }
 
   return (
-    <div className="w-full bg-base-100 p-4 md:p-8">
-      {/* ===== PROFILE CARD ===== */}
-      <div className="shadow-md rounded-3xl p-6">
-        <div className="flex flex-col md:flex-row items-start gap-6">
-          <div className="relative">
-            <div className="w-32 h-32 rounded-full flex items-center justify-center ring ring-primary ring-offset-2">
-              <span className="text-5xl font-bold">
-                {user.name?.[0]}
-                {user.surname?.[0]}
-              </span>
-            </div>
-            <div className="badge badge-primary absolute -bottom-2 -right-2">
-              {user.level}
-            </div>
-          </div>
-
-          <div className="flex-1 text-center md:text-left">
-            <h1 className="text-3xl font-bold">
-              {user.name} {user.surname}
-            </h1>
-
-            <p className="text-xl mt-1">
-              {t("profile.role")}: {user.role}
-            </p>
-
-            <p className="text-xl">
-              {t("profile.group")}: {user.group?.name || t("profile.noGroup")}
-            </p>
-
-            <div className="flex flex-wrap gap-4 mt-3 text-sm opacity-70">
-              <div className="flex items-center gap-2">
-                <Calendar size={16} />
-                {user.joinDate &&
-                  `${t("profile.joined")}: ${dayjs(user.joinDate).format(
-                    "DD.MM.YYYY"
-                  )}`}
-              </div>
-
-              <div className="flex items-center gap-2">
-                <Trophy size={16} className="text-yellow-500" />
-                {user.points || 0} {t("rating")}
-              </div>
-            </div>
-
-            {/* STATS */}
-            <div className="stats stats-vertical md:stats-horizontal mt-4 bg-base-200 rounded-xl">
-              <div className="stat">
-                <div className="stat-title">{t("profile.totalLessons")}</div>
-                <div className="stat-value">{user.totalLessons}</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-title">{t("profile.completedLessons")}</div>
-                <div className="stat-value text-success">{user.completedLessons}</div>
-              </div>
-
-              <div className="stat">
-                <div className="stat-title">{t("profile.pendingLessons")}</div>
-                <div className="stat-value text-warning">{user.pendingLessons}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== PROGRESS ===== */}
-      <div className="mt-6 shadow-md rounded-3xl p-6 ">
-        <div className="flex items-center gap-3 mb-3">
-          <Target className="text-primary" />
-          <h2 className="text-2xl font-bold">{t("profile.progress")}</h2>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4 mt-4">
-          <div className="p-4 rounded-xl bg-success/20">
-            <CheckCircle className="text-success mb-1" />
-            <p className="font-semibold">{t("status.checked")}</p>
-            <p className="text-2xl font-bold">{user.completedLessons}</p>
-          </div>
-
-          <div className="p-4 rounded-xl bg-warning/20">
-            <BookOpen className="text-warning mb-1" />
-            <p className="font-semibold">{t("status.pending")}</p>
-            <p className="text-2xl font-bold">{user.pendingLessons}</p>
-          </div>
-        </div>
-      </div>
-
-      {/* ===== RECENT SUBMISSIONS ===== */}
-      <div className="mt-6 shadow-md rounded-3xl p-6 ">
-        <div className="flex items-center gap-3 mb-4">
-          <TrendingUp className="text-primary" />
-          <h2 className="text-2xl font-bold">{t("profile.recentSubmissions")}</h2>
-        </div>
-
-        {user.recentSubmissions?.length > 0 ? (
-          <div className="space-y-3">
-            {user.recentSubmissions.map((s, i) => (
-              <div
-                key={i}
-                className="p-4 rounded-xl  flex justify-between items-center"
-              >
-                <div>
-                  <p className="font-semibold">{s.description || t("profile.noTitle")}</p>
-                  <p className="text-sm opacity-60">{dayjs(s.date).format("DD.MM.YYYY")}</p>
+    <div className="min-h-screen bg-[#0A0A0A] text-white p-6">
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* ===== PROFILE HEADER CARD ===== */}
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-xl">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            {/* Avatar va info */}
+            <div className="flex items-center gap-6">
+              <div className="relative">
+                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center ring-4 ring-blue-500/30 ring-offset-4 ring-offset-gray-900">
+                  <span className="text-5xl md:text-6xl font-bold text-white">
+                    {user.name?.[0]}
+                    {user.surname?.[0]}
+                  </span>
                 </div>
-
-                <span
-                  className={`px-3 py-1 rounded-full text-sm font-semibold ${
-                    s.status === "CHECKED"
-                      ? "bg-success/20 text-success"
-                      : "bg-warning/20 text-warning"
-                  }`}
-                >
-                  {s.status === "CHECKED" ? t("status.checked") : t("status.pending")}
-                </span>
+                <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-gray-900" />
               </div>
-            ))}
+
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold">
+                  {user.name} {user.surname}
+                </h1>
+                <p className="text-gray-400 text-lg mt-1">@{user.login || "username"}</p>
+
+                <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    <User size={16} />
+                    Talaba
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Calendar size={16} />
+                    Qo'shilgan: {dayjs(user.joinDate).format("DD.MM.YYYY")}
+                  </div>
+                  <div className="flex items-center gap-2 text-yellow-400">
+                    <Trophy size={16} />
+                    #{user.ranking || 5} Reyting
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Edit button */}
+            <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-900/30">
+              <Edit size={18} />
+              Tahriirlash
+            </button>
           </div>
-        ) : (
-          <p className="text-center text-gray-500">{t("profile.noSubmissions")}</p>
-        )}
+
+          {/* Stats grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+            <div className="bg-gray-950/80 border border-gray-800 rounded-xl p-6 text-center">
+              <p className="text-4xl font-bold text-white mb-1">24</p>
+              <p className="text-gray-400">Jami darslar</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-950 to-green-900 border border-green-800/50 rounded-xl p-6 text-center">
+              <p className="text-4xl font-bold text-white mb-1">12</p>
+              <p className="text-green-300">Bajarilgan</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-950 to-amber-900 border border-amber-800/50 rounded-xl p-6 text-center">
+              <p className="text-4xl font-bold text-white mb-1">3</p>
+              <p className="text-amber-300">Kutilayotgan</p>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800/50 rounded-xl p-6 text-center">
+              <p className="text-4xl font-bold text-white mb-1">856</p>
+              <p className="text-blue-300">Umumiy ball</p>
+            </div>
+          </div>
+        </div>
+
+        {/* ===== BOTTOM SECTION ===== */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Contact Info */}
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <Mail className="text-gray-400" size={24} />
+              Bog'lanish ma'lumotlari
+            </h3>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Mail className="text-gray-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">Email</p>
+                  <p className="font-medium">jasur@example.com</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <Phone className="text-gray-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">Telefon</p>
+                  <p className="font-medium">+998 90 123 45 67</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <MapPin className="text-gray-400" size={20} />
+                </div>
+                <div>
+                  <p className="text-gray-400 text-sm mb-1">Manzil</p>
+                  <p className="font-medium">Toshkent, O'zbekiston</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* O'qish progressi */}
+          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
+            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+              <Target className="text-blue-500" size={24} />
+              O'qish progressi
+            </h3>
+
+            <div className="space-y-6">
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">React asoslari</span>
+                  <span className="text-green-400 font-bold">100%</span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-3">
+                  <div className="bg-green-500 h-3 rounded-full" style={{ width: "100%" }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">Next.js</span>
+                  <span className="text-blue-400 font-bold">75%</span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-3">
+                  <div className="bg-blue-500 h-3 rounded-full" style={{ width: "75%" }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between mb-2">
+                  <span className="font-medium">TypeScript</span>
+                  <span className="text-amber-400 font-bold">50%</span>
+                </div>
+                <div className="w-full bg-gray-800 rounded-full h-3">
+                  <div className="bg-amber-500 h-3 rounded-full" style={{ width: "50%" }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

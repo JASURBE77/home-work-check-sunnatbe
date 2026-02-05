@@ -1,96 +1,83 @@
-import React, { useEffect, useState } from "react";
-import LanguageSelector from "./LanguageSelector";
-import { Link, useNavigate } from "react-router-dom";
-import { useSelector, useDispatch } from "react-redux";
-import api from "../utils/api";
-import Logo from "../assets/logo.png"
-import { logout } from "../app/slice/authSlice";
+import React, { useState } from "react";
+import { Menu, X, ChevronDown } from "lucide-react";
+import LanguageSelector from "./LanguageSelector"; // o'zingizda bor deb faraz qildim
+import Logo from "../assets/logo.png";   // agar logo kerak bo'lsa
 
-const Header = () => {
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
+export default function Header({ onMenuClick, isSidebarOpen }) {
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  const storedUser = useSelector((state) => state.auth.user);
-
-  const [user, setUser] = useState(storedUser || null);
-  const [loading, setLoading] = useState(true);
-
-  const fetchProfile = async () => {
-    try {
-      const res = await api({ url: "/me", method: "GET" });
-      setUser(res.data);
-    } catch (err) {
-      console.error("User fetch error:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (!storedUser) {
-      setLoading(false);
-      return;
-    }
-    fetchProfile();
-  }, [storedUser]);
-
-  const checkout = () => {
-    dispatch(logout());
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("refreshToken");
-    navigate("/login");
+  // Bu yerni o'zingizning real user ma'lumotlaringiz bilan almashtiring
+  const user = {
+    name: "Jasur",
+    surname: "Rustamov",
+    role: "student",
   };
 
   return (
-    <header className="z-999 w-full">
-      <div className="navbar flex items-center justify-end md:justify-between">
-        <div className="hidden md:flex justify-start items-center">
-          <img src={Logo} alt="logo" className="w-20 h-20" />
-          <h2 className="text-2xl text-black font-bold">Student Control</h2>
+    <header className="border border-gray-800 sticky bg-[#0A0A0A] top-10 z-999 px-5 py-4 rounded-2xl mb-5">
+      <div className="flex items-center justify-between">
+        {/* Chap taraf — logo + hamburger */}
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 hover:bg-blue-700/80 rounded-lg transition-colors"
+          >
+            {isSidebarOpen ? <X size={26} /> : <Menu size={26} />}
+          </button>
+
+          <div className="flex  items-center gap-3">
+         <img src={Logo} className="w-12" alt="" />
+            <h1 className="text-2xl font-bold  text-white">Student Control</h1>
+          </div>
         </div>
 
-        <div className="flex gap-5 items-center">
+        {/* O'ng taraf — til + user dropdown */}
+        <div className="flex items-center gap-5">
           <LanguageSelector />
 
-          {loading ? (
-            <div className="flex items-center gap-2">
-              <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse"></div>
-            </div>
-          ) : (
-            <div className="flex justify-center items-center gap-2">
-              <div className="dropdown dropdown-end">
-                <div
-                  tabIndex={0}
-                  role="button"
-                  className="btn btn-ghost btn-circle bg-gray-800">
-                  <div className="w-10 flex items-center justify-center rounded-full">
-                    <span className="text-xl text-white">
-                      {user?.name?.[0]?.toUpperCase()}
-                      {user?.surname?.[0]?.toUpperCase()}
-                    </span>
-                  </div>
+          <div className="relative">
+            <button
+              onClick={() => setDropdownOpen(!dropdownOpen)}
+              className="flex items-center gap-3 hover:opacity-90 transition-opacity"
+            >
+              <div className="w-11 h-11 bg-gray-700 rounded-full flex items-center justify-center text-lg font-bold text-white">
+                {user.name?.[0]}
+                {user.surname?.[0]}
+              </div>
+
+              <div className="hidden sm:flex flex-col items-start">
+                <span className="font-semibold leading-tight">
+                  {user.name} {user.surname}
+                </span>
+                <span className="text-xs text-blue-200">{user.role}</span>
+              </div>
+
+              <ChevronDown size={18} className="hidden sm:block text-gray-300" />
+            </button>
+
+            {dropdownOpen && (
+              <div className="absolute right-0 mt-3 w-60 bg-[#1F2937] rounded-xl shadow-2xl py-2 z-50 border border-gray-700 text-sm">
+                <div className="px-5 py-3 border-b border-gray-700">
+                  <div className="font-semibold">{user.name} {user.surname}</div>
+                  <div className="text-gray-400">{user.role}</div>
                 </div>
 
-                <ul
-                  tabIndex={0}
-                  className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow">
-                  <li className="text-xl font-semibold">
-                    <Link to="/profile">Hisobingiz</Link>
-                  </li>
-                  <li className="text-xl font-semibold">
-                    <button onClick={checkout}>Chiqish</button>
-                  </li>
-                </ul>
+                <button className="w-full text-left px-5 py-3 hover:bg-gray-700/80 flex items-center gap-3">
+                  Profil
+                </button>
+
+                <button className="w-full text-left px-5 py-3 hover:bg-gray-700/80 flex items-center gap-3">
+                  Sozlamalar
+                </button>
+
+                <button className="w-full text-left px-5 py-3 text-red-400 hover:bg-gray-700/80 flex items-center gap-3">
+                  Chiqish
+                </button>
               </div>
-              <span className="text-black text-[19px]">
-                {user?.name} {user?.surname}
-              </span>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </header>
   );
-};
-
-export default Header;
+}

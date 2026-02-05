@@ -1,45 +1,47 @@
-import React from "react";
+import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "../App.jsx";
-import Home from "../pages/Home.jsx";
-import Login from "../pages/Login.jsx";
-import HomeWork from "../pages/HomeWork.jsx";
-import MonkeyTypePage from "../pages/Monkey-type-page.jsx";
-import Rating from "../pages/Rating.jsx";
-import Review from "../pages/Review.jsx";
-import Profile from "../pages/Profile.jsx";
 import ProtectedRoute from "../components/ProtectedRoute.jsx";
-import Error from "../pages/Error.jsx";
-import TeacherTasks from "../pages/TeacherTasks.jsx";
-import Test from "../components/Test.jsx";
-import HistoryTest from "../pages/HistoryTest.jsx";
+
+// Lazy import qilamiz
+const App = lazy(() => import("../App.jsx"));
+const Home = lazy(() => import("../pages/Home.jsx"));
+const Login = lazy(() => import("../pages/Login.jsx"));
+const HomeWork = lazy(() => import("../pages/HomeWork.jsx"));
+const MonkeyTypePage = lazy(() => import("../pages/Monkey-type-page.jsx"));
+const Rating = lazy(() => import("../pages/Rating.jsx"));
+const Review = lazy(() => import("../pages/Review.jsx"));
+const Profile = lazy(() => import("../pages/Profile.jsx"));
+const Error = lazy(() => import("../pages/Error.jsx"));
+const TeacherTasks = lazy(() => import("../pages/TeacherTasks.jsx"));
+const Test = lazy(() => import("../components/Test.jsx"));
+const HistoryTest = lazy(() => import("../pages/HistoryTest.jsx"));
+
+const Loading = () => <span className="loading loading-spinner text-primary"></span>;
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: (
       <ProtectedRoute>
-        <App />
+        <Suspense fallback={<Loading />}>
+          <App />
+        </Suspense>
       </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Home /> },
-      { path: "homework", element: <HomeWork /> },
-      { path: "reviews", element: <Review /> },
-      { path: "typer", element: <MonkeyTypePage /> },
-      { path: "rating", element: <Rating /> },
-      { path: "profile", element: <Profile /> },
-      // Majburiy bo‘lmagan groupId qo‘shdik:
-      { path: "tasks", element: <TeacherTasks /> },
-      { path: "/student-exam/:examSession", element: <Test />},
-      {
-        path: "/historytask",
-        element: <HistoryTest />
-      }
+      { index: true, element: <Suspense fallback={<Loading />}><Home /></Suspense> },
+      { path: "homework", element: <Suspense fallback={<Loading />}><HomeWork /></Suspense> },
+      { path: "reviews", element: <Suspense fallback={<Loading />}><Review /></Suspense> },
+      { path: "typer", element: <Suspense fallback={<Loading />}><MonkeyTypePage /></Suspense> },
+      { path: "rating", element: <Suspense fallback={<Loading />}><Rating /></Suspense> },
+      { path: "profile", element: <Suspense fallback={<Loading />}><Profile /></Suspense> },
+      { path: "tasks", element: <Suspense fallback={<Loading />}><TeacherTasks /></Suspense> },
+      { path: "/student-exam/:examSession", element: <Suspense fallback={<Loading />}><Test /></Suspense> },
+      { path: "/historytask", element: <Suspense fallback={<Loading />}><HistoryTest /></Suspense> },
     ],
   },
-  { path: "/500", element: <Error /> },
-  { path: "/login", element: <Login /> },
+  { path: "/500", element: <Suspense fallback={<Loading />}><Error /></Suspense> },
+  { path: "/login", element: <Suspense fallback={<Loading />}><Login /></Suspense> },
 ]);
 
 const AppRouter = () => <RouterProvider router={router} />;
