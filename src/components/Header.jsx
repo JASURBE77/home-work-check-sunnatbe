@@ -1,17 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Menu, X, ChevronDown } from "lucide-react";
 import LanguageSelector from "./LanguageSelector"; // o'zingizda bor deb faraz qildim
 import Logo from "../assets/logo.png";   // agar logo kerak bo'lsa
+import api from "../utils/api";
+import { useSelector } from "react-redux";
 
 export default function Header({ onMenuClick, isSidebarOpen }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+ const storedUser = useSelector((state) => state.auth.user);
 
-  // Bu yerni o'zingizning real user ma'lumotlaringiz bilan almashtiring
-  const user = {
-    name: "Jasur",
-    surname: "Rustamov",
-    role: "student",
+  const [user, setUser] = useState(storedUser || null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api({ url: "/me", method: "GET" });
+      setUser(res.data);
+    } catch (err) {
+      console.error("User fetch error:", err);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const checkoutUser = () => {
+    localStorage.removeItem("persist:auth")
+    window.location.href = "/login"
+  }
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
 
   return (
     <header className="border border-gray-800 sticky bg-[#0A0A0A] top-10 z-999 px-5 py-4 rounded-2xl mb-5">
@@ -33,7 +53,6 @@ export default function Header({ onMenuClick, isSidebarOpen }) {
 
         {/* O'ng taraf — til + user dropdown */}
         <div className="flex items-center gap-5">
-          <LanguageSelector />
 
           <div className="relative">
             <button
@@ -70,7 +89,7 @@ export default function Header({ onMenuClick, isSidebarOpen }) {
                   Sozlamalar
                 </button>
 
-                <button className="w-full text-left px-5 py-3 text-red-400 hover:bg-gray-700/80 flex items-center gap-3">
+                <button onClick={checkoutUser} className="w-full text-left px-5 py-3 text-red-400 hover:bg-gray-700/80 flex items-center gap-3">
                   Chiqish
                 </button>
               </div>

@@ -13,7 +13,7 @@ const navItems = [
   { name: "Bosh sahifa", icon: Home, path: "/" },
   { name: "Uy vazifasi", icon: BookOpen, path: "/homework" },
   { name: "Bajarilganlar", icon: CheckSquare, path: "/reviews" },
-  { name: "Topshiriqlar", icon: FileText, path: "/tasks" },
+  { name: "Imthonlar", icon: FileText, path: "/tasks" },
   { name: "Profil", icon: User, path: "/profile" },
 ];
 

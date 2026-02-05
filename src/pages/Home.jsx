@@ -15,7 +15,7 @@ export default function Dashboard() {
   const { t } = useTranslation();
   const token = useSelector((state) => state.auth.token);
 
-  const [user, setUser] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -27,11 +27,11 @@ export default function Dashboard() {
 
     try {
       const res = await api({
-        url: "/me",
+        url: "/submissions",
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUser(res.data);
+      setSubmissions(res.data.data || []);
     } catch (err) {
       console.error("Dashboard API error:", err);
       setError(t("dashboard.fetch_error") || "Ma'lumotlarni yuklab bo'lmadi");
@@ -44,13 +44,29 @@ export default function Dashboard() {
     fetchData();
   }, [token]);
 
-  // Backenddan kelgan real ma'lumotlar
-  const completed = user?.completedLessons || 0;
-  const pending = user?.pendingLessons || 0;
-  const totalPoints = 0; // backendda hali yo'q
-  const ranking = "?";   // backendda hali yo'q
-  const recentSubmissions = user?.recentSubmissions || [];
-  const pendingAssignments = []; // backendda hali yo'q
+  // Backend ma'lumotlaridan hisoblash
+  const completed = submissions.filter(s => 
+    s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
+  ).length;
+  
+  const pending = submissions.filter(s => 
+    s.submission.status === "PENDING"
+  ).length;
+  
+  const totalPoints = submissions
+    .filter(s => s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED")
+    .reduce((sum, s) => sum + (s.submission.score || 0), 0);
+  
+  const ranking = "?";
+  
+  const recentSubmissions = submissions.slice(0, 5).map(s => ({
+    description: s.submission.description,
+    date: s.submission.date,
+    score: s.submission.score,
+    status: s.submission.status
+  }));
+
+  const userName = submissions.length > 0 ? submissions[0].name : "Talaba";
 
   if (loading) {
     return (
@@ -84,20 +100,12 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="min-h-screen bg-[#0A0A0A] p-6 text-center text-gray-400 py-20">
-        Foydalanuvchi ma'lumotlari topilmadi
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white p-6 space-y-8">
       {/* Salomlashuv */}
       <div>
         <h1 className="text-4xl font-bold mb-1">
-          Salom, {user.name || user.login || "Talaba"}!
+          Salom, {userName}!
         </h1>
         <p className="text-gray-400 text-lg">
           Bugungi kunning vazifalarini ko'rib chiqing
@@ -117,7 +125,7 @@ export default function Dashboard() {
               <CheckCircle2 className="w-8 h-8 text-green-400" />
             </div>
           </div>
-          <p className="text-green-400 text-sm">+0% o'tgan haftaga nisbatan</p>
+          <p className="text-green-400 text-sm">Jami tekshirilgan topshiriqlar</p>
         </div>
 
         {/* Kutilayotgan */}
@@ -131,7 +139,7 @@ export default function Dashboard() {
               <Clock className="w-8 h-8 text-amber-400" />
             </div>
           </div>
-          <p className="text-amber-400 text-sm">+0% o'tgan haftaga nisbatan</p>
+          <p className="text-amber-400 text-sm">Tekshirilmagan topshiriqlar</p>
         </div>
 
         {/* Umumiy ball */}
@@ -145,7 +153,7 @@ export default function Dashboard() {
               <Trophy className="w-8 h-8 text-blue-400" />
             </div>
           </div>
-          <p className="text-blue-400 text-sm">+0% o'tgan haftaga nisbatan</p>
+          <p className="text-blue-400 text-sm">Barcha topshiriqlardan</p>
         </div>
 
         {/* Reyting */}
@@ -159,7 +167,7 @@ export default function Dashboard() {
               <ArrowUpRight className="w-8 h-8 text-purple-400" />
             </div>
           </div>
-          <p className="text-purple-400 text-sm">O'tgan haftaga nisbatan</p>
+          <p className="text-purple-400 text-sm">Guruh bo'yicha</p>
         </div>
       </div>
 
@@ -177,19 +185,24 @@ export default function Dashboard() {
         <div className="bg-gradient-to-br from-emerald-950 to-emerald-900 rounded-2xl p-6 border border-emerald-800/50">
           <h3 className="text-xl font-bold mb-4">Progress</h3>
           <p className="text-gray-300 mb-3">
-            Oylik maqsadingizning 0% bajarildi
+            {completed} / {submissions.length} topshiriq bajarildi
           </p>
           <div className="w-full bg-gray-800 rounded-full h-3 mb-2">
-            <div className="bg-emerald-500 h-3 rounded-full" style={{ width: "0%" }} />
+            <div 
+              className="bg-emerald-500 h-3 rounded-full transition-all duration-300" 
+              style={{ width: `${submissions.length > 0 ? (completed / submissions.length * 100) : 0}%` }} 
+            />
           </div>
-          <p className="text-sm text-gray-400">Umumiy: 0%</p>
+          <p className="text-sm text-gray-400">
+            Umumiy: {submissions.length > 0 ? Math.round(completed / submissions.length * 100) : 0}%
+          </p>
         </div>
 
         {/* Muddat yaqin */}
         <div className="bg-gradient-to-br from-amber-950 to-amber-900 rounded-2xl p-6 border border-amber-800/50">
           <h3 className="text-xl font-bold mb-4">Muddat yaqin</h3>
           <p className="text-gray-300 mb-2">
-            {pending} ta topshiriq yaqin orada tugaydi
+            {pending} ta topshiriq tekshirilishini kutmoqda
           </p>
           <button className="mt-4 bg-amber-600 hover:bg-amber-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
             Barchasini ko'rish
@@ -240,7 +253,9 @@ export default function Dashboard() {
                       sub.status === "PENDING" ? "text-amber-400" : "text-green-400"
                     }`}
                   >
-                    {sub.status === "PENDING" ? "Kutilmoqda" : "Bajarildi"}
+                    {sub.status === "PENDING" ? "Kutilmoqda" : 
+                     sub.status === "CHECKED" ? "Tekshirildi" : 
+                     sub.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Bajarildi"}
                   </p>
                 </div>
               </div>

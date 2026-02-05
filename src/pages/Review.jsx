@@ -7,18 +7,24 @@ import { CheckCircle2, Star, Download, ExternalLink, RefreshCw } from "lucide-re
 
 const Review = () => {
   const { t } = useTranslation();
-  const storedUser = useSelector((state) => state.auth.user);
+  const token = useSelector((state) => state.auth.token);
 
-  const [user, setUser] = useState(storedUser || null);
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchSubmissions = async () => {
+    if (!token) return;
+    
     setLoading(true);
     try {
-      const res = await api({ url: "/me", method: "GET" });
-      setUser(res.data);
+      const res = await api({ 
+        url: "/submissions", 
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSubmissions(res.data.data || []);
     } catch (err) {
-      console.error("User fetch error:", err);
+      console.error("Submissions fetch error:", err);
     } finally {
       setLoading(false);
     }
@@ -26,22 +32,27 @@ const Review = () => {
 
   useEffect(() => {
     fetchSubmissions();
-  }, [storedUser]);
+  }, [token]);
 
   const handleRefresh = () => {
     fetchSubmissions();
   };
 
+  // Faqat tekshirilgan topshiriqlarni olish
+  const checkedSubmissions = submissions.filter(s => 
+    s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
+  );
+
   // Calculate statistics
-  const stats = user?.recentSubmissions
+  const stats = checkedSubmissions.length > 0
     ? {
-        total: user.recentSubmissions.length,
+        total: checkedSubmissions.length,
         avgScore: Math.round(
-          user.recentSubmissions.reduce((sum, s) => sum + (s.score || 0), 0) /
-            user.recentSubmissions.length
+          checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0) /
+            checkedSubmissions.length
         ),
-        totalScore: user.recentSubmissions.reduce(
-          (sum, s) => sum + (s.score || 0),
+        totalScore: checkedSubmissions.reduce(
+          (sum, s) => sum + (s.submission.score || 0),
           0
         ),
       }
@@ -104,7 +115,7 @@ const Review = () => {
     );
   }
 
-  if (!user || !user.recentSubmissions || user.recentSubmissions.length === 0) {
+  if (checkedSubmissions.length === 0) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -112,7 +123,7 @@ const Review = () => {
             <CheckCircle2 className="w-8 h-8 text-gray-500" />
           </div>
           <p className="text-xl text-gray-400">
-            {t("review.empty") || "Hali topshiriqlar yo'q"}
+            {t("review.empty") || "Hali tekshirilgan topshiriqlar yo'q"}
           </p>
         </div>
       </div>
@@ -185,94 +196,119 @@ const Review = () => {
 
         {/* Submissions List */}
         <div className="space-y-4">
-          {user.recentSubmissions.map((submission, idx) => (
-            <motion.div
-              key={submission._id || idx}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.05 }}
-              className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all group"
-            >
-              <div className="flex items-start justify-between gap-4">
-                {/* Left Section - Icon and Content */}
-                <div className="flex items-start gap-4 flex-1">
-                  {/* Icon */}
-                  <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <CheckCircle2 className="w-6 h-6 text-green-500" />
-                  </div>
-
-                  {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    {/* Title */}
-                    <h3 className="text-xl font-semibold mb-1 truncate">
-                      {submission.HwLink.includes("github.com")
-                        ? submission.HwLink.split("/").slice(-1)[0]
-                        : "Loyiha"}
-                    </h3>
-
-                    {/* Date */}
-                    <p className="text-sm text-gray-400 mb-3">
-                      {new Date(
-                        submission.date || submission.createdAt
-                      ).toLocaleDateString("uz-UZ", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-
-                    {/* Comment */}
-                    <div className="mb-3">
-                      <p className="text-sm text-gray-300">
-                        <span className="font-medium">Izoh:</span>{" "}
-                        {submission.description ||
-                          t("review.no_description") ||
-                          "Izoh yo'q"}
-                      </p>
+          {checkedSubmissions.map((item, idx) => {
+            const submission = item.submission;
+            return (
+              <motion.div
+                key={submission._id || idx}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05 }}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all group"
+              >
+                <div className="flex items-start justify-between gap-4">
+                  {/* Left Section - Icon and Content */}
+                  <div className="flex items-start gap-4 flex-1">
+                    {/* Icon */}
+                    <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <CheckCircle2 className="w-6 h-6 text-green-500" />
                     </div>
 
-                    {/* Stars */}
-                    <div>{renderStars(submission.score || 0)}</div>
-                  </div>
-                </div>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      {/* Title */}
+                      <h3 className="text-xl font-semibold mb-1 truncate">
+                        {submission.HwLink.includes("github.com")
+                          ? submission.HwLink.split("/").slice(-1)[0]
+                          : submission.description || "Loyiha"}
+                      </h3>
 
-                {/* Right Section - Score and Link */}
-                <div className="flex flex-col items-end gap-3">
-                  {/* Score */}
-                  <div className="text-right">
-                    <p
-                      className={`text-4xl font-bold ${getScoreColor(
-                        submission.score || 0
-                      )}`}
+                      {/* Date */}
+                      <p className="text-sm text-gray-400 mb-3">
+                        {new Date(submission.date).toLocaleDateString("uz-UZ", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}
+                        {submission.checkedDate && (
+                          <span className="ml-2">
+                            • Tekshirildi: {new Date(submission.checkedDate).toLocaleDateString("uz-UZ", {
+                              day: "numeric",
+                              month: "long",
+                            })}
+                          </span>
+                        )}
+                      </p>
+
+                      {/* Comment */}
+                      <div className="mb-3">
+                        <p className="text-sm text-gray-300">
+                          <span className="font-medium">Izoh:</span>{" "}
+                          {submission.description ||
+                            t("review.no_description") ||
+                            "Izoh yo'q"}
+                        </p>
+                      </div>
+
+                      {/* Group Info */}
+                      {item.group && (
+                        <p className="text-xs text-gray-500 mb-2">
+                          Guruh: {item.group.name}
+                        </p>
+                      )}
+
+                      {/* Stars */}
+                      <div>{renderStars(submission.score || 0)}</div>
+                    </div>
+                  </div>
+
+                  {/* Right Section - Score and Link */}
+                  <div className="flex flex-col items-end gap-3">
+                    {/* Score */}
+                    <div className="text-right">
+                      <p
+                        className={`text-4xl font-bold ${getScoreColor(
+                          submission.score || 0
+                        )}`}
+                      >
+                        {submission.score || 0}
+                      </p>
+                      <p className="text-sm text-gray-400">/ 100</p>
+                    </div>
+
+                    {/* Status Badge */}
+                    <span className={`text-xs px-3 py-1 rounded-full ${
+                      submission.status === "AGAIN CHECKED" 
+                        ? "bg-purple-600/20 text-purple-400" 
+                        : "bg-green-600/20 text-green-400"
+                    }`}>
+                      {submission.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Tekshirildi"}
+                    </span>
+
+                    {/* External Link */}
+                    <a
+                      href={submission.HwLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
                     >
-                      {submission.score || 0}
-                    </p>
-                    <p className="text-sm text-gray-400">/ 100</p>
+                      <ExternalLink className="w-5 h-5 text-gray-400" />
+                    </a>
                   </div>
-
-                  {/* External Link */}
-                  <a
-                    href={submission.HwLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
-                  >
-                    <ExternalLink className="w-5 h-5 text-gray-400" />
-                  </a>
                 </div>
-              </div>
 
-              {/* Teacher Feedback */}
-              {submission.teacherDescription && (
-                <div className="mt-4 pt-4 border-t border-zinc-800">
-                  <p className="text-sm text-gray-400 mb-1">
-                    O'qituvchi izohi:
-                  </p>
-                  <p className="text-gray-300">{submission.teacherDescription}</p>
-                </div>
-              )}
-            </motion.div>
-          ))}
+                {/* Teacher Feedback */}
+                {submission.teacherDescription && (
+                  <div className="mt-4 pt-4 border-t border-zinc-800">
+                    <p className="text-sm text-gray-400 mb-1">
+                      O'qituvchi izohi {submission.checkedBy && `(${submission.checkedBy})`}:
+                    </p>
+                    <p className="text-gray-300">{submission.teacherDescription}</p>
+                  </div>
+                )}
+              </motion.div>
+            );
+          })}
         </div>
 
         {/* Refresh Button (Fixed at bottom right) */}
