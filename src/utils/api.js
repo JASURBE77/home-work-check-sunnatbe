@@ -1,5 +1,6 @@
 import axios from "axios";
 import AppRouter from "../routers/AppRouter";
+import { useSelector } from "react-redux";
 
 export const instance = axios.create({
     baseURL: import.meta.env.VITE_SERVER_URL,
@@ -13,7 +14,7 @@ instance.interceptors.response.use(
       const status = error.response.status;
 
       if (status === 401 && window.location.pathname !== "/login") {
-        localStorage.removeItem("accessToken");
+        localStorage.removeItem("persist:auth");
         window.location.href = "/login";
       }
 
@@ -28,7 +29,7 @@ instance.interceptors.response.use(
 
 
 export const api  = ({ url, open = false, ...props }) => {
-    const token = localStorage.getItem("accessToken");
+    const token = localStorage.getItem("accessToken")
 
     if (!open) {
         props.headers = {

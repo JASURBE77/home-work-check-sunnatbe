@@ -10,8 +10,8 @@ import {
   Calendar,
   Target,
 } from "lucide-react";
-import { fetchProfile } from "../app/slice/Profilestore";
-import api from "../utils/api";
+import { fetchProfile } from "../../store/slice/Profilestore";
+import api from "../../utils/api";
 import dayjs from "dayjs";
 
 export default function Profile() {
@@ -24,9 +24,7 @@ export default function Profile() {
   const [loading, setLoading] = useState(true);
 
   // Redux orqali profile fetch qilish
-  useEffect(() => {
-    if (token) dispatch(fetchProfile());
-  }, [token, dispatch]);
+
 
   // API orqali submissions fetch qilish
   const ProfileFetch = async () => {

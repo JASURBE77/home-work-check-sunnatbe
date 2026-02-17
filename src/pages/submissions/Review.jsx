@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import api from "../utils/api";
+import api from "../../utils/api";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { CheckCircle2, Star, Download, ExternalLink, RefreshCw } from "lucide-react";
-import { fetchProfile } from "../app/slice/Profilestore"; 
+import { fetchProfile } from "../../store/slice/Profilestore"; 
 
 const Review = () => {
   const { t } = useTranslation();
@@ -13,29 +13,12 @@ const Review = () => {
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.profile.data);
 
-  // ---------- Dastlabki test ma'lumotini shu yerga qo‘shamiz ----------
+
   const [submissions, setSubmissions] = useState([
-    {
-      "name": "Humoyun",
-      "surname": "Shuhratov",
-      "userId": "6959265eef6c2dfad120db68",
-      "submission": {
-          "HwLink": "https://jasurbe77.github.io/magazin/",
-          "description": "sdevrf",
-          "date": "2026-02-05T00:00:00.000Z",
-          "status": "PENDING",
-          "score": 0,
-          "teacherDescription": "",
-          "_id": "6984a2017fffa87cb67fbe48"
-      }
-    }
   ]);
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (token) dispatch(fetchProfile());
-  }, [token, dispatch]);
 
   const fetchSubmissions = async () => {
     if (!token || !profile?._id) return;

@@ -1,14 +1,13 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../utils/api';
 
-// Async thunk - profile ma'lumotlarini olish
 export const fetchProfile = createAsyncThunk(
   'profile/fetchProfile',
   async (_, { getState, rejectWithValue }) => {
     try {
       const { token } = getState().auth;
       const res = await api({
-        url: '/me',
+        url: '/users/me',
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` }
       });

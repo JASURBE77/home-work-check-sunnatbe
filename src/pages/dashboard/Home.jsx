@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { CheckCircle2, Clock, Trophy, ArrowUpRight } from "lucide-react";
-import api from "../utils/api";
+import api from "../../utils/api";
 import { useTranslation } from "react-i18next";
-import { fetchProfile } from "../app/slice/Profilestore"; // profile slice import
+import { fetchProfile } from "../../store/slice/Profilestore"; 
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -16,14 +16,8 @@ export default function Dashboard() {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  // Profile ma'lumotlarini olish
-  useEffect(() => {
-    if (token) dispatch(fetchProfile());
-  }, [token, dispatch]);
-
   const fetchData = async () => {
-    if (!token || !profile) return;
+    if (!profile) return;
 
     setLoading(true);
     setError(null);

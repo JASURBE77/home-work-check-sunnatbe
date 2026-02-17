@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Upload, Send, Link as LinkIcon, MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
-import api from "../utils/api";
+import api from "../../utils/api";
 
 const INITIAL_FORM = {
   type: "github",
@@ -23,7 +23,7 @@ const isValidUrl = (string) => {
 
 export default function HouseDonationPage() {
   const { t } = useTranslation();
-  const token = useSelector((state) => state.auth.token);
+  const token = localStorage.getItem("accessToken")
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -58,7 +58,7 @@ export default function HouseDonationPage() {
 
     try {
       const res = await api({
-        url: "/postHomeWork",
+        url: "/submissions/postHomeWork",
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

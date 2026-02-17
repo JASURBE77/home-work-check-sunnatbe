@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import api from "../utils/api";
+import api from "../../utils/api";
 import {
   AlertCircle,
   CheckCircle2,
@@ -23,7 +23,7 @@ const TeacherTasks = () => {
 
   const getme = async () => {
     try {
-      const res = await api({ url: "/me", method: "GET" });
+      const res = await api({ url: "/users/me", method: "GET" });
       setGroupId(res.data.group?._id);
     } catch (error) {
       console.error("getme error:", error);
@@ -35,7 +35,7 @@ const TeacherTasks = () => {
     try {
       setLoading(true);
       const res = await api({
-        url: `/exam-session/group/${groupId}`,
+        url: `/exam-session/group`,
         method: "GET",
       });
       setTasks(Array.isArray(res.data.data) ? res.data.data : []);
