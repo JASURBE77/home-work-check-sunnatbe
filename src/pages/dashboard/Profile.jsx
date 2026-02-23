@@ -1,16 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
-import {
-  Mail,
-  MapPin,
-  Edit,
-  Trophy,
-  User,
-  Calendar,
-  Target,
-} from "lucide-react";
-import { fetchProfile } from "../../store/slice/Profilestore";
+import { Mail, MapPin, Trophy, User, Calendar, Target, CheckCircle2, Clock } from "lucide-react";
 import api from "../../utils/api";
 import dayjs from "dayjs";
 
@@ -18,26 +9,18 @@ export default function Profile() {
   const { t } = useTranslation();
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.profile.data);
-  const dispatch = useDispatch();
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Redux orqali profile fetch qilish
-
-
-  // API orqali submissions fetch qilish
   const ProfileFetch = async () => {
     if (!token || !profile?._id) return;
-
     try {
-      const res = await api({ 
-        url:`/submissions/${profile._id}`,
+      const res = await api({
+        url: `/submissions/${profile._id}`,
         method: "GET",
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       });
-
-      // Response data structurega moslash
       const data = Array.isArray(res.data.data) ? res.data.data : [res.data.data];
       setSubmissions(data);
     } catch (err) {
@@ -51,282 +34,233 @@ export default function Profile() {
     ProfileFetch();
   }, [token, profile]);
 
-  // Ma'lumotlarni hisoblash
   const user = submissions.length > 0 ? submissions[0] : null;
 
   const stats = {
     total: submissions.length,
-    completed: submissions.filter(s => 
-      s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED"
+    completed: submissions.filter(
+      (s) => s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED"
     ).length,
-    pending: submissions.filter(s => s.submission?.status === "PENDING").length,
+    pending: submissions.filter((s) => s.submission?.status === "PENDING").length,
     totalScore: submissions
-      .filter(s => s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED")
-      .reduce((sum, s) => sum + (s.submission?.score || 0), 0)
+      .filter((s) => s.submission?.status === "CHECKED" || s.submission?.status === "AGAIN CHECKED")
+      .reduce((sum, s) => sum + (s.submission?.score || 0), 0),
   };
 
-  // Progress hisobi (har bir kurs uchun)
+  const progressPct = stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0;
+
   const courses = submissions.reduce((acc, item) => {
     if (item.group?.name) {
-      const groupName = item.group.name;
-      if (!acc[groupName]) acc[groupName] = { total: 0, completed: 0 };
-      acc[groupName].total++;
+      const g = item.group.name;
+      if (!acc[g]) acc[g] = { total: 0, completed: 0 };
+      acc[g].total++;
       if (item.submission?.status === "CHECKED" || item.submission?.status === "AGAIN CHECKED") {
-        acc[groupName].completed++;
+        acc[g].completed++;
       }
     }
     return acc;
   }, {});
 
-  const courseProgress = Object.entries(courses).map(([name, data]) => ({
-    name,
-    percentage: Math.round((data.completed / data.total) * 100)
-  })).slice(0, 3); // Faqat 3 ta kursni ko'rsatish
+  const courseProgress = Object.entries(courses)
+    .map(([name, data]) => ({
+      name,
+      percentage: Math.round((data.completed / data.total) * 100),
+    }))
+    .slice(0, 3);
 
+  const initials = `${profile?.name?.[0] || ""}${profile?.surname?.[0] || ""}`.toUpperCase();
+
+  // ── LOADING ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] p-6 space-y-8 animate-pulse">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-800 p-8">
-          <div className="flex flex-col md:flex-row items-center gap-8">
-            <div className="w-40 h-40 rounded-full bg-gray-700" />
-            <div className="flex-1 space-y-4">
-              <div className="h-10 w-3/4 bg-gray-700 rounded-xl" />
-              <div className="h-6 w-1/2 bg-gray-700 rounded" />
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="h-28 bg-gray-700 rounded-xl" />
-                ))}
-              </div>
+      <div className="min-h-screen bg-slate-50 p-5 space-y-4 animate-pulse">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6">
+          <div className="flex items-center gap-5">
+            <div className="w-20 h-20 rounded-full bg-slate-200" />
+            <div className="space-y-2 flex-1">
+              <div className="h-6 w-48 bg-slate-200 rounded-lg" />
+              <div className="h-4 w-32 bg-slate-200 rounded" />
             </div>
           </div>
+          <div className="grid grid-cols-4 gap-4 mt-5">
+            {[...Array(4)].map((_, i) => <div key={i} className="h-20 bg-slate-200 rounded-xl" />)}
+          </div>
         </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
-            <div className="h-8 w-1/2 bg-gray-700 rounded mb-6" />
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-800 rounded-xl mb-4" />
-            ))}
-          </div>
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
-            <div className="h-8 w-1/2 bg-gray-700 rounded mb-6" />
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-12 bg-gray-800 rounded-xl mb-4" />
-            ))}
-          </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div className="h-64 bg-slate-200 rounded-2xl" />
+          <div className="h-64 bg-slate-200 rounded-2xl" />
         </div>
       </div>
     );
   }
 
+  // ── NO DATA ──
   if (!user) {
     return (
-      <div className="min-h-screen bg-[#0A0A0A] flex items-center justify-center">
-        <p className="text-red-400 text-xl">Profil topilmadi</p>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <p className="text-slate-400 text-sm">Profil topilmadi</p>
       </div>
     );
   }
+
   return (
-    <div className="min-h-screen bg-[#0A0A0A] text-white p-6">
-      <div className="max-w-7xl mx-auto space-y-8">
-        {/* ===== PROFILE HEADER CARD ===== */}
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl border border-gray-800 p-6 md:p-8 shadow-xl">
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-            {/* Avatar va info */}
-            <div className="flex items-center gap-6">
-              <div className="relative">
-                <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-blue-600 to-blue-700 flex items-center justify-center ring-4 ring-blue-500/30 ring-offset-4 ring-offset-gray-900">
-                  <span className="text-5xl md:text-6xl font-bold text-white">
-                    {user.name?.[0] || 'U'}
-                    {user.surname?.[0] || 'S'}
-                  </span>
-                </div>
-                <div className="absolute bottom-2 right-2 w-6 h-6 bg-green-500 rounded-full border-4 border-gray-900" />
-              </div>
+    <div className="min-h-screen bg-slate-50 p-5 space-y-4">
 
-              <div>
-                <h1 className="text-3xl md:text-4xl font-bold">
-                  {user.name} {user.surname}
-                </h1>
-                <p className="text-gray-400 text-lg mt-1">
-                  @{user.userId?.slice(-8) || "username"}
-                </p>
-
-                <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
-                  <div className="flex items-center gap-2">
-                    <User size={16} />
-                    Talaba
-                  </div>
-                  {user.group && (
-                    <div className="flex items-center gap-2">
-                      <Calendar size={16} />
-                      Guruh: {user.group.name}
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-yellow-400">
-                    <Trophy size={16} />
-                    #{stats.completed > 0 ? Math.ceil(stats.completed / 2) : "?"} Reyting
-                  </div>
-                </div>
-              </div>
+      {/* ── PROFILE HEADER ── */}
+      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+          {/* Avatar */}
+          <div className="relative flex-shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-blue-600 flex items-center justify-center border-4 border-blue-100">
+              <span className="text-xl md:text-2xl font-bold text-white">{initials}</span>
             </div>
-
-            {/* Edit button */}
-            <button className="flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 rounded-xl text-white font-medium transition-all shadow-lg shadow-blue-900/30">
-              <Edit size={18} />
-              Tahrirlash
-            </button>
+            <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-white" />
           </div>
 
-          {/* Stats grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
-            <div className="bg-gray-950/80 border border-gray-800 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-white mb-1">{stats.total}</p>
-              <p className="text-gray-400">Jami topshiriqlar</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-950 to-green-900 border border-green-800/50 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-white mb-1">{stats.completed}</p>
-              <p className="text-green-300">Bajarilgan</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-amber-950 to-amber-900 border border-amber-800/50 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-white mb-1">{stats.pending}</p>
-              <p className="text-amber-300">Kutilayotgan</p>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-950 to-blue-900 border border-blue-800/50 rounded-xl p-6 text-center">
-              <p className="text-4xl font-bold text-white mb-1">{stats.totalScore}</p>
-              <p className="text-blue-300">Umumiy ball</p>
+          {/* Info */}
+          <div className="flex-1 min-w-0">
+            <h1 className="text-lg font-bold text-slate-900 tracking-tight">
+              {user.name} {user.surname}
+            </h1>
+            <div className="flex flex-wrap items-center gap-3 mt-1.5">
+              <span className="flex items-center gap-1 text-xs text-slate-400">
+                <User size={12} /> Talaba
+              </span>
+              {user.group && (
+                <span className="flex items-center gap-1 text-xs text-slate-400">
+                  <Calendar size={12} /> {user.group.name}
+                </span>
+              )}
+              <span className="flex items-center gap-1 text-xs text-amber-500 font-medium">
+                <Trophy size={12} />
+                #{stats.completed > 0 ? Math.ceil(stats.completed / 2) : "?"} Reyting
+              </span>
             </div>
           </div>
         </div>
 
-        {/* ===== BOTTOM SECTION ===== */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Contact Info */}
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <Mail className="text-gray-400" size={24} />
-              Bog'lanish ma'lumotlari
-            </h3>
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-slate-800">{stats.total}</p>
+            <p className="text-xs text-slate-400 mt-0.5">Jami</p>
+          </div>
+          <div className="bg-green-50 border border-green-100 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-green-700">{stats.completed}</p>
+            <p className="text-xs text-green-500 mt-0.5">Bajarilgan</p>
+          </div>
+          <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-amber-600">{stats.pending}</p>
+            <p className="text-xs text-amber-500 mt-0.5">Kutilayotgan</p>
+          </div>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 text-center">
+            <p className="text-2xl font-bold text-blue-700">{stats.totalScore}</p>
+            <p className="text-xs text-blue-500 mt-0.5">Umumiy ball</p>
+          </div>
+        </div>
+      </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <User className="text-gray-400" size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-400 text-sm mb-1">Username</p>
-                  <p className="font-medium">{user.name} {user.surname}</p>
-                </div>
-              </div>
+      {/* ── BOTTOM ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Mail className="text-gray-400" size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-400 text-sm mb-1">User ID</p>
-                  <p className="font-medium text-xs break-all">{user.userId}</p>
-                </div>
-              </div>
+        {/* Contact */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-[14px] font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <Mail size={15} className="text-slate-400" />
+            Bog'lanish ma'lumotlari
+          </h3>
 
-              {user.group && (
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <MapPin className="text-gray-400" size={20} />
+          <div className="space-y-3">
+            {[
+              {
+                icon: <User size={15} className="text-slate-400" />,
+                label: "Ism familiya",
+                value: `${user.name} ${user.surname}`,
+              },
+              {
+                icon: <Mail size={15} className="text-slate-400" />,
+                label: "User ID",
+                value: user.userId,
+                mono: true,
+              },
+              user.group && {
+                icon: <MapPin size={15} className="text-slate-400" />,
+                label: "Guruh",
+                value: user.group.name,
+              },
+              {
+                icon: <Calendar size={15} className="text-slate-400" />,
+                label: "Oxirgi topshiriq",
+                value: submissions[0]?.submission?.date
+                  ? dayjs(submissions[0].submission.date).format("DD.MM.YYYY")
+                  : "Ma'lumot yo'q",
+              },
+            ]
+              .filter(Boolean)
+              .map((row, i) => (
+                <div key={i} className="flex items-center gap-3 py-2.5 border-b border-slate-100 last:border-0">
+                  <div className="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center flex-shrink-0">
+                    {row.icon}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-gray-400 text-sm mb-1">Guruh</p>
-                    <p className="font-medium">{user.group.name}</p>
+                    <p className="text-[11px] text-slate-400">{row.label}</p>
+                    <p className={`text-[13px] font-medium text-slate-800 truncate ${row.mono ? "font-mono text-[11px]" : ""}`}>
+                      {row.value}
+                    </p>
                   </div>
                 </div>
-              )}
-
-              <div className="flex items-start gap-4">
-                <div className="w-12 h-12 bg-gray-950 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <Calendar className="text-gray-400" size={20} />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-gray-400 text-sm mb-1">Oxirgi topshiriq</p>
-                  <p className="font-medium">
-                    {submissions[0]?.submission?.date 
-                      ? dayjs(submissions[0].submission.date).format("DD.MM.YYYY")
-                      : "Ma'lumot yo'q"}
-                  </p>
-                </div>
-              </div>
-            </div>
+              ))}
           </div>
+        </div>
 
-          {/* O'qish progressi */}
-          <div className="bg-gray-900 rounded-2xl border border-gray-800 p-8">
-            <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
-              <Target className="text-blue-500" size={24} />
-              O'qish progressi
-            </h3>
+        {/* Progress */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-[14px] font-semibold text-slate-800 mb-4 flex items-center gap-2">
+            <Target size={15} className="text-blue-500" />
+            O'qish progressi
+          </h3>
 
-            <div className="space-y-6">
-              {courseProgress.length > 0 ? (
-                courseProgress.map((course, idx) => {
-                  // Inline styles ishlatish (Tailwind dynamic classes muammosi uchun)
-                  let bgColor = "#10b981"; // green-500
-                  let textColor = "text-green-400";
-                  
-                  if (course.percentage >= 80) {
-                    bgColor = "#10b981"; // green-500
-                    textColor = "text-green-400";
-                  } else if (course.percentage >= 50) {
-                    bgColor = "#3b82f6"; // blue-500
-                    textColor = "text-blue-400";
-                  } else {
-                    bgColor = "#f59e0b"; // amber-500
-                    textColor = "text-amber-400";
-                  }
-                  
-                  return (
-                    <div key={idx}>
-                      <div className="flex justify-between mb-2">
-                        <span className="font-medium truncate pr-4">{course.name}</span>
-                        <span className={`${textColor} font-bold`}>
-                          {course.percentage}%
-                        </span>
-                      </div>
-                      <div className="w-full bg-gray-800 rounded-full h-3">
-                        <div 
-                          className="h-3 rounded-full transition-all duration-500"
-                          style={{ 
-                            width: `${course.percentage}%`,
-                            backgroundColor: bgColor
-                          }}
-                        />
-                      </div>
+          <div className="space-y-4">
+            {courseProgress.length > 0 ? (
+              courseProgress.map((course, idx) => {
+                const pct = course.percentage;
+                const barColor =
+                  pct >= 80 ? "bg-green-500" : pct >= 50 ? "bg-blue-500" : "bg-amber-400";
+                const textColor =
+                  pct >= 80 ? "text-green-600" : pct >= 50 ? "text-blue-600" : "text-amber-500";
+
+                return (
+                  <div key={idx}>
+                    <div className="flex justify-between mb-1.5">
+                      <span className="text-[13px] font-medium text-slate-700 truncate pr-3">
+                        {course.name}
+                      </span>
+                      <span className={`text-[13px] font-bold ${textColor}`}>{pct}%</span>
                     </div>
-                  );
-                })
-              ) : (
-                <div className="text-center text-gray-400 py-8">
-                  Hali kurslar mavjud emas
-                </div>
-              )}
+                    <div className="w-full h-2 bg-slate-100 rounded-full">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-500 ${barColor}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-sm text-slate-400 text-center py-6">Hali kurslar mavjud emas</p>
+            )}
 
-              {/* Umumiy progress */}
-              <div className="pt-4 border-t border-gray-800">
-                <div className="flex justify-between mb-2">
-                  <span className="font-medium">Umumiy progress</span>
-                  <span className="text-purple-400 font-bold">
-                    {stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%
-                  </span>
-                </div>
-                <div className="w-full bg-gray-800 rounded-full h-3">
-                  <div 
-                    className="bg-purple-500 h-3 rounded-full transition-all duration-500"
-                    style={{ 
-                      width: `${stats.total > 0 ? Math.round((stats.completed / stats.total) * 100) : 0}%` 
-                    }}
-                  />
-                </div>
+            {/* Overall */}
+            <div className="pt-3 border-t border-slate-100">
+              <div className="flex justify-between mb-1.5">
+                <span className="text-[13px] font-semibold text-slate-700">Umumiy progress</span>
+                <span className="text-[13px] font-bold text-violet-600">{progressPct}%</span>
+              </div>
+              <div className="w-full h-2 bg-slate-100 rounded-full">
+                <div
+                  className="h-2 rounded-full bg-violet-500 transition-all duration-500"
+                  style={{ width: `${progressPct}%` }}
+                />
               </div>
             </div>
           </div>

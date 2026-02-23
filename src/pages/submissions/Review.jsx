@@ -1,34 +1,24 @@
 import React, { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import api from "../../utils/api";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { CheckCircle2, Star, Download, ExternalLink, RefreshCw } from "lucide-react";
-import { fetchProfile } from "../../store/slice/Profilestore"; 
+import { CheckCircle2, Star, Trophy, ExternalLink, RefreshCw } from "lucide-react";
 
 const Review = () => {
   const { t } = useTranslation();
-  const dispatch = useDispatch();
-
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.profile.data);
 
-
-  const [submissions, setSubmissions] = useState([
-  ]);
-
+  const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
-
 
   const fetchSubmissions = async () => {
     if (!token || !profile?._id) return;
-
     setLoading(true);
     try {
-      const userId = profile._id;
-
       const res = await api({
-        url: `/submissions/${userId}`,
+        url: `/submissions/${profile._id}`,
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -44,81 +34,70 @@ const Review = () => {
     fetchSubmissions();
   }, [token, profile?._id]);
 
-  const handleRefresh = () => {
-    fetchSubmissions();
-  };
-
-  // ---------- Faqat tekshirilgan topshiriqlarni olish (PENDINGni ham qo‘shdik) ----------
-  const checkedSubmissions = submissions.filter(s => 
-    s.submission.status === "CHECKED" || 
-    s.submission.status === "AGAIN CHECKED" ||
-    s.submission.status === "PENDING"
+  const checkedSubmissions = submissions.filter(
+    (s) =>
+      s.submission.status === "CHECKED" ||
+      s.submission.status === "AGAIN CHECKED" ||
+      s.submission.status === "PENDING"
   );
 
-  const stats = checkedSubmissions.length > 0
-    ? {
-        total: checkedSubmissions.length,
-        avgScore: Math.round(
-          checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0) /
-            checkedSubmissions.length
-        ),
-        totalScore: checkedSubmissions.reduce(
-          (sum, s) => sum + (s.submission.score || 0),
-          0
-        ),
-      }
-    : { total: 0, avgScore: 0, totalScore: 0 };
+  const stats = {
+    total: checkedSubmissions.length,
+    avgScore:
+      checkedSubmissions.length > 0
+        ? Math.round(
+            checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0) /
+              checkedSubmissions.length
+          )
+        : 0,
+    totalScore: checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0),
+  };
 
   const renderStars = (score) => {
-    const maxStars = 5;
-    const filledStars = Math.min(Math.floor(score / 20), maxStars);
+    const filled = Math.min(Math.floor(score / 20), 5);
     return (
       <div className="flex gap-0.5">
-        {[...Array(maxStars)].map((_, i) => (
+        {[...Array(5)].map((_, i) => (
           <Star
             key={i}
-            className={`w-4 h-4 ${i < filledStars ? "fill-yellow-500 text-yellow-500" : "text-gray-600"}`}
+            size={13}
+            className={i < filled ? "fill-amber-400 text-amber-400" : "text-slate-200"}
           />
         ))}
       </div>
     );
   };
 
-  const getScoreColor = (score) => {
-    if (score >= 90) return "text-green-400";
-    if (score >= 70) return "text-yellow-400";
-    return "text-red-400";
+  const getScoreStyle = (score) => {
+    if (score >= 90) return { text: "text-green-600", bg: "bg-green-50", border: "border-green-100" };
+    if (score >= 70) return { text: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" };
+    return { text: "text-red-500", bg: "bg-red-50", border: "border-red-100" };
   };
 
+  // ── LOADING ──
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white p-6">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="h-12 w-64 bg-zinc-800 rounded-lg animate-pulse"></div>
-          <div className="h-6 w-96 bg-zinc-800 rounded-lg animate-pulse"></div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-28 animate-pulse"></div>
-            ))}
-          </div>
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 h-40 animate-pulse"></div>
-            ))}
-          </div>
+      <div className="min-h-screen bg-slate-50 p-5 space-y-4 animate-pulse">
+        <div className="h-8 w-56 bg-slate-200 rounded-lg" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-slate-200 rounded-2xl" />)}
+        </div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => <div key={i} className="h-36 bg-slate-200 rounded-2xl" />)}
         </div>
       </div>
     );
   }
 
+  // ── EMPTY ──
   if (checkedSubmissions.length === 0) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-8 h-8 text-gray-500" />
+          <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-200">
+            <CheckCircle2 size={24} className="text-slate-400" />
           </div>
-          <p className="text-xl text-gray-400">
+          <p className="text-slate-500 text-sm">
             {t("review.empty") || "Hali tekshirilgan topshiriqlar yo'q"}
           </p>
         </div>
@@ -127,116 +106,162 @@ const Review = () => {
   }
 
   return (
-    <div className="min-h-screen text-white p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold mb-2">Bajarilgan topshiriqlar</h1>
-          <p className="text-gray-400 text-lg">Tekshirilgan va baholangan barcha topshiriqlaringiz</p>
-        </motion.div>
+    <div className="min-h-screen bg-slate-50 p-5 space-y-5">
 
-        {/* Statistics */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-green-500" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.total}</p>
-                <p className="text-sm text-gray-400">Jami bajarilgan</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-blue-600/20 rounded-xl flex items-center justify-center">
-                <Star className="w-6 h-6 text-blue-500" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.avgScore}%</p>
-                <p className="text-sm text-gray-400">O'rtacha ball</p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-yellow-600/20 rounded-xl flex items-center justify-center">
-                <Download className="w-6 h-6 text-yellow-500" />
-              </div>
-              <div>
-                <p className="text-3xl font-bold">{stats.totalScore}</p>
-                <p className="text-sm text-gray-400">Umumiy ball</p>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+      {/* ── HEADER ── */}
+      <div>
+        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Bajarilgan topshiriqlar</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Tekshirilgan va baholangan barcha topshiriqlaringiz</p>
+      </div>
 
-        {/* Submissions List */}
-        <div className="space-y-4">
-          {checkedSubmissions.map((item, idx) => {
-            const submission = item.submission;
-            return (
-              <motion.div key={submission._id || idx} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.05 }} className="bg-zinc-900 border border-zinc-800 rounded-2xl p-6 hover:border-zinc-700 transition-all group">
-                <div className="flex items-start justify-between gap-4 flex-wrap md:flex-nowrap">
-                  <div className="flex items-start gap-4 flex-1 min-w-0">
-                    <div className="w-12 h-12 bg-green-600/20 rounded-xl flex items-center justify-center flex-shrink-0">
-                      <CheckCircle2 className="w-6 h-6 text-green-500" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-xl font-semibold mb-1 truncate">
-                        {submission.HwLink.includes("github.com")
-                          ? submission.HwLink.split("/").slice(-1)[0]
-                          : submission.description || "Loyiha"}
-                      </h3>
-                      <p className="text-sm text-gray-400 mb-3">
-                        {new Date(submission.date).toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" })}
-                        {submission.checkedDate && (
-                          <span className="ml-2">
-                            • Tekshirildi: {new Date(submission.checkedDate).toLocaleDateString("uz-UZ", { day: "numeric", month: "long" })}
+      {/* ── STATS ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Jami */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
+            <CheckCircle2 size={19} className="text-green-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+            <p className="text-xs text-slate-400">Jami bajarilgan</p>
+          </div>
+        </div>
+
+        {/* O'rtacha */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
+            <Star size={19} className="text-blue-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{stats.avgScore}%</p>
+            <p className="text-xs text-slate-400">O'rtacha ball</p>
+          </div>
+        </div>
+
+        {/* Umumiy */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
+            <Trophy size={19} className="text-amber-500" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-slate-900">{stats.totalScore}</p>
+            <p className="text-xs text-slate-400">Umumiy ball</p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── LIST ── */}
+      <div className="space-y-3">
+        {checkedSubmissions.map((item, idx) => {
+          const sub = item.submission;
+          const score = sub.score || 0;
+          const scoreStyle = getScoreStyle(score);
+          const isPending = sub.status === "PENDING";
+          const repoName = sub.HwLink?.includes("github.com")
+            ? sub.HwLink.split("/").slice(-1)[0]
+            : sub.description || "Loyiha";
+
+          return (
+            <motion.div
+              key={sub._id || idx}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.04 }}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-blue-200 hover:shadow-md transition-all duration-150"
+            >
+              <div className="flex items-start gap-4">
+                {/* Icon */}
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isPending ? "bg-amber-50" : "bg-green-50"}`}>
+                  <CheckCircle2 size={18} className={isPending ? "text-amber-400" : "text-green-500"} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <h3 className="text-[14px] font-semibold text-slate-800 truncate">{repoName}</h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        {new Date(sub.date).toLocaleDateString("uz-UZ", {
+                          day: "numeric", month: "long", year: "numeric",
+                        })}
+                        {sub.checkedDate && (
+                          <span className="ml-2 text-slate-300">
+                            · Tekshirildi: {new Date(sub.checkedDate).toLocaleDateString("uz-UZ", {
+                              day: "numeric", month: "long",
+                            })}
                           </span>
                         )}
                       </p>
-                      <div className="mb-3">
-                        <p className="text-sm text-gray-300">
-                          <span className="font-medium">Izoh:</span> {submission.description || t("review.no_description") || "Izoh yo'q"}
-                        </p>
-                      </div>
-                      {item.group && <p className="text-xs text-gray-500 mb-2">Guruh: {item.group.name}</p>}
-                      <div>{renderStars(submission.score || 0)}</div>
+                    </div>
+
+                    {/* Score badge */}
+                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${scoreStyle.bg} ${scoreStyle.border} flex-shrink-0`}>
+                      <span className={`text-xl font-bold ${scoreStyle.text}`}>{score}</span>
+                      <span className={`text-xs ${scoreStyle.text} opacity-60`}>/100</span>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-3 flex-shrink-0">
-                    <div className="text-right">
-                      <p className={`text-4xl font-bold ${getScoreColor(submission.score || 0)}`}>{submission.score || 0}</p>
-                      <p className="text-sm text-gray-400">/ 100</p>
+
+                  {/* Description */}
+                  {sub.description && (
+                    <p className="text-[13px] text-slate-500 mt-2 leading-relaxed">
+                      {sub.description}
+                    </p>
+                  )}
+
+                  {/* Stars + status + link */}
+                  <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
+                    <div className="flex items-center gap-3">
+                      {renderStars(score)}
+                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full
+                        ${isPending
+                          ? "bg-amber-50 text-amber-600"
+                          : sub.status === "AGAIN CHECKED"
+                          ? "bg-violet-50 text-violet-600"
+                          : "bg-green-50 text-green-600"
+                        }`}
+                      >
+                        {isPending ? "Kutilmoqda" : sub.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Tekshirildi"}
+                      </span>
+                      {item.group && (
+                        <span className="text-[11px] text-slate-400">{item.group.name}</span>
+                      )}
                     </div>
-                    <span className={`text-xs px-3 py-1 rounded-full ${submission.status === "AGAIN CHECKED" ? "bg-purple-600/20 text-purple-400" : "bg-green-600/20 text-green-400"}`}>
-                      {submission.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Tekshirildi"}
-                    </span>
-                    <a href={submission.HwLink} target="_blank" rel="noopener noreferrer" className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors">
-                      <ExternalLink className="w-5 h-5 text-gray-400" />
+
+                    <a
+                      href={sub.HwLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-[12px] text-blue-500 hover:text-blue-700 font-medium transition-colors"
+                    >
+                      <ExternalLink size={13} />
+                      Ko'rish
                     </a>
                   </div>
-                </div>
-                {submission.teacherDescription && (
-                  <div className="mt-4 pt-4 border-t border-zinc-800">
-                    <p className="text-sm text-gray-400 mb-1">
-                      O'qituvchi izohi {submission.checkedBy && `(${submission.checkedBy})`}:
-                    </p>
-                    <p className="text-gray-300">{submission.teacherDescription}</p>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
 
-        {/* Refresh Button */}
-        <motion.button initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 }} onClick={handleRefresh} disabled={loading} className="fixed bottom-8 right-8 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 text-white p-4 rounded-full shadow-2xl shadow-indigo-500/30 transition-all hover:scale-110 disabled:cursor-not-allowed z-50">
-          <RefreshCw className={`w-6 h-6 ${loading ? "animate-spin" : ""}`} />
-        </motion.button>
+                  {/* Teacher comment */}
+                  {sub.teacherDescription && (
+                    <div className="mt-3 pt-3 border-t border-slate-100">
+                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
+                        O'qituvchi izohi {sub.checkedBy && `· ${sub.checkedBy}`}
+                      </p>
+                      <p className="text-[13px] text-slate-600">{sub.teacherDescription}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
+
+      {/* ── REFRESH FAB ── */}
+      <button
+        onClick={fetchSubmissions}
+        disabled={loading}
+        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white w-12 h-12 rounded-full shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all hover:scale-105 disabled:cursor-not-allowed z-50"
+      >
+        <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
+      </button>
     </div>
   );
 };

@@ -29,155 +29,168 @@ export default function Header({ onMenuClick, isSidebarOpen }) {
   }, []);
 
   useEffect(() => {
-    if (!user) {
-      dispatch(fetchProfile());
-    }
+    if (!user) dispatch(fetchProfile());
   }, [dispatch, user]);
 
+  const initials = `${user?.name?.[0]?.toUpperCase() || ""}${user?.surname?.[0]?.toUpperCase() || ""}`;
+
+  // ── LOADING SKELETON ──
   if (loading) {
     return (
-      <header className="border border-gray-800 sticky bg-[#0A0A0A] top-10 z-50 px-5 py-4 rounded-2xl mb-5">
+      <header className="sticky top-3 z-50 mb-5 bg-white border border-slate-200 rounded-2xl px-[18px] py-[10px] shadow-sm">
         <div className="flex items-center justify-between">
-          <div className="h-10 w-40 bg-gray-800 animate-pulse rounded-lg"></div>
-          <div className="h-10 w-10 bg-gray-800 animate-pulse rounded-full"></div>
+          <div className="h-9 w-40 rounded-lg bg-slate-100 animate-pulse" />
+          <div className="h-9 w-9 rounded-full bg-slate-100 animate-pulse" />
         </div>
       </header>
     );
   }
 
   return (
-    <header className="border border-gray-800/50 sticky bg-gradient-to-r from-[#0A0A0A] via-[#0D0D0D] to-[#0A0A0A] top-10 z-50 px-5 py-3.5 rounded-2xl mb-5 shadow-xl backdrop-blur-sm">
-      <div className="flex items-center justify-between">
-        {/* Chap taraf — hamburger + logo */}
-        <div className="flex items-center gap-4">
-          <button
-            onClick={onMenuClick}
-            className="lg:hidden p-2.5 hover:bg-blue-600/20 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95"
-            aria-label="Menu"
-          >
-            {isSidebarOpen ? (
-              <X size={24} className="text-gray-300" />
-            ) : (
-              <Menu size={24} className="text-gray-300" />
-            )}
-          </button>
+    <>
+      {/* Dropdown animation */}
+      <style>{`
+        @keyframes ddOpen {
+          from { opacity: 0; transform: translateY(-6px) scale(0.98); }
+          to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .dd-open { animation: ddOpen 0.17s ease; }
+      `}</style>
 
-          <div className="flex items-center gap-3 group">
-            <div className="relative">
-              <img
-                src={Logo}
-                className="w-11 h-11 object-contain transition-transform duration-300 group-hover:scale-110"
-                alt="Logo"
-              />
-              <div className="absolute inset-0 bg-blue-500/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-            </div>
-            <h1 className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent hidden sm:block">
-              Student Control
-            </h1>
-          </div>
-        </div>
+      <header className="sticky top-3 z-50 mb-5 bg-white border border-slate-200 rounded-2xl px-[18px] py-[10px] shadow-[0_1px_3px_rgba(0,0,0,0.05),0_6px_24px_rgba(0,0,0,0.07)]">
+        <div className="flex items-center justify-between">
 
-        {/* O'ng taraf */}
-        <div className="flex items-center gap-3 lg:gap-5">
-          <button
-            className="relative p-2.5 hover:bg-gray-800/80 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 hidden sm:block"
-            aria-label="Notifications"
-          >
-            <Bell size={22} className="text-gray-300" />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-          </button>
-
-          <div className="hidden md:block">
-            <LanguageSelector />
-          </div>
-
-          {/* User dropdown */}
-          <div className="relative" ref={dropdownRef}>
+          {/* ── LEFT ── */}
+          <div className="flex items-center gap-2.5">
+            {/* Hamburger — only mobile */}
             <button
-              onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-3 hover:bg-gray-800/40 px-3 py-2 rounded-xl transition-all duration-300 hover:scale-[1.02] active:scale-95"
+              onClick={onMenuClick}
+              aria-label="Menu"
+              className="lg:hidden flex items-center justify-center w-[34px] h-[34px] rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors duration-150"
             >
-              <div className="relative">
-                <div className="w-10 h-10 lg:w-11 lg:h-11 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-base lg:text-lg font-bold text-white shadow-lg">
-                  {user?.name?.[0]?.toUpperCase()}
-                  {user?.surname?.[0]?.toUpperCase()}
-                </div>
-                <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-[#0A0A0A]"></div>
-              </div>
-
-              <div className="hidden lg:flex flex-col items-start max-w-[150px]">
-                <span className="font-semibold text-sm leading-tight text-white truncate w-full">
-                  {user?.name} {user?.surname}
-                </span>
-                <span className="text-xs text-blue-300/80 capitalize">
-                  {user?.role}
-                </span>
-              </div>
-
-              <ChevronDown
-                size={18}
-                className={`text-gray-400 transition-transform duration-300 hidden lg:block ${
-                  dropdownOpen ? "rotate-180" : ""
-                }`}
-              />
+              {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {dropdownOpen && (
-              <div className="absolute right-0 mt-3 w-64 bg-gradient-to-br from-[#1a1a1a] to-[#0f0f0f] rounded-2xl shadow-2xl py-2 z-[100] border border-gray-700/50 backdrop-blur-md animate-in fade-in slide-in-from-top-2 duration-200">
-                {/* User info header */}
-                <div className="px-5 py-4 border-b border-gray-700/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-lg font-bold text-white">
-                      {user?.name?.[0]?.toUpperCase()}
-                      {user?.surname?.[0]?.toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="font-semibold text-white truncate">
-                        {user?.name} {user?.surname}
-                      </div>
-                      <div className="text-sm text-gray-400 capitalize">
-                        {user?.role}
-                      </div>
-                    </div>
-                  </div>
+            {/* Brand */}
+            <div className="flex items-center gap-2.5">
+              <div className="flex-shrink-0 w-9 h-9 rounded-[10px] bg-blue-50 border border-blue-100 flex items-center justify-center">
+                <img src={Logo} alt="Logo" className="w-[22px] h-[22px] object-contain" />
+              </div>
+              <div className="hidden sm:flex items-baseline gap-1">
+                <span className="text-[17px] font-bold text-slate-900 tracking-tight">Student</span>
+                <span className="text-[17px] font-bold text-blue-600 tracking-tight">Control</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── RIGHT ── */}
+          <div className="flex items-center gap-1">
+
+            {/* Notification */}
+            <button
+              aria-label="Notifications"
+              className="relative hidden sm:flex items-center justify-center w-9 h-9 rounded-[9px] text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors duration-150"
+            >
+              <Bell size={18} />
+              <span className="absolute top-[7px] right-[7px] w-[7px] h-[7px] bg-red-500 rounded-full border-[1.5px] border-white" />
+            </button>
+
+            {/* Language selector */}
+            <div className="hidden md:block px-1">
+              <LanguageSelector />
+            </div>
+
+            {/* Divider */}
+            <div className="hidden sm:block w-px h-6 bg-slate-200 mx-1.5" />
+
+            {/* ── USER DROPDOWN ── */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                className="flex items-center gap-2 pl-[5px] pr-2 py-[5px] rounded-[10px] hover:bg-slate-50 transition-colors duration-150"
+              >
+                {/* Avatar */}
+                <div className="relative flex-shrink-0 w-[34px] h-[34px] rounded-full bg-blue-600 border-2 border-blue-100 flex items-center justify-center">
+                  <span className="text-[12px] font-bold text-white tracking-[0.3px]">{initials}</span>
+                  <span className="absolute -bottom-[1px] -right-[1px] w-[9px] h-[9px] bg-green-500 rounded-full border-2 border-white" />
                 </div>
 
-                <div className="py-2">
-                  <button
-                    className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-200 transition-all duration-200 group"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <User size={18} className="text-gray-400 group-hover:text-blue-400 transition-colors" />
-                    <span className="group-hover:translate-x-1 transition-transform duration-200">Profil</span>
-                  </button>
+                {/* Name + role — desktop only */}
+                <div className="hidden lg:flex flex-col items-start max-w-[120px]">
+                  <span className="text-[13px] font-semibold text-slate-900 truncate max-w-[120px] leading-[1.3]">
+                    {user?.name} {user?.surname}
+                  </span>
+                  <span className="text-[11px] font-medium text-blue-600 capitalize leading-[1.3]">
+                    {user?.role}
+                  </span>
+                </div>
 
-                  <button
-                    className="w-full text-left px-5 py-3 hover:bg-gray-700/50 flex items-center gap-3 text-gray-200 transition-all duration-200 group"
-                    onClick={() => setDropdownOpen(false)}
-                  >
-                    <Settings size={18} className="text-gray-400 group-hover:text-blue-400 transition-colors" />
-                    <span className="group-hover:translate-x-1 transition-transform duration-200">Sozlamalar</span>
-                  </button>
+                {/* Chevron — desktop only */}
+                <ChevronDown
+                  size={15}
+                  className="hidden lg:block text-slate-400 flex-shrink-0 transition-transform duration-200"
+                  style={{ transform: dropdownOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+                />
+              </button>
 
-                  <div className="px-5 py-3 md:hidden border-t border-gray-700/50 mt-2 pt-4">
-                    <LanguageSelector />
+              {/* Dropdown panel */}
+              {dropdownOpen && (
+                <div className="dd-open absolute right-0 top-[calc(100%+8px)] w-[236px] bg-white border border-slate-200 rounded-2xl shadow-[0_4px_6px_rgba(0,0,0,0.05),0_16px_40px_rgba(0,0,0,0.1)] overflow-hidden z-[100]">
+
+                  {/* Profile header */}
+                  <div className="flex items-center gap-[11px] px-4 py-3.5 bg-slate-50">
+                    <div className="flex-shrink-0 w-[38px] h-[38px] rounded-full bg-blue-600 flex items-center justify-center text-[13px] font-bold text-white">
+                      {initials}
+                    </div>
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-[13.5px] font-semibold text-slate-900 truncate">{user?.name} {user?.surname}</span>
+                      <span className="text-[11.5px] font-medium text-blue-600 capitalize mt-0.5">{user?.role}</span>
+                    </div>
                   </div>
 
-                  <div className="border-t border-gray-700/50 mt-2 pt-2">
+                  <div className="h-px bg-slate-100" />
+
+                  {/* Menu items */}
+                  <div className="py-1.5">
+                    <button
+                      onClick={() => setDropdownOpen(false)}
+                      className="w-full text-left flex items-center gap-2.5 px-4 py-[9px] text-[13.5px] font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:pl-5 transition-all duration-150 group"
+                    >
+                      <User size={15} className="text-slate-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                      Profil
+                    </button>
+                    <button
+                      onClick={() => setDropdownOpen(false)}
+                      className="w-full text-left flex items-center gap-2.5 px-4 py-[9px] text-[13.5px] font-medium text-slate-700 hover:bg-blue-50 hover:text-blue-600 hover:pl-5 transition-all duration-150 group"
+                    >
+                      <Settings size={15} className="text-slate-400 group-hover:text-blue-600 transition-colors flex-shrink-0" />
+                      Sozlamalar
+                    </button>
+
+                    {/* Language — mobile only */}
+                    <div className="md:hidden px-4 py-2 border-t border-slate-100 mt-1">
+                      <LanguageSelector />
+                    </div>
+                  </div>
+
+                  <div className="h-px bg-slate-100" />
+
+                  {/* Logout */}
+                  <div className="py-1.5">
                     <button
                       onClick={checkoutUser}
-                      className="w-full text-left px-5 py-3 text-red-400 hover:bg-red-500/10 flex items-center gap-3 transition-all duration-200 group"
+                      className="w-full text-left flex items-center gap-2.5 px-4 py-[9px] text-[13.5px] font-medium text-red-500 hover:bg-red-50 hover:pl-5 transition-all duration-150"
                     >
-                      <LogOut size={18} className="group-hover:text-red-300 transition-colors" />
-                      <span className="group-hover:translate-x-1 transition-transform duration-200">Chiqish</span>
+                      <LogOut size={15} className="flex-shrink-0" />
+                      Chiqish
                     </button>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
+    </>
   );
 }

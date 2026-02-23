@@ -2,6 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import authReducer from "./slice/authSlice";
 import storage from "redux-persist/lib/storage";
 import profileReducer from "./slice/Profilestore"
+import submissionsReducer from "./slice/submissionsSlice";
 import {
   persistReducer,
   persistStore,
@@ -18,7 +19,8 @@ const persistedReducer = persistReducer(persistConfig, authReducer);
 
 export const store = configureStore({
   reducer: { auth: persistedReducer,
-     profile: profileReducer
+     profile: profileReducer,
+     submissions:submissionsReducer
   },
   
   middleware: (getDefaultMiddleware) =>

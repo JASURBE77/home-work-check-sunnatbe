@@ -1,17 +1,12 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Upload, Send, Link as LinkIcon, MessageSquare } from "lucide-react";
+import { Upload, Send, Link as LinkIcon, MessageSquare, CheckCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useSelector } from "react-redux";
-import api from "../../utils/api";
+import { useDispatch, useSelector } from "react-redux";
+import { sendHomework, resetSendState } from "../../store/slice/submissionsSlice";
 
-const INITIAL_FORM = {
-  type: "github",
-  link: "",
-  comment: "",
-};
+const INITIAL_FORM = { type: "github", link: "", comment: "" };
 
-// URL validation helper
 const isValidUrl = (string) => {
   try {
     const url = new URL(string);
@@ -23,179 +18,119 @@ const isValidUrl = (string) => {
 
 export default function HouseDonationPage() {
   const { t } = useTranslation();
-  const token = localStorage.getItem("accessToken")
+  const dispatch = useDispatch();
+
+  const { sendLoading, sendError, sendSuccess } = useSelector((state) => state.submissions);
 
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [serverError, setServerError] = useState("");
+
+  // sendSuccess bo'lganda formni tozalash va 5 soniyadan so'ng reset
+  useEffect(() => {
+    if (sendSuccess) {
+      setFormData(INITIAL_FORM);
+      setErrors({});
+      const timer = setTimeout(() => dispatch(resetSendState()), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [sendSuccess, dispatch]);
 
   const validateForm = useCallback(() => {
     const newErrors = {};
-
-    // Link validation
     if (!formData.link.trim()) {
       newErrors.link = "Link kiritish majburiy";
     } else if (!isValidUrl(formData.link)) {
       newErrors.link = "Yaroqli URL kiriting";
     }
-
-    // Comment validation
     if (!formData.comment.trim()) {
       newErrors.comment = "Izoh kiritish majburiy";
     } else if (formData.comment.length > 200) {
       newErrors.comment = "Izoh 200 belgidan oshmasligi kerak";
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
-  const postFetch = async () => {
-    setLoading(true);
-    setServerError("");
-
-    try {
-      const res = await api({
-        url: "/submissions/postHomeWork",
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        data: {
-          HwLink: formData.link.trim(),
-          description: formData.comment.trim(),
-        },
-      });
-
-      if (res.status === 201 || res.status === 200) {
-        setSubmitted(true);
-        setFormData(INITIAL_FORM);
-        setErrors({});
-        setTimeout(() => setSubmitted(false), 5000);
-      } else {
-        throw new Error(res.data?.message || "Xato yuz berdi");
-      }
-    } catch (err) {
-      console.error("Submission error:", err);
-
-      if (err.response) {
-        setServerError(
-          err.response.data?.message || `Server xatosi: ${err.response.status}`
-        );
-      } else if (err.request) {
-        setServerError("Serverga ulanib bo'lmadi. Internetni tekshiring.");
-      } else {
-        setServerError(err.message || "Noma'lum xatolik yuz berdi");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleChange = useCallback(
     (e) => {
       const { name, value } = e.target;
-
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-
-      if (errors[name]) {
-        setErrors((prev) => ({
-          ...prev,
-          [name]: "",
-        }));
-      }
-
-      if (serverError) {
-        setServerError("");
-      }
+      setFormData((prev) => ({ ...prev, [name]: value }));
+      if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
     },
-    [errors, serverError]
+    [errors]
   );
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (validateForm()) {
-      await postFetch();
+      dispatch(sendHomework({ link: formData.link, comment: formData.comment }));
     }
   };
 
   return (
-    <div className="min-h-screen text-white flex items-center justify-center p-4">
+    <div className="min-h-screen bg-slate-50 flex items-start justify-center p-5 pt-6">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-2xl"
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-xl"
       >
-        {/* Header */}
-        <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-            className="inline-flex items-center justify-center w-20 h-20 bg-indigo-600 rounded-2xl mb-6 shadow-lg shadow-indigo-500/30"
-          >
-            <Upload className="w-10 h-10 text-white" />
-          </motion.div>
-          <h1 className="text-4xl md:text-5xl font-bold mb-3">
-            Uy vazifasini yuborish
-          </h1>
-          <p className="text-gray-400 text-base">
+        {/* ── HEADER ── */}
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center shadow-sm">
+              <Upload size={18} className="text-white" />
+            </div>
+            <h1 className="text-xl font-bold text-slate-900 tracking-tight">
+              Uy vazifasini yuborish
+            </h1>
+          </div>
+          <p className="text-sm text-slate-400 ml-[52px]">
             GitHub yoki Vercel orqali loyihangizni yuboring
           </p>
         </div>
 
-        {/* Main Card */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3 }}
-          className="bg-zinc-900 rounded-3xl p-8 shadow-2xl border border-zinc-800"
-        >
-          {submitted ? (
+        {/* ── MAIN CARD ── */}
+        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+          {sendSuccess ? (
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
+              initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className="text-center py-12"
+              className="flex flex-col items-center justify-center py-16 px-6 text-center"
             >
-              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-600 rounded-full mb-4">
-                <Send className="w-8 h-8 text-white" />
+              <div className="w-14 h-14 rounded-full bg-green-50 flex items-center justify-center mb-4 border border-green-100">
+                <CheckCircle size={28} className="text-green-500" />
               </div>
-              <h2 className="text-2xl font-bold mb-2 text-green-500">
+              <h2 className="text-lg font-semibold text-slate-800 mb-1">
                 Muvaffaqiyatli yuborildi!
               </h2>
-              <p className="text-gray-400">Uy vazifangiz ko'rib chiqiladi</p>
+              <p className="text-sm text-slate-400">Uy vazifangiz ko'rib chiqiladi</p>
             </motion.div>
           ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Type Selection */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-5">
+
+              {/* Type */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-300">
-                  <Upload className="w-4 h-4" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  <Upload size={13} />
                   Topshiriq turi
                 </label>
                 <select
                   name="type"
                   value={formData.type}
                   onChange={handleChange}
-                  className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white outline-none focus:border-indigo-500 transition-colors cursor-pointer"
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition-all cursor-pointer"
                 >
-                  <option value="github">Topshiriq turini tanlang</option>
                   <option value="github">GitHub</option>
                   <option value="vercel">Vercel</option>
                 </select>
               </div>
 
-              {/* Link Input */}
+              {/* Link */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-300">
-                  <LinkIcon className="w-4 h-4" />
+                <label className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  <LinkIcon size={13} />
                   Loyiha havolasi
                 </label>
                 <input
@@ -204,25 +139,31 @@ export default function HouseDonationPage() {
                   value={formData.link}
                   onChange={handleChange}
                   placeholder="https://github.com/username/repo"
-                  className={`w-full bg-zinc-800 border ${
-                    errors.link ? "border-red-500" : "border-zinc-700"
-                  } rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors`}
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:ring-2 transition-all
+                    ${errors.link
+                      ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
+                      : "border-slate-200 focus:border-blue-500 focus:ring-blue-500/10"
+                    }`}
                 />
-                <p className="text-xs text-gray-500 mt-2">
-                  GitHub repository yoki Vercel deployment havolasini kiriting
-                </p>
-                {errors.link && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                    {errors.link}
+                {errors.link ? (
+                  <p className="text-red-500 text-xs mt-1.5">{errors.link}</p>
+                ) : (
+                  <p className="text-xs text-slate-400 mt-1.5">
+                    GitHub repository yoki Vercel deployment havolasini kiriting
                   </p>
                 )}
               </div>
 
-              {/* Comment Input */}
+              {/* Comment */}
               <div>
-                <label className="flex items-center gap-2 text-sm font-medium mb-3 text-gray-300">
-                  <MessageSquare className="w-4 h-4" />
-                  Izoh ({formData.comment.length}/200)
+                <label className="flex items-center justify-between text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                  <span className="flex items-center gap-1.5">
+                    <MessageSquare size={13} />
+                    Izoh
+                  </span>
+                  <span className={`normal-case font-normal tracking-normal ${formData.comment.length > 180 ? "text-red-400" : "text-slate-400"}`}>
+                    {formData.comment.length}/200
+                  </span>
                 </label>
                 <textarea
                   name="comment"
@@ -231,66 +172,64 @@ export default function HouseDonationPage() {
                   maxLength={200}
                   rows={4}
                   placeholder="Loyiha haqida qisqacha izoh..."
-                  className={`w-full bg-zinc-800 border ${
-                    errors.comment ? "border-red-500" : "border-zinc-700"
-                  } rounded-xl px-4 py-3 text-white placeholder-gray-500 outline-none focus:border-indigo-500 transition-colors resize-none`}
+                  className={`w-full bg-slate-50 border rounded-xl px-4 py-2.5 text-sm text-slate-800 placeholder-slate-400 outline-none focus:ring-2 transition-all resize-none
+                    ${errors.comment
+                      ? "border-red-300 focus:border-red-400 focus:ring-red-500/10"
+                      : "border-slate-200 focus:border-blue-500 focus:ring-blue-500/10"
+                    }`}
                 />
                 {errors.comment && (
-                  <p className="text-red-500 text-sm mt-2 flex items-center gap-1">
-                    {errors.comment}
-                  </p>
+                  <p className="text-red-500 text-xs mt-1.5">{errors.comment}</p>
                 )}
               </div>
 
-              {/* Server Error */}
-              {serverError && (
+              {/* Server error */}
+              {sendError && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
+                  initial={{ opacity: 0, y: -6 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-red-900/20 border border-red-500/50 rounded-xl p-4 text-red-400 text-sm"
+                  className="bg-red-50 border border-red-200 rounded-xl px-4 py-3 text-red-600 text-sm"
                 >
-                  {serverError}
+                  {sendError}
                 </motion.div>
               )}
 
-              {/* Submit Button */}
+              {/* Submit */}
               <button
                 type="submit"
-                disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800 disabled:cursor-not-allowed text-white font-medium py-3.5 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-lg shadow-indigo-500/20"
+                disabled={sendLoading}
+                className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed text-white text-sm font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2 shadow-sm"
               >
-                {loading ? (
+                {sendLoading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     Yuborilmoqda...
                   </>
                 ) : (
                   <>
-                    <Send className="w-5 h-5" />
+                    <Send size={16} />
                     Yuborish
                   </>
                 )}
               </button>
             </form>
           )}
-        </motion.div>
+        </div>
 
-        {/* Footer Tips */}
-        <div className="mt-8 bg-zinc-900 rounded-2xl p-6 border border-zinc-800">
-          <h3 className="font-semibold mb-3 text-gray-200">Maslahatlar</h3>
-          <ul className="space-y-2 text-sm text-gray-400">
-            <li className="flex items-start gap-2">
-              <span className="text-indigo-500 mt-0.5">•</span>
-              <span>Repository public bo'lishi kerak</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-indigo-500 mt-0.5">•</span>
-              <span>README.md faylida loyiha haqida ma'lumot bo'lsin</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-indigo-500 mt-0.5">•</span>
-              <span>Kod toza va tushunarli bo'lishi muhim</span>
-            </li>
+        {/* ── TIPS ── */}
+        <div className="mt-4 bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-[13px] font-semibold text-slate-700 mb-3">💡 Maslahatlar</h3>
+          <ul className="space-y-2">
+            {[
+              "Repository public bo'lishi kerak",
+              "README.md faylida loyiha haqida ma'lumot bo'lsin",
+              "Kod toza va tushunarli bo'lishi muhim",
+            ].map((tip, i) => (
+              <li key={i} className="flex items-start gap-2 text-[13px] text-slate-500">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-1.5 flex-shrink-0" />
+                {tip}
+              </li>
+            ))}
           </ul>
         </div>
       </motion.div>

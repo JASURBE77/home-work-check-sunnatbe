@@ -12,7 +12,7 @@ const Rating         = lazy(() => import("../pages/dashboard/Rating.jsx"));
 const Review         = lazy(() => import("../pages/submissions/Review.jsx"));
 const Profile        = lazy(() => import("../pages/dashboard/Profile.jsx"));
 const Error          = lazy(() => import("../pages/error/Error.jsx"));
-const TeacherTasks   = lazy(() => import("../pages/dashboard/TeacherTasks.jsx"));
+const TeacherTasks   = lazy(() => import("../pages/tasks/TeacherTasks.jsx"));
 const Test           = lazy(() => import("../components/Test.jsx"));
 const HistoryTest    = lazy(() => import("../pages/dashboard/HistoryTest.jsx"));
 
