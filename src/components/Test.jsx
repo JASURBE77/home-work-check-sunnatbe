@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../utils/api";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
@@ -7,34 +7,43 @@ const ExamPage = () => {
   const { examSession } = useParams();
   const navigate = useNavigate();
 
+  // Lazy init — localStorage dan to'g'ridan-to'g'ri o'qiydi, restore effect kerak emas
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const s = localStorage.getItem(`exam-${examSession}-currentIndex`);
+    return s ? Number(s) : 0;
+  });
+  const [page, setPage] = useState(() => {
+    const s = localStorage.getItem(`exam-${examSession}-page`);
+    return s ? Number(s) : 0;
+  });
+  const [selectedAnswer, setSelectedAnswer] = useState(
+    () => localStorage.getItem(`exam-${examSession}-selectedAnswer`) || null
+  );
+
   const [questions, setQuestions] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [fetchLoading, setFetchLoading] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
-  const [questionChanging, setQuestionChanging] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
-  const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [score, setScore] = useState(null);
   const [errorMessage, setErrorMessage] = useState("");
 
-  useEffect(() => {
-    const savedIndex = localStorage.getItem(`exam-${examSession}-currentIndex`);
-    const savedPage = localStorage.getItem(`exam-${examSession}-page`);
-    const savedAnswer = localStorage.getItem(`exam-${examSession}-selectedAnswer`);
-    if (savedIndex) setCurrentIndex(Number(savedIndex));
-    if (savedPage) setPage(Number(savedPage));
-    if (savedAnswer) setSelectedAnswer(savedAnswer);
-  }, [examSession]);
+  // Birinchi render-da setCurrentIndex(0) ishlamasligi uchun
+  const isFirstPageRender = useRef(true);
 
+  // localStorage ga saqlash
   useEffect(() => {
     localStorage.setItem(`exam-${examSession}-currentIndex`, currentIndex);
   }, [currentIndex, examSession]);
 
   useEffect(() => {
     localStorage.setItem(`exam-${examSession}-page`, page);
+    if (isFirstPageRender.current) {
+      isFirstPageRender.current = false;
+      return; // mount-da currentIndex ni 0 ga reset qilmaymiz
+    }
     setCurrentIndex(0);
+    setSelectedAnswer(null);
   }, [page, examSession]);
 
   useEffect(() => {
@@ -60,8 +69,6 @@ const ExamPage = () => {
       const data = res.data.data || [];
       setQuestions(Array.isArray(data) ? data : []);
       setTotalPages(res.data.totalPages || 1);
-      setSelectedAnswer(null);
-      setQuestionChanging(false);
     } catch (err) {
       setErrorMessage(err?.response?.data?.message || "Savollarni olishda xatolik");
       setQuestions([]);
@@ -81,7 +88,6 @@ const ExamPage = () => {
     if (!question) return;
     try {
       setActionLoading(true);
-      setQuestionChanging(true);
       setErrorMessage("");
       await api({
         url: "/student-exam/answer",
@@ -98,7 +104,6 @@ const ExamPage = () => {
       setErrorMessage(err?.response?.data?.message || "Javob yuborishda xatolik");
     } finally {
       setActionLoading(false);
-      setQuestionChanging(false);
     }
   };
 
@@ -106,7 +111,6 @@ const ExamPage = () => {
     if (isFinished || actionLoading) return;
     try {
       setActionLoading(true);
-      setQuestionChanging(true);
       setErrorMessage("");
       if (selectedAnswer) {
         const question = questions[currentIndex];
@@ -121,7 +125,7 @@ const ExamPage = () => {
         method: "POST",
         data: { sessionId: examSession },
       });
-      setScore(finishRes.data.totalScore?.toFixed(1) || "0");
+      setScore(finishRes.data.totalScore?.toFixed(1) ?? "0");
       setIsFinished(true);
       localStorage.removeItem(`exam-${examSession}-currentIndex`);
       localStorage.removeItem(`exam-${examSession}-page`);
@@ -130,7 +134,6 @@ const ExamPage = () => {
       setErrorMessage(err?.response?.data?.message || "Imtihonni yakunlashda xatolik");
     } finally {
       setActionLoading(false);
-      setQuestionChanging(false);
     }
   };
 
@@ -180,7 +183,7 @@ const ExamPage = () => {
 
   const question = questions[currentIndex];
   const progressPct = questions.length > 0 ? ((currentIndex + 1) / questions.length) * 100 : 0;
-  const isBusy = actionLoading || questionChanging || fetchLoading;
+  const isBusy = actionLoading || fetchLoading;
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 md:p-6 flex items-start justify-center">
@@ -248,42 +251,38 @@ const ExamPage = () => {
             {question?.question || "Savol yuklanmoqda..."}
           </h2>
 
-      {question?.description && (
-  <p
-    className="text-[13px] text-slate-500 mb-5"
-    dangerouslySetInnerHTML={{ __html: question.description }}
-  />
-)}
+          {question?.description && (
+            <p
+              className="text-[13px] text-slate-500 mb-5"
+              dangerouslySetInnerHTML={{ __html: question.description }}
+            />
+          )}
+
           {/* Answers */}
           <div className="space-y-2.5 mt-5 mb-6">
             {question?.answers?.map((ans) => {
               const isSelected = selectedAnswer === ans._id;
               return (
-                <label
+                <button
                   key={ans._id}
-                  className={`flex items-center gap-3 p-3.5 border rounded-xl cursor-pointer transition-all duration-150
+                  type="button"
+                  disabled={isBusy || isFinished}
+                  onClick={() => setSelectedAnswer(ans._id)}
+                  className={`w-full flex items-center gap-3 p-3.5 border rounded-xl cursor-pointer transition-all duration-150 text-left
                     ${isSelected
                       ? "border-blue-500 bg-blue-50 shadow-sm"
                       : "border-slate-200 hover:border-blue-300 hover:bg-slate-50"
-                    }`}
+                    } disabled:cursor-not-allowed`}
                 >
                   {/* Custom radio */}
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 transition-all
                     ${isSelected ? "border-blue-500 bg-blue-500" : "border-slate-300"}`}>
                     {isSelected && <div className="w-2 h-2 rounded-full bg-white" />}
                   </div>
-                  <input
-                    type="radio"
-                    name="answer"
-                    disabled={isBusy || isFinished}
-                    checked={isSelected}
-                    onChange={() => setSelectedAnswer(ans._id)}
-                    className="sr-only"
-                  />
                   <span className={`text-[14px] leading-snug ${isSelected ? "text-blue-700 font-medium" : "text-slate-700"}`}>
                     {ans.value}
                   </span>
-                </label>
+                </button>
               );
             })}
           </div>

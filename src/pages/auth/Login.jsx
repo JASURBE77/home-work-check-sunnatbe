@@ -1,87 +1,117 @@
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect } from "react";
+import { Form, Input, Button, Card, Typography } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../../store/slice/authSlice";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
+import { useToast } from "../../hooks/useToast";
 import LoginImg from "../../assets/LoginImg.svg";
 import Logo from "../../assets/logo.png";
-import Text from "../../assets/text.svg";
+
+const { Title, Text } = Typography;
 
 export default function Login() {
+  const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const toast = useToast();
   const { loading, error } = useSelector((state) => state.auth);
+  const [form] = Form.useForm();
 
-  const { register, handleSubmit, formState: { errors } } = useForm();
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
 
-  const onSubmit = async (data) => {
+  const onFinish = async (values) => {
     const resultAction = await dispatch(
-      loginUser({ login: data.login, password: data.password })
+      loginUser({ login: values.login, password: values.password })
     );
-
     if (loginUser.fulfilled.match(resultAction)) {
       localStorage.setItem("accessToken", resultAction.payload.accessToken);
+      toast.success(t("login.success") || "Muvaffaqiyatli kirdingiz!");
       navigate("/");
     }
   };
 
   return (
-    <div className="flex h-screen w-full bg-[#e7ecf3]">
-      <div className="hidden md:block  w-1/2 relative">
-        <img className="h-screen w-full object-cover" src={LoginImg} alt="login" />
-        <img
-          src={Text}
-          alt="text"
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        />
+    <div style={{ display: "flex", height: "100vh", background: "#e7ecf3" }}>
+      {/* Left image */}
+      <div style={{ flex: 1, display: "none", position: "relative" }} className="login-img-side">
+        <img src={LoginImg} alt="login" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       </div>
 
-      <div className="w-full px-4 md:px-0 md:w-1/2 flex items-center justify-center relative ">
-        <div className="absolute top-0 right-0">
-          <img className="w-25 h-25 md:w-35 md:h-35 object-contain" src={Logo} alt="logo" />
-        </div>
+      {/* Right form */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: "24px", position: "relative" }}>
+        <img
+          src={Logo}
+          alt="logo"
+          style={{ position: "absolute", top: 0, right: 0, width: 80, height: 80, objectFit: "contain" }}
+        />
 
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-[#1935CA] font-bold text-3xl mb-2">Tizimga kirish</h2>
-          <p className="text-[#1935CA] text-sm mb-6">Login va parolingiz bilan tizimga kiring</p>
+        <motion.div
+          initial={{ opacity: 0, y: 32, scale: 0.97 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          style={{ width: "100%", maxWidth: 420 }}
+        >
+          <Card
+            style={{ borderRadius: 16, boxShadow: "0 8px 32px rgba(0,0,0,0.10)" }}
+            styles={{ body: { padding: "36px 32px" } }}
+          >
+            <Title level={3} style={{ color: "#1935CA", marginBottom: 4 }}>
+              {t("login.title")}
+            </Title>
+            <Text style={{ color: "#1935CA", fontSize: 13, display: "block", marginBottom: 28 }}>
+              {t("login.subtitle")}
+            </Text>
 
-          <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)}>
-            <label className="flex flex-col gap-2">
-              <span className="text-[#696F79] font-semibold text-sm">Login</span>
-              <input
-                type="text"
-                placeholder="Login"
-                className="px-5 py-3 rounded-lg shadow-sm border border-transparent outline-none placeholder-[#1935CA] focus:border-[#1935CA] focus:ring-2 focus:ring-[#1935CA]/30 transition"
-                {...register("login", { required: "Login kiriting" })}
-              />
-              {errors.login && <p className="text-red-500 text-sm">{errors.login.message}</p>}
-            </label>
+            <Form form={form} layout="vertical" onFinish={onFinish} size="large">
+              <Form.Item
+                name="login"
+                label={<span style={{ fontWeight: 600, color: "#696F79" }}>{t("login.login_label")}</span>}
+                rules={[{ required: true, message: t("login.error_login") }]}
+              >
+                <Input
+                  prefix={<UserOutlined style={{ color: "#94a3b8" }} />}
+                  placeholder={t("login.login_label")}
+                  style={{ borderRadius: 10 }}
+                />
+              </Form.Item>
 
-            <label className="flex flex-col gap-2">
-              <span className="text-[#696F79] font-semibold text-sm">Password</span>
-              <input
-                type="password"
-                placeholder="Password"
-                className="px-5 py-3 rounded-lg shadow-sm border border-transparent outline-none placeholder-[#1935CA] focus:border-[#1935CA] focus:ring-2 focus:ring-[#1935CA]/30 transition"
-                {...register("password", {
-                  required: "Parol kiriting",
-                  minLength: { value: 6, message: "Kamida 6 ta belgidan iborat bo‘lishi kerak" },
-                })}
-              />
-              {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-            </label>
+              <Form.Item
+                name="password"
+                label={<span style={{ fontWeight: 600, color: "#696F79" }}>{t("login.password_label")}</span>}
+                rules={[
+                  { required: true, message: t("login.error_password") },
+                  { min: 6, message: t("login.error_password_min") },
+                ]}
+              >
+                <Input.Password
+                  prefix={<LockOutlined style={{ color: "#94a3b8" }} />}
+                  placeholder={t("login.password_label")}
+                  style={{ borderRadius: 10 }}
+                />
+              </Form.Item>
 
-            {error && <p className="text-red-500 text-sm bg-red-50 p-3 rounded-lg">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-[#1935CA] text-white py-4 rounded-xl font-semibold uppercase tracking-wide transition hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center"
-            >
-              {loading ? <span className="loading loading-spinner loading-sm"></span> : "Login"}
-            </button>
-          </form>
-        </div>
+              <Form.Item style={{ marginBottom: 0, marginTop: 8 }}>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  block
+                  size="large"
+                  style={{ height: 48, fontWeight: 600, letterSpacing: 1, borderRadius: 12 }}
+                >
+                  {t("login.button")}
+                </Button>
+              </Form.Item>
+            </Form>
+          </Card>
+        </motion.div>
       </div>
     </div>
   );

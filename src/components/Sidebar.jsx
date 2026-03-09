@@ -1,101 +1,98 @@
 import React from "react";
+import { Layout, Menu, Drawer, Typography } from "antd";
 import {
-  Home,
-  BookOpen,
-  CheckSquare,
-  FileText,
-  User,
-} from "lucide-react";
-import { NavLink } from "react-router-dom";
+  HomeOutlined,
+  BookOutlined,
+  CheckSquareOutlined,
+  FileTextOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import Logo from "../assets/logo.png";
 
-const navItems = [
-  { name: "Bosh sahifa", icon: Home, path: "/" },
-  { name: "Uy vazifasi", icon: BookOpen, path: "/homework" },
-  { name: "Bajarilganlar", icon: CheckSquare, path: "/reviews" },
-  { name: "Imthonlar", icon: FileText, path: "/tasks" },
-  { name: "Profil", icon: User, path: "/profile" },
-];
+const { Sider } = Layout;
+const { Text } = Typography;
 
-export default function Sidebar({ isOpen, onClose }) {
+const SIDER_WIDTH = 220;
+
+export default function Sidebar({ mobileOpen, onClose }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  const items = [
+    { key: "/",        icon: <HomeOutlined />,        label: t("nav.home") },
+    { key: "/homework",icon: <BookOutlined />,         label: t("nav.homework") },
+    { key: "/reviews", icon: <CheckSquareOutlined />,  label: t("nav.reviews") },
+    { key: "/tasks",   icon: <FileTextOutlined />,     label: t("nav.tasks") },
+    { key: "/profile", icon: <UserOutlined />,         label: t("nav.profile") },
+  ];
+
+  const selectedKey =
+    location.pathname === "/" ? "/" : "/" + location.pathname.split("/")[1];
+
+  const handleClick = ({ key }) => {
+    navigate(key);
+    onClose?.();
+  };
+
+  const logo = (
+    <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0f0f0", display: "flex", alignItems: "center", gap: 10 }}>
+      <img src={Logo} alt="logo" style={{ width: 28, height: 28, objectFit: "contain" }} />
+      <span>
+        <Text strong style={{ fontSize: 16, color: "#1e293b" }}>Student</Text>
+        <Text strong style={{ fontSize: 16, color: "#1935CA" }}>Control</Text>
+      </span>
+    </div>
+  );
+
+  const menuNode = (
+    <Menu
+      mode="inline"
+      selectedKeys={[selectedKey]}
+      items={items}
+      onClick={handleClick}
+      style={{ border: "none", padding: "8px 8px" }}
+    />
+  );
+
   return (
     <>
-      {/* Mobile overlay */}
-      {isOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-30"
-          onClick={onClose}
-        />
-      )}
-
-      <aside
-        className={`
-          fixed lg:static inset-y-0 z-40 w-64
-          bg-white border-r border-slate-200
-          rounded-lg
-          transform transition-transform duration-300 ease-in-out lg:translate-x-0
-          ${isOpen ? "translate-x-0" : "-translate-x-full"}
-          flex flex-col
-          shadow-[4px_0_24px_rgba(0,0,0,0.06)] lg:shadow-none
-        `}
+      {/* Desktop sider */}
+      <Sider
+        width={SIDER_WIDTH}
+        style={{
+          background: "#fff",
+          borderRight: "1px solid #f0f0f0",
+          height: "100vh",
+          overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
+        }}
+        className="hidden-mobile"
       >
-    
-        <div className="h-[68px] flex items-center px-5 border-b border-slate-100 lg:hidden">
-          <div className="flex items-baseline gap-1">
-            <span className="text-[17px] font-bold text-slate-900 tracking-tight">Student</span>
-            <span className="text-[17px] font-bold text-blue-600 tracking-tight">Control</span>
-          </div>
+        {logo}
+        <div style={{ flex: 1, overflow: "auto" }}>{menuNode}</div>
+        <div style={{ padding: "12px 20px", borderTop: "1px solid #f0f0f0" }}>
+          <Text style={{ fontSize: 11, color: "#94a3b8" }}>
+            <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: "50%", background: "#22c55e", marginRight: 6 }} />
+            {t("sidebar.version")}
+          </Text>
         </div>
+      </Sider>
 
-        {/* Nav items */}
-        <nav className="flex-1 py-4 px-3 space-y-0.5 overflow-y-auto">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === "/"}
-              onClick={() => window.innerWidth < 1024 && onClose?.()}
-              className={({ isActive }) =>
-                `group flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-[14px] font-medium transition-all duration-150
-                ${
-                  isActive
-                    ? "bg-blue-600 text-white shadow-[0_2px_8px_rgba(37,99,235,0.3)]"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
-                }`  
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  <span
-                    className={`flex items-center justify-center w-8 h-8 rounded-lg flex-shrink-0 transition-colors duration-150
-                    ${isActive
-                      ? "bg-white/20"
-                      : "bg-slate-100 group-hover:bg-slate-200"
-                    }`}
-                  >
-                    <item.icon
-                      size={17}
-                      className={isActive ? "text-blue-600" : "text-slate-500 group-hover:text-slate-700"}
-                    />
-                  </span>
-                  <span className="text-blue-600">{item.name}</span>
-
-                  {isActive && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70" />
-                  )}
-                </>
-              )}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* Footer */}
-        <div className="px-4 py-4 border-t border-slate-100">
-          <div className="flex items-center gap-2 px-3.5 py-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
-            <span className="text-[11.5px] text-slate-400 font-medium">Version 1.0.0</span>
-          </div>
-        </div>
-      </aside>
+      {/* Mobile drawer */}
+      <Drawer
+        open={mobileOpen}
+        onClose={onClose}
+        placement="left"
+        width={SIDER_WIDTH}
+        styles={{ body: { padding: 0, display: "flex", flexDirection: "column" }, header: { display: "none" } }}
+      >
+        {logo}
+        <div style={{ flex: 1 }}>{menuNode}</div>
+      </Drawer>
     </>
   );
 }

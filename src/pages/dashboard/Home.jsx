@@ -1,22 +1,43 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { CheckCircle2, Clock, Trophy, ArrowUpRight } from "lucide-react";
+import {
+  Card, Row, Col, Statistic, Progress, Tag, List, Typography, Button, Spin,
+} from "antd";
+import {
+  CheckCircleOutlined, ClockCircleOutlined, TrophyOutlined, RiseOutlined,
+} from "@ant-design/icons";
+import { motion } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useToast } from "../../hooks/useToast";
 import { SubmissionsGet } from "../../store/slice/submissionsSlice";
+
+const { Text, Title } = Typography;
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.3, ease: "easeOut" },
+  }),
+};
 
 export default function Dashboard() {
   const { t } = useTranslation();
   const dispatch = useDispatch();
+  const toast = useToast();
 
   const profile = useSelector((state) => state.profile.data);
   const profileLoading = useSelector((state) => state.profile.loading);
   const { data: submissions, loading, error } = useSelector((state) => state.submissions);
 
   useEffect(() => {
-    if (profile?._id) {
-      dispatch(SubmissionsGet());
-    }
+    if (profile?._id) dispatch(SubmissionsGet());
   }, [dispatch, profile]);
+
+  useEffect(() => {
+    if (error) toast.error(error);
+  }, [error]);
 
   const completed = submissions.filter(
     (s) => s.submission.status === "CHECKED" || s.submission.status === "AGAIN CHECKED"
@@ -31,205 +52,178 @@ export default function Dashboard() {
   const progressPct =
     submissions.length > 0 ? Math.round((completed / submissions.length) * 100) : 0;
 
-  const recentSubmissions = submissions.slice(0, 5).map((s) => ({
-    description: s.submission.description,
-    date: s.submission.date,
-    score: s.submission.score,
-    status: s.submission.status,
-  }));
-
+  const recentSubmissions = submissions.slice(0, 5);
   const userName = profile?.name || "Talaba";
 
-  // ── LOADING ──
   if (loading || profileLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 p-6 space-y-6 animate-pulse">
-        <div className="h-10 w-72 bg-slate-200 rounded-xl" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-36 bg-slate-200 rounded-2xl" />
-          ))}
-        </div>
-        <div className="h-64 bg-slate-200 rounded-2xl" />
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <Spin size="large" />
       </div>
     );
   }
 
-  // ── ERROR ──
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center gap-4 text-slate-600">
-        <p className="text-red-500 font-medium">{error}</p>
-        <button
-          onClick={() => dispatch(SubmissionsGet())}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-medium transition-colors"
-        >
-          Qayta urinib ko'rish
-        </button>
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <Button type="primary" onClick={() => dispatch(SubmissionsGet())} style={{ borderRadius: 10 }}>
+          {t("home.retry")}
+        </Button>
       </div>
     );
   }
 
+  const getStatusTag = (status) => {
+    switch (status) {
+      case "CHECKED":
+        return <Tag color="success">{t("home.status.checked")}</Tag>;
+      case "AGAIN CHECKED":
+        return <Tag color="purple">{t("home.status.rechecked")}</Tag>;
+      case "PENDING":
+        return <Tag color="warning">{t("home.status.pending")}</Tag>;
+      default:
+        return <Tag>{t("home.status.done")}</Tag>;
+    }
+  };
+
+  const statCards = [
+    {
+      title: t("home.completed"),
+      value: completed,
+      prefix: <CheckCircleOutlined style={{ color: "#22c55e" }} />,
+      sub: t("home.all_checked"),
+      pct: progressPct,
+      color: "#22c55e",
+    },
+    {
+      title: t("home.pending"),
+      value: pending,
+      prefix: <ClockCircleOutlined style={{ color: "#f59e0b" }} />,
+      sub: t("home.unchecked"),
+      pct: submissions.length > 0 ? Math.round((pending / submissions.length) * 100) : 0,
+      color: "#f59e0b",
+    },
+    {
+      title: t("home.total_score"),
+      value: totalPoints,
+      prefix: <TrophyOutlined style={{ color: "#3b82f6" }} />,
+      sub: t("home.from_all"),
+      pct: 100,
+      color: "#3b82f6",
+    },
+    {
+      title: t("home.progress"),
+      value: progressPct,
+      suffix: "%",
+      prefix: <RiseOutlined style={{ color: "#8b5cf6" }} />,
+      sub: `${completed} / ${submissions.length} ${t("home.submitted_of")}`,
+      pct: progressPct,
+      color: "#8b5cf6",
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-white rounded-xl border border-gray-50 p-5 space-y-5">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Greeting */}
+      <motion.div
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+      >
+        <Title level={4} style={{ margin: 0, color: "#1e293b" }}>
+          {t("home.greeting")}, <span style={{ color: "#1935CA" }}>{userName}!</span>
+        </Title>
+        <Text style={{ color: "#94a3b8", fontSize: 13 }}>{t("home.subtitle")}</Text>
+      </motion.div>
 
-      {/* ── GREETING ── */}
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-          Salom, <span className="text-blue-600">{userName}!</span>
-        </h1>
-        <p className="text-slate-400 text-sm mt-0.5">
-          Bugungi kunning vazifalarini ko'rib chiqing
-        </p>
-      </div>
+      {/* Stat Cards */}
+      <Row gutter={[16, 16]}>
+        {statCards.map((card, i) => (
+          <Col key={i} xs={24} sm={12} lg={6}>
+            <motion.div custom={i} variants={cardVariants} initial="hidden" animate="visible">
+              <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }}>
+                <Statistic
+                  title={<Text style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1 }}>{card.title}</Text>}
+                  value={card.value}
+                  suffix={card.suffix}
+                  prefix={card.prefix}
+                  valueStyle={{ color: "#1e293b", fontWeight: 700 }}
+                />
+                <Text style={{ fontSize: 11, color: "#94a3b8" }}>{card.sub}</Text>
+                <Progress percent={card.pct} showInfo={false} strokeColor={card.color} trailColor="#f1f5f9" size="small" style={{ marginTop: 8 }} />
+              </Card>
+            </motion.div>
+          </Col>
+        ))}
+      </Row>
 
-      {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Bajarilgan */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Bajarilgan</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{completed}</p>
+      {/* Recent Submissions */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.35, duration: 0.3 }}
+      >
+        <Card
+          title={
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+              <Text strong style={{ fontSize: 14 }}>{t("home.recent")}</Text>
+              <Text style={{ fontSize: 12, color: "#94a3b8", fontWeight: 400 }}>
+                {submissions.length} {t("home.total_count")}
+              </Text>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2 size={20} className="text-green-500" />
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mt-3">Jami tekshirilgan topshiriqlar</p>
-          <div className="mt-3 h-1 w-full bg-slate-100 rounded-full">
-            <div
-              className="h-1 bg-green-500 rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Kutilayotgan */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kutilayotgan</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{pending}</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-              <Clock size={20} className="text-amber-500" />
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mt-3">Tekshirilmagan topshiriqlar</p>
-          <div className="mt-3 h-1 w-full bg-slate-100 rounded-full">
-            <div
-              className="h-1 bg-amber-400 rounded-full transition-all duration-500"
-              style={{ width: `${submissions.length > 0 ? (pending / submissions.length) * 100 : 0}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Umumiy ball */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Umumiy ball</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{totalPoints}</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-              <Trophy size={20} className="text-blue-500" />
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mt-3">Barcha topshiriqlardan</p>
-          <div className="mt-3 h-1 w-full bg-slate-100 rounded-full">
-            <div className="h-1 bg-blue-500 rounded-full w-full" />
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
-          <div className="flex items-start justify-between">
-            <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Progress</p>
-              <p className="text-3xl font-bold text-slate-900 mt-1">{progressPct}%</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-violet-50 flex items-center justify-center flex-shrink-0">
-              <ArrowUpRight size={20} className="text-violet-500" />
-            </div>
-          </div>
-          <p className="text-xs text-slate-400 mt-3">
-            {completed} / {submissions.length} topshiriq bajarildi
-          </p>
-          <div className="mt-3 h-1 w-full bg-slate-100 rounded-full">
-            <div
-              className="h-1 bg-violet-500 rounded-full transition-all duration-500"
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ── RECENT SUBMISSIONS ── */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-          <h2 className="text-[15px] font-semibold text-slate-800">So'nggi topshiriqlar</h2>
-          <span className="text-xs text-slate-400">{submissions.length} ta jami</span>
-        </div>
-
-        <div className="divide-y divide-slate-100 max-h-[420px] overflow-y-auto">
+          }
+          style={{ borderRadius: 14, border: "1px solid #e2e8f0" }}
+          styles={{ body: { padding: 0 } }}
+        >
           {recentSubmissions.length > 0 ? (
-            recentSubmissions.map((sub, idx) => {
-              const isPending = sub.status === "PENDING";
-              const statusLabel =
-                sub.status === "PENDING"
-                  ? "Kutilmoqda"
-                  : sub.status === "CHECKED"
-                  ? "Tekshirildi"
-                  : sub.status === "AGAIN CHECKED"
-                  ? "Qayta tekshirildi"
-                  : "Bajarildi";
-
-              return (
-                <div
-                  key={idx}
-                  className="flex items-center gap-4 px-5 py-3.5 hover:bg-slate-50 transition-colors duration-100"
-                >
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 ${isPending ? "bg-amber-50" : "bg-green-50"}`}>
-                    {isPending ? (
-                      <Clock size={17} className="text-amber-500" />
-                    ) : (
-                      <CheckCircle2 size={17} className="text-green-500" />
-                    )}
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-[13.5px] font-medium text-slate-800 truncate">
-                      {sub.description || "Topshiriq"}
-                    </p>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      {new Date(sub.date).toLocaleDateString("uz-UZ", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="text-right flex-shrink-0">
-                    <p className="text-[13px] font-semibold text-slate-800">
-                      {sub.score > 0 ? `${sub.score} ball` : "—"}
-                    </p>
-                    <span className={`inline-block mt-0.5 text-[11px] font-medium px-2 py-0.5 rounded-full
-                      ${isPending ? "bg-amber-50 text-amber-600" : "bg-green-50 text-green-600"}`}>
-                      {statusLabel}
-                    </span>
-                  </div>
-                </div>
-              );
-            })
+            <List
+              dataSource={recentSubmissions}
+              renderItem={(item) => {
+                const sub = item.submission;
+                const isPending = sub.status === "PENDING";
+                return (
+                  <List.Item
+                    style={{ padding: "12px 20px" }}
+                    extra={
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontWeight: 600, fontSize: 13, color: "#1e293b" }}>
+                          {sub.score > 0 ? `${sub.score} ${t("home.ball")}` : "—"}
+                        </div>
+                        {getStatusTag(sub.status)}
+                      </div>
+                    }
+                  >
+                    <List.Item.Meta
+                      avatar={
+                        <div style={{
+                          width: 36, height: 36, borderRadius: 10,
+                          background: isPending ? "#fffbeb" : "#f0fdf4",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                        }}>
+                          {isPending
+                            ? <ClockCircleOutlined style={{ color: "#f59e0b", fontSize: 16 }} />
+                            : <CheckCircleOutlined style={{ color: "#22c55e", fontSize: 16 }} />
+                          }
+                        </div>
+                      }
+                      title={<Text style={{ fontSize: 13, fontWeight: 500 }}>{sub.description || "Topshiriq"}</Text>}
+                      description={
+                        <Text style={{ fontSize: 12, color: "#94a3b8" }}>
+                          {new Date(sub.date).toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" })}
+                        </Text>
+                      }
+                    />
+                  </List.Item>
+                );
+              }}
+            />
           ) : (
-            <div className="text-center py-12 text-slate-400 text-sm">
-              Hozircha hech qanday topshiriq topshirilmagan
+            <div style={{ textAlign: "center", padding: "48px 0", color: "#94a3b8", fontSize: 13 }}>
+              {t("home.empty")}
             </div>
           )}
-        </div>
-      </div>
+        </Card>
+      </motion.div>
     </div>
   );
 }

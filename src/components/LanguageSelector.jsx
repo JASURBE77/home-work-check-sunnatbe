@@ -1,36 +1,41 @@
 import React from "react";
-import { FiGlobe } from "react-icons/fi";
+import { Dropdown, Button } from "antd";
+import { GlobalOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
 
 const LanguageSelector = () => {
   const { i18n } = useTranslation();
+  const currentLang = i18n.language?.startsWith("ru") ? "ru" : "uz";
 
-  const currentLang = localStorage.getItem("lang") || "uz";
-
-  const changeLanguage = (lang) => {
-    i18n.changeLanguage(lang);
-    localStorage.setItem("i18nextLng", lang);
-  };
+  const items = [
+    {
+      key: "uz",
+      label: "🇺🇿 O'zbekcha",
+      onClick: () => i18n.changeLanguage("uz"),
+    },
+    {
+      key: "ru",
+      label: (
+        <span>
+          🇷🇺 Русский{" "}
+          <span style={{ fontSize: 10, background: "#ef4444", color: "#fff", padding: "1px 6px", borderRadius: 4, marginLeft: 4 }}>
+            BETA
+          </span>
+        </span>
+      ),
+      onClick: () => i18n.changeLanguage("ru"),
+    },
+  ];
 
   return (
-    <div className="dropdown dropdown-end">
-      <div tabIndex={0} role="button" className="btn bg-blue-600 border-none rounded-xl text-white gap-2">
-        <FiGlobe className="text-lg" />
-        {currentLang === "uz" ? "O'zbekcha" : "Русский"}
-      </div>
-
-      <ul
-        tabIndex={0}
-        className="dropdown-content menu p-2 shadow bg-base-100 rounded-box w-45"
+    <Dropdown menu={{ items, selectedKeys: [currentLang] }} trigger={["click"]} placement="bottomRight">
+      <Button
+        icon={<GlobalOutlined />}
+        style={{ borderRadius: 10 }}
       >
-        <li>
-          <button onClick={() => changeLanguage("uz")}>🇺🇿 O'zbekcha</button>
-        </li>
-        <li>
-          <button onClick={() => changeLanguage("ru")}>🇷🇺 Русский <span className="badge bg-red-500 text-white">BETA</span></button>
-        </li>
-      </ul>
-    </div>
+        {currentLang === "uz" ? "O'zbekcha" : "Русский"}
+      </Button>
+    </Dropdown>
   );
 };
 

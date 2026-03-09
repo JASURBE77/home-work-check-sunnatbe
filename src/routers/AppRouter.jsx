@@ -1,5 +1,6 @@
 import React, { lazy, Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { Spin } from "antd";
 import ProtectedRoute from "../guard/ProtectedRoute.jsx";
 
 // ─── Lazy imports ───────────────────────────────────────────────────────────
@@ -18,8 +19,8 @@ const HistoryTest    = lazy(() => import("../pages/dashboard/HistoryTest.jsx"));
 
 // ─── Global loading fallback ─────────────────────────────────────────────────
 const PageLoader = () => (
-  <div className="flex items-center justify-center min-h-screen bg-[#0A0A0A]">
-    <span className="loading loading-spinner text-primary" />
+  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", background: "#f0f2f5" }}>
+    <Spin size="large" />
   </div>
 );
 

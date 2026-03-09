@@ -1,133 +1,125 @@
 {
-  "home": "Главная",
-  "games": "Игры",
-  "code": "Код",
-  "profile-link": "Профиль",
-  "rating": "Рейтинг",
-  "hello_jasur": "Привет, Жасур!",
-  "progress_title": "Прогресс выполнения",
-  "homework_progress": "Выданные дз (6 из 12)",
-  "quality_progress": "Качество (4.4 из 5.0)",
-  "overall_progress": "Общий прогресс",
-  "status_bad": "Критично",
-  "status_ok": "Нормально",
-  "status_good": "Отлично",
-
+  "nav": {
+    "home": "Главная",
+    "homework": "Домашнее задание",
+    "reviews": "Выполненные",
+    "tasks": "Экзамены",
+    "profile": "Профиль"
+  },
+  "login": {
+    "title": "Войдите в систему",
+    "subtitle": "Войдите с помощью логина и пароля",
+    "login_label": "Логин",
+    "password_label": "Пароль",
+    "button": "Войти",
+    "error_login": "Введите логин",
+    "error_password": "Введите пароль",
+    "error_password_min": "Минимум 6 символов"
+  },
+  "home": {
+    "greeting": "Привет",
+    "subtitle": "Просмотрите задания на сегодня",
+    "completed": "Выполнено",
+    "pending": "В ожидании",
+    "total_score": "Общий балл",
+    "progress": "Прогресс",
+    "all_checked": "Всего проверенных заданий",
+    "unchecked": "Непроверенные задания",
+    "from_all": "Из всех заданий",
+    "recent": "Последние задания",
+    "total_count": "всего",
+    "empty": "Пока заданий нет",
+    "retry": "Попробовать снова",
+    "submitted_of": "заданий выполнено",
+    "ball": "балл",
+    "status": {
+      "pending": "Ожидание",
+      "checked": "Проверено",
+      "rechecked": "Перепроверено",
+      "done": "Выполнено"
+    }
+  },
   "homework": {
-    "title": "Домашнее задание",
-    "description": "Отправляйте проект через GitHub и Vercel",
-    "labels": {
-      "github": "GitHub Ссылка",
-      "vercel": "Vercel Ссылка",
-      "comment": "Комментарий"
-    },
-    "buttons": {
-      "submit": "Отправить"
-    },
-    "messages": {
-      "success": "Успешно отправлено!",
-      "successDetail": "Ваше домашнее задание принято",
-      "footer": "Все поля обязательны. Комментарий не более 50 символов."
-    },
+    "page_title": "Отправить домашнее задание",
+    "subtitle": "Отправьте проект через GitHub или Vercel",
+    "type_label": "Тип задания",
+    "link_label": "Ссылка на проект",
+    "link_placeholder": "https://github.com/username/repo",
+    "link_hint": "Введите ссылку на GitHub репозиторий или Vercel деплой",
+    "comment_label": "Комментарий",
+    "comment_placeholder": "Краткое описание проекта...",
+    "success_title": "Успешно отправлено!",
+    "success_desc": "Ваше домашнее задание будет проверено",
+    "sending": "Отправка...",
+    "send": "Отправить",
+    "tips_title": "Советы",
+    "tip1": "Репозиторий должен быть публичным",
+    "tip2": "В README.md должна быть информация о проекте",
+    "tip3": "Код должен быть чистым и понятным",
     "errors": {
-      "githubRequired": "Ссылка на GitHub обязательна",
-      "githubInvalid": "Введите правильную ссылку GitHub",
-      "vercelRequired": "Ссылка на Vercel обязательна",
-      "vercelInvalid": "Введите правильную ссылку Vercel",
-      "commentRequired": "Комментарий обязателен",
-      "commentMax": "Комментарий не должен превышать 50 символов"
+      "link_required": "Ссылка обязательна",
+      "link_invalid": "Введите корректный URL",
+      "comment_required": "Комментарий обязателен",
+      "comment_max": "Комментарий не должен превышать 200 символов"
     }
   },
-  "student_controller": "Student Controller",
-  "login_title": "Войдите в свой аккаунт",
-  "login_placeholder": "Введите логин",
-  "password_placeholder": "Введите пароль",
-  "login_button": "Войти",
-  "loading": "Загрузка...",
-  "no_account": "Нет аккаунта?",
-  "sign_up": "Регистрация",
-  "login_server_error": "Нет связи с сервером или ошибка CORS",
-    "dashboard": {
-    "hello": "Привет",
-    "total_points": "Общий балл",
-    "score": "Баллы",
-    "items": "шт",
-    "user_not_found": "Пользователь не найден"
+  "review": {
+    "title": "Выполненные задания",
+    "subtitle": "Все ваши проверенные и оцененные задания",
+    "total": "Всего выполнено",
+    "avg_score": "Средний балл",
+    "total_score": "Общий балл",
+    "empty": "Проверенных заданий пока нет",
+    "view": "Открыть",
+    "teacher_comment": "Комментарий преподавателя",
+    "status": {
+      "pending": "Ожидание",
+      "checked": "Проверено",
+      "rechecked": "Перепроверено"
+    }
   },
-    "review": {
-    "refresh": "Обновить",
-    "empty": "Заданий нет",
-    "comment": "Комментарий",
-    "no_description": "Описание отсутствует",
-    "date": "Дата",
-    "status": "Статус",
-    "teacher_feedback": "Комментарий преподавателя",
-    "no_feedback": "Комментарий отсутствует",
-    "score": "Баллы"
-  },
-  
-  "teacherTasks": {
-    "title": "Заданы",
-    "empty": "Заданий нет",
-    "description": "Описание",
-    "group": "Группа",
-    "status": "Статус",
-    "start": "Начало",
-    "end": "Окончание",
+  "tasks": {
+    "title": "Экзамены",
+    "empty": "Экзаменов нет",
+    "count": "экзаменов доступно",
+    "practice": "Практика",
+    "test": "Тест",
     "finished": "Завершено",
-    "start_exam": "Начать экзамен",
-    "view_result": "Посмотреть ответы"
+    "waiting": "Ожидание",
+    "active": "Активно",
+    "open_layout": "Открыть макет",
+    "requirements": "Требования",
+    "placeholder_link": "GitHub / Vercel ссылка",
+    "send": "Отправить",
+    "submitted": "Отправлено и проверяется",
+    "starting": "Запуск...",
+    "view_result": "Посмотреть результат",
+    "waiting_start": "Ожидание начала",
+    "start": "Начать экзамен",
+    "warning": "Предупреждение",
+    "warning_text": "После начала экзамена, если вы покинете страницу, экзамен завершится и набранные баллы будут засчитаны.",
+    "cancel": "Отмена",
+    "begin": "Начать",
+    "unnamed": "Без названия"
   },
-    "history": {
-    "exam_result": "результат экзамена",
-    "back": "Назад",
-    "status": "Статус",
-    "started_at": "Время начала",
-    "finished_at": "Время окончания",
-    "score": "Баллы",
-    "questions": "Вопросы и ответы",
-    "no_questions": "Вопросов нет",
-    "question": "Вопрос",
-    "your_answer": "Ваш ответ",
-    "correct_answer": "Правильный ответ",
-    "answer_score": "Баллы",
-    "no_result": "Результат не найден",
-    "no_question_text": "Текст вопроса отсутствует",
-    "not_found": "Не найдено"
-  },
-   "profile": {
-    "notFound": "Данные не найдены",
-    "role": "Роль",
+  "profile": {
+    "not_found": "Профиль не найден",
+    "student": "Студент",
+    "rating": "Рейтинг",
+    "total": "Всего",
+    "completed": "Выполнено",
+    "pending": "В ожидании",
+    "total_score": "Общий балл",
+    "contact": "Контактная информация",
+    "full_name": "Имя и фамилия",
     "group": "Группа",
-    "noGroup": "У вас нет группы",
-    "joined": "Присоединился",
-    "progress": "Прогресс обучения",
-    "overallProgress": "Общий прогресс",
-    "recentSubmissions": "Последние задания",
-    "noSubmissions": "Заданий нет",
-    "noTitle": "Без названия",
-    "totalLessons": "Всего уроков",
-    "completedLessons": "Выполнено",
-    "pendingLessons": "В ожидании"
+    "last_submission": "Последнее задание",
+    "no_data": "Нет данных",
+    "learning_progress": "Прогресс обучения",
+    "overall_progress": "Общий прогресс",
+    "no_courses": "Курсов пока нет"
   },
-  "status": {
-    "checked": "Проверено",
-    "pending": "В процессе"
-  },
-    "sidebar": {
-    "menu": "Меню",
-    "links": {
-      "home": "Главная",
-      "homework": "Домашнее задание",
-      "code": "Выполненные задания",
-      "tasks": "Задачи"
-    },
-    "footer": {
-      "version": "Версия 1.0.5",
-      "authors": "Рустамов & Ходжимурадов"
-    }
+  "sidebar": {
+    "version": "Версия 1.0.0"
   }
-
-
-
 }

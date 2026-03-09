@@ -2,18 +2,36 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import api from "../../utils/api";
 import { useTranslation } from "react-i18next";
+import {
+  Card, Row, Col, Statistic, Tag, Typography, Button, Spin, Rate, Empty,
+} from "antd";
+import {
+  CheckCircleOutlined, StarOutlined, TrophyOutlined, ExportOutlined, ReloadOutlined,
+} from "@ant-design/icons";
 import { motion } from "framer-motion";
-import { CheckCircle2, Star, Trophy, ExternalLink, RefreshCw } from "lucide-react";
+import { useToast } from "../../hooks/useToast";
+
+const { Text, Title } = Typography;
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.32, ease: "easeOut" },
+  }),
+};
 
 const Review = () => {
   const { t } = useTranslation();
+  const toast = useToast();
   const token = useSelector((state) => state.auth.token);
   const profile = useSelector((state) => state.profile.data);
 
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = async (showToast = false) => {
     if (!token || !profile?._id) return;
     setLoading(true);
     try {
@@ -23,16 +41,16 @@ const Review = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSubmissions(res.data.data || []);
+      if (showToast) toast.success(t("review.refreshed") || "Yangilandi!");
     } catch (err) {
       console.error("Submissions fetch error:", err);
+      if (showToast) toast.error(t("review.refresh_error") || "Yangilashda xatolik");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchSubmissions();
-  }, [token, profile?._id]);
+  useEffect(() => { fetchSubmissions(); }, [token, profile?._id]);
 
   const checkedSubmissions = submissions.filter(
     (s) =>
@@ -43,120 +61,93 @@ const Review = () => {
 
   const stats = {
     total: checkedSubmissions.length,
-    avgScore:
-      checkedSubmissions.length > 0
-        ? Math.round(
-            checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0) /
-              checkedSubmissions.length
-          )
-        : 0,
+    avgScore: checkedSubmissions.length > 0
+      ? Math.round(checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0) / checkedSubmissions.length)
+      : 0,
     totalScore: checkedSubmissions.reduce((sum, s) => sum + (s.submission.score || 0), 0),
   };
 
-  const renderStars = (score) => {
-    const filled = Math.min(Math.floor(score / 20), 5);
-    return (
-      <div className="flex gap-0.5">
-        {[...Array(5)].map((_, i) => (
-          <Star
-            key={i}
-            size={13}
-            className={i < filled ? "fill-amber-400 text-amber-400" : "text-slate-200"}
-          />
-        ))}
-      </div>
-    );
+  const getScoreColor = (score) => {
+    if (score >= 90) return "#22c55e";
+    if (score >= 70) return "#f59e0b";
+    return "#ef4444";
   };
 
-  const getScoreStyle = (score) => {
-    if (score >= 90) return { text: "text-green-600", bg: "bg-green-50", border: "border-green-100" };
-    if (score >= 70) return { text: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" };
-    return { text: "text-red-500", bg: "bg-red-50", border: "border-red-100" };
+  const getStatusTag = (status) => {
+    switch (status) {
+      case "CHECKED": return <Tag color="success">{t("review.status.checked")}</Tag>;
+      case "AGAIN CHECKED": return <Tag color="purple">{t("review.status.rechecked")}</Tag>;
+      default: return <Tag color="warning">{t("review.status.pending")}</Tag>;
+    }
   };
 
-  // ── LOADING ──
   if (loading) {
-    return (
-      <div className="min-h-screen bg-slate-50 p-5 space-y-4 animate-pulse">
-        <div className="h-8 w-56 bg-slate-200 rounded-lg" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[1, 2, 3].map((i) => <div key={i} className="h-24 bg-slate-200 rounded-2xl" />)}
-        </div>
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => <div key={i} className="h-36 bg-slate-200 rounded-2xl" />)}
-        </div>
-      </div>
-    );
+    return <div style={{ display: "flex", justifyContent: "center", padding: 60 }}><Spin size="large" /></div>;
   }
 
-  // ── EMPTY ──
   if (checkedSubmissions.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-14 h-14 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 border border-slate-200">
-            <CheckCircle2 size={24} className="text-slate-400" />
-          </div>
-          <p className="text-slate-500 text-sm">
-            {t("review.empty") || "Hali tekshirilgan topshiriqlar yo'q"}
-          </p>
-        </div>
+      <div style={{ display: "flex", justifyContent: "center", padding: 60 }}>
+        <Empty description={t("review.empty")} />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-5 space-y-5">
+    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+      {/* Header */}
+      <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.28 }}>
+        <Title level={4} style={{ margin: 0 }}>{t("review.title")}</Title>
+        <Text style={{ color: "#94a3b8", fontSize: 13 }}>{t("review.subtitle")}</Text>
+      </motion.div>
 
-      {/* ── HEADER ── */}
-      <div>
-        <h1 className="text-xl font-bold text-slate-900 tracking-tight">Bajarilgan topshiriqlar</h1>
-        <p className="text-sm text-slate-400 mt-0.5">Tekshirilgan va baholangan barcha topshiriqlaringiz</p>
-      </div>
+      {/* Stats */}
+      <Row gutter={[16, 16]}>
+        {[
+          {
+            title: t("review.total"),
+            value: stats.total,
+            prefix: <CheckCircleOutlined style={{ color: "#22c55e" }} />,
+          },
+          {
+            title: t("review.avg_score"),
+            value: stats.avgScore,
+            suffix: "%",
+            prefix: <StarOutlined style={{ color: "#3b82f6" }} />,
+          },
+          {
+            title: t("review.total_score"),
+            value: stats.totalScore,
+            prefix: <TrophyOutlined style={{ color: "#f59e0b" }} />,
+          },
+        ].map((stat, i) => (
+          <Col key={i} xs={24} sm={8}>
+            <motion.div
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+            >
+              <Card style={{ borderRadius: 14, border: "1px solid #e2e8f0" }}>
+                <Statistic
+                  title={stat.title}
+                  value={stat.value}
+                  suffix={stat.suffix}
+                  prefix={stat.prefix}
+                  valueStyle={{ color: "#1e293b", fontWeight: 700 }}
+                />
+              </Card>
+            </motion.div>
+          </Col>
+        ))}
+      </Row>
 
-      {/* ── STATS ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Jami */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 size={19} className="text-green-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-            <p className="text-xs text-slate-400">Jami bajarilgan</p>
-          </div>
-        </div>
-
-        {/* O'rtacha */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0">
-            <Star size={19} className="text-blue-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{stats.avgScore}%</p>
-            <p className="text-xs text-slate-400">O'rtacha ball</p>
-          </div>
-        </div>
-
-        {/* Umumiy */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex items-center gap-4">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center flex-shrink-0">
-            <Trophy size={19} className="text-amber-500" />
-          </div>
-          <div>
-            <p className="text-2xl font-bold text-slate-900">{stats.totalScore}</p>
-            <p className="text-xs text-slate-400">Umumiy ball</p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── LIST ── */}
-      <div className="space-y-3">
+      {/* List */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {checkedSubmissions.map((item, idx) => {
           const sub = item.submission;
           const score = sub.score || 0;
-          const scoreStyle = getScoreStyle(score);
-          const isPending = sub.status === "PENDING";
+          const scoreColor = getScoreColor(score);
           const repoName = sub.HwLink?.includes("github.com")
             ? sub.HwLink.split("/").slice(-1)[0]
             : sub.description || "Loyiha";
@@ -164,104 +155,87 @@ const Review = () => {
           return (
             <motion.div
               key={sub._id || idx}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.04 }}
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 hover:border-blue-200 hover:shadow-md transition-all duration-150"
+              custom={idx}
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
             >
-              <div className="flex items-start gap-4">
-                {/* Icon */}
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${isPending ? "bg-amber-50" : "bg-green-50"}`}>
-                  <CheckCircle2 size={18} className={isPending ? "text-amber-400" : "text-green-500"} />
-                </div>
+              <Card
+                style={{ borderRadius: 14, border: "1px solid #e2e8f0" }}
+                styles={{ body: { padding: "16px 20px" } }}
+              >
+                <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
+                  {/* Score badge */}
+                  <div style={{
+                    minWidth: 56, height: 56, borderRadius: 14,
+                    background: `${scoreColor}15`,
+                    border: `1px solid ${scoreColor}30`,
+                    display: "flex", flexDirection: "column",
+                    alignItems: "center", justifyContent: "center",
+                    flexShrink: 0,
+                  }}>
+                    <span style={{ fontSize: 18, fontWeight: 700, color: scoreColor, lineHeight: 1 }}>{score}</span>
+                    <span style={{ fontSize: 10, color: "#94a3b8" }}>/100</span>
+                  </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-3 flex-wrap">
-                    <div className="min-w-0">
-                      <h3 className="text-[14px] font-semibold text-slate-800 truncate">{repoName}</h3>
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        {new Date(sub.date).toLocaleDateString("uz-UZ", {
-                          day: "numeric", month: "long", year: "numeric",
-                        })}
-                        {sub.checkedDate && (
-                          <span className="ml-2 text-slate-300">
-                            · Tekshirildi: {new Date(sub.checkedDate).toLocaleDateString("uz-UZ", {
-                              day: "numeric", month: "long",
-                            })}
-                          </span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
+                      <Text strong style={{ fontSize: 14 }}>{repoName}</Text>
+                      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                        {getStatusTag(sub.status)}
+                        {sub.HwLink && (
+                          <a href={sub.HwLink} target="_blank" rel="noopener noreferrer">
+                            <Button type="link" icon={<ExportOutlined />} size="small" style={{ padding: 0, fontSize: 12 }}>
+                              {t("review.view")}
+                            </Button>
+                          </a>
                         )}
-                      </p>
+                      </div>
                     </div>
 
-                    {/* Score badge */}
-                    <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border ${scoreStyle.bg} ${scoreStyle.border} flex-shrink-0`}>
-                      <span className={`text-xl font-bold ${scoreStyle.text}`}>{score}</span>
-                      <span className={`text-xs ${scoreStyle.text} opacity-60`}>/100</span>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 6 }}>
+                      <Rate disabled value={Math.min(Math.floor(score / 20), 5)} style={{ fontSize: 12 }} />
+                      <Text style={{ fontSize: 12, color: "#94a3b8" }}>
+                        {new Date(sub.date).toLocaleDateString("uz-UZ", { day: "numeric", month: "long", year: "numeric" })}
+                      </Text>
                     </div>
+
+                    {sub.description && (
+                      <Text style={{ fontSize: 13, color: "#64748b", display: "block", marginTop: 6 }}>
+                        {sub.description}
+                      </Text>
+                    )}
+
+                    {sub.teacherDescription && (
+                      <div style={{ marginTop: 10, paddingTop: 10, borderTop: "1px solid #f1f5f9" }}>
+                        <Text style={{ fontSize: 11, fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", letterSpacing: 1, display: "block", marginBottom: 4 }}>
+                          {t("review.teacher_comment")} {sub.checkedBy && `· ${sub.checkedBy}`}
+                        </Text>
+                        <Text style={{ fontSize: 13, color: "#475569" }}>{sub.teacherDescription}</Text>
+                      </div>
+                    )}
                   </div>
-
-                  {/* Description */}
-                  {sub.description && (
-                    <p className="text-[13px] text-slate-500 mt-2 leading-relaxed">
-                      {sub.description}
-                    </p>
-                  )}
-
-                  {/* Stars + status + link */}
-                  <div className="flex items-center justify-between mt-3 flex-wrap gap-2">
-                    <div className="flex items-center gap-3">
-                      {renderStars(score)}
-                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full
-                        ${isPending
-                          ? "bg-amber-50 text-amber-600"
-                          : sub.status === "AGAIN CHECKED"
-                          ? "bg-violet-50 text-violet-600"
-                          : "bg-green-50 text-green-600"
-                        }`}
-                      >
-                        {isPending ? "Kutilmoqda" : sub.status === "AGAIN CHECKED" ? "Qayta tekshirildi" : "Tekshirildi"}
-                      </span>
-                      {item.group && (
-                        <span className="text-[11px] text-slate-400">{item.group.name}</span>
-                      )}
-                    </div>
-
-                    <a
-                      href={sub.HwLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-[12px] text-blue-500 hover:text-blue-700 font-medium transition-colors"
-                    >
-                      <ExternalLink size={13} />
-                      Ko'rish
-                    </a>
-                  </div>
-
-                  {/* Teacher comment */}
-                  {sub.teacherDescription && (
-                    <div className="mt-3 pt-3 border-t border-slate-100">
-                      <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wide mb-1">
-                        O'qituvchi izohi {sub.checkedBy && `· ${sub.checkedBy}`}
-                      </p>
-                      <p className="text-[13px] text-slate-600">{sub.teacherDescription}</p>
-                    </div>
-                  )}
                 </div>
-              </div>
+              </Card>
             </motion.div>
           );
         })}
       </div>
 
-      {/* ── REFRESH FAB ── */}
-      <button
-        onClick={fetchSubmissions}
-        disabled={loading}
-        className="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white w-12 h-12 rounded-full shadow-lg shadow-blue-500/25 flex items-center justify-center transition-all hover:scale-105 disabled:cursor-not-allowed z-50"
-      >
-        <RefreshCw size={18} className={loading ? "animate-spin" : ""} />
-      </button>
+      {/* Refresh button */}
+      <Button
+        type="primary"
+        shape="circle"
+        icon={<ReloadOutlined />}
+        onClick={() => fetchSubmissions(true)}
+        loading={loading}
+        size="large"
+        style={{
+          position: "fixed", bottom: 24, right: 24,
+          width: 48, height: 48, zIndex: 50,
+          boxShadow: "0 4px 14px rgba(25,53,202,0.35)",
+        }}
+      />
     </div>
   );
 };

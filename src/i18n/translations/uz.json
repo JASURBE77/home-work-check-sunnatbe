@@ -1,135 +1,125 @@
 {
-  "home": "Bosh sahifa",
-  "homework-link": "Uy vazifa",
-  "games": "O'yinlar",
-  "code": "uy ishilarim",
-  "profile-link": "Profil",
-  "rating": "Reyting",
-  "hello_jasur": "Salom",
-  "progress_title": "Bajarilish jarayoni",
-  "homework_progress": "Uy ishi tashalganlar (6 dan 12)",
-  "quality_progress": "Sifat (4.4 dan 5.0)",
-  "overall_progress": "Umumiy progress",
-  "status_bad": "Juda past",
-  "status_ok": "Yaxshi",
-  "status_good": "Topshirildi",
-  
+  "nav": {
+    "home": "Bosh sahifa",
+    "homework": "Uy vazifasi",
+    "reviews": "Bajarilganlar",
+    "tasks": "Imtihonlar",
+    "profile": "Profil"
+  },
+  "login": {
+    "title": "Tizimga kirish",
+    "subtitle": "Login va parolingiz bilan tizimga kiring",
+    "login_label": "Login",
+    "password_label": "Password",
+    "button": "Login",
+    "error_login": "Login kiriting",
+    "error_password": "Parol kiriting",
+    "error_password_min": "Kamida 6 ta belgidan iborat bo'lishi kerak"
+  },
+  "home": {
+    "greeting": "Salom",
+    "subtitle": "Bugungi kunning vazifalarini ko'rib chiqing",
+    "completed": "Bajarilgan",
+    "pending": "Kutilayotgan",
+    "total_score": "Umumiy ball",
+    "progress": "Progress",
+    "all_checked": "Jami tekshirilgan topshiriqlar",
+    "unchecked": "Tekshirilmagan topshiriqlar",
+    "from_all": "Barcha topshiriqlardan",
+    "recent": "So'nggi topshiriqlar",
+    "total_count": "ta jami",
+    "empty": "Hozircha hech qanday topshiriq topshirilmagan",
+    "retry": "Qayta urinib ko'rish",
+    "submitted_of": "topshiriq bajarildi",
+    "ball": "ball",
+    "status": {
+      "pending": "Kutilmoqda",
+      "checked": "Tekshirildi",
+      "rechecked": "Qayta tekshirildi",
+      "done": "Bajarildi"
+    }
+  },
   "homework": {
-    "title": "Uy Ishi Topshirish",
-    "description": "Loyihangizni GitHub va Vercel orqali jönating",
-    "labels": {
-      "github": "GitHub Link",
-      "vercel": "Vercel Link",
-      "comment": "Izoh"
-    },
-    "buttons": {
-      "submit": "Jonatish"
-    },
-    "messages": {
-      "success": "Muvaffaqiyatli jonatildi!",
-      "successDetail": "Uy ishingiz qabul qilindi",
-      "footer": "Barcha maydonlar majburiy. Izoh 50 harfdan oshmasligi kerak."
-    },
+    "page_title": "Uy vazifasini yuborish",
+    "subtitle": "GitHub yoki Vercel orqali loyihangizni yuboring",
+    "type_label": "Topshiriq turi",
+    "link_label": "Loyiha havolasi",
+    "link_placeholder": "https://github.com/username/repo",
+    "link_hint": "GitHub repository yoki Vercel deployment havolasini kiriting",
+    "comment_label": "Izoh",
+    "comment_placeholder": "Loyiha haqida qisqacha izoh...",
+    "success_title": "Muvaffaqiyatli yuborildi!",
+    "success_desc": "Uy vazifangiz ko'rib chiqiladi",
+    "sending": "Yuborilmoqda...",
+    "send": "Yuborish",
+    "tips_title": "Maslahatlar",
+    "tip1": "Repository public bo'lishi kerak",
+    "tip2": "README.md faylida loyiha haqida ma'lumot bo'lsin",
+    "tip3": "Kod toza va tushunarli bo'lishi muhim",
     "errors": {
-      "githubRequired": "GitHub silka majburiy",
-      "githubInvalid": "To'g'ri GitHub silka kiriting",
-      "vercelRequired": "Vercel silka majburiy",
-      "vercelInvalid": "To'g'ri Vercel silka kiriting",
-      "commentRequired": "Izoh majburiy",
-      "commentMax": "Izoh 50 harfdan oshmasligi kerak"
+      "link_required": "Link kiritish majburiy",
+      "link_invalid": "Yaroqli URL kiriting",
+      "comment_required": "Izoh kiritish majburiy",
+      "comment_max": "Izoh 200 belgidan oshmasligi kerak"
     }
   },
-
-  
-  "student_controller": "Student Controller",
-  "login_title": "Hisobingizga kiring",
-  "login_placeholder": "Login kiriting",
-  "password_placeholder": "Parol kiriting",
-  "login_button": "Kirish",
-  "loading": "Yuklanmoqda...",
-  "no_account": "Hisobingiz yo‘qmi?",
-  "sign_up": "Ro‘yxatdan o‘tish",
-  "login_server_error": "Server bilan aloqa yo‘q yoki CORS xatosi",
-
-    "dashboard": {
-    "hello": "Salom",
-    "total_points": "Jami ball",
-    "score": "Ball",
-    "items": "ta",
-    "user_not_found": "Foydalanuvchi topilmadi"
+  "review": {
+    "title": "Bajarilgan topshiriqlar",
+    "subtitle": "Tekshirilgan va baholangan barcha topshiriqlaringiz",
+    "total": "Jami bajarilgan",
+    "avg_score": "O'rtacha ball",
+    "total_score": "Umumiy ball",
+    "empty": "Hali tekshirilgan topshiriqlar yo'q",
+    "view": "Ko'rish",
+    "teacher_comment": "O'qituvchi izohi",
+    "status": {
+      "pending": "Kutilmoqda",
+      "checked": "Tekshirildi",
+      "rechecked": "Qayta tekshirildi"
+    }
   },
-    "review": {
-    "refresh": "Yangilash",
-    "empty": "Hech qanday topshiriq yo‘q",
-    "comment": "Izoh",
-    "no_description": "Hech qanday tavsif yo‘q",
-    "date": "Sana",
-    "status": "Holati",
-    "teacher_feedback": "O‘qituvchi izohi",
-    "no_feedback": "Izoh berilmagan",
-    "score": "Ball"
-  },
-    "teacherTasks": {
-    "title": "O‘qituvchi topshiriqlari",
-    "empty": "Topshiriqlar yo‘q",
-    "description": "Tavsif",
-    "group": "Guruh",
-    "status": "Holati",
-    "start": "Boshlanish",
-    "end": "Tugash",
+  "tasks": {
+    "title": "Imtihonlar",
+    "empty": "Imtihonlar mavjud emas",
+    "count": "ta imtihon mavjud",
+    "practice": "Amaliyot",
+    "test": "Test",
     "finished": "Yakunlangan",
-    "start_exam": "Imtihonni boshlash",
-    "view_result": "Yechilgan javoblarni ko‘rish"
+    "waiting": "Kutilmoqda",
+    "active": "Faol",
+    "open_layout": "Maketni ochish",
+    "requirements": "Talablar",
+    "placeholder_link": "GitHub / Vercel linki",
+    "send": "Yuborish",
+    "submitted": "Yuborilgan va tekshirilmoqda",
+    "starting": "Boshlanmoqda...",
+    "view_result": "Natijani ko'rish",
+    "waiting_start": "Boshlanishi kutilmoqda",
+    "start": "Imtihonni boshlash",
+    "warning": "Ogohlantirish",
+    "warning_text": "Imtihonni boshlaganingizdan so'ng sahifani tark etsangiz imtihon yakunlanadi va to'plangan ball hisoblanadi.",
+    "cancel": "Bekor qilish",
+    "begin": "Boshlash",
+    "unnamed": "Nomsiz imtihon"
   },
-    "history": {
-    "exam_result": "imtihon natijasi",
-    "back": "Ortga qaytish",
-    "status": "Holati",
-    "started_at": "Boshlangan vaqti",
-    "finished_at": "Tugagan vaqti",
-    "score": "Ball",
-    "questions": "Savollar va javoblar",
-    "no_questions": "Savollar mavjud emas",
-    "question": "Savol",
-    "your_answer": "Sizning javobingiz",
-    "correct_answer": "To‘g‘ri javob",
-    "answer_score": "Ball",
-    "no_result": "Natija topilmadi",
-    "no_question_text": "Savol matni mavjud emas",
-    "not_found": "Topilmadi"
-  },
-    "profile": {
-    "notFound": "Ma’lumot topilmadi",
-    "role": "Roli",
+  "profile": {
+    "not_found": "Profil topilmadi",
+    "student": "Talaba",
+    "rating": "Reyting",
+    "total": "Jami",
+    "completed": "Bajarilgan",
+    "pending": "Kutilayotgan",
+    "total_score": "Umumiy ball",
+    "contact": "Bog'lanish ma'lumotlari",
+    "full_name": "Ism familiya",
     "group": "Guruh",
-    "noGroup": "Sizning guruhingiz yo‘q",
-    "joined": "Qo‘shildi",
-    "progress": "O‘qish jarayoni",
-    "overallProgress": "Umumiy jarayon",
-    "recentSubmissions": "So‘nggi topshiriqlar",
-    "noSubmissions": "Hech qanday topshiriq yo‘q",
-    "noTitle": "Sarlavha yo‘q",
-    "totalLessons": "Jami darslar",
-    "completedLessons": "Topshirildi",
-    "pendingLessons": "Kutilmoqda"
+    "last_submission": "Oxirgi topshiriq",
+    "no_data": "Ma'lumot yo'q",
+    "learning_progress": "O'qish progressi",
+    "overall_progress": "Umumiy progress",
+    "no_courses": "Hali kurslar mavjud emas"
   },
-  "status": {
-    "checked": "Topshirildi",
-    "pending": "Jarayonda"
-  },
-    "sidebar": {
-    "menu": "Menyu",
-    "links": {
-      "home": "Bosh sahifa",
-      "homework": "Uyga vazifa",
-      "code": "Vazifalar",
-      "tasks": "Imtihonlar"
-    },
-    "footer": {
-      "version": "Version 1.0.5",
-      "authors": "Rustamov & Xojimurodov"
-    }
+  "sidebar": {
+    "version": "Version 1.0.0"
   }
-
 }
-

@@ -1,10 +1,8 @@
 import axios from "axios";
-import AppRouter from "../routers/AppRouter";
-import { useSelector } from "react-redux";
 
 export const instance = axios.create({
     baseURL: import.meta.env.VITE_SERVER_URL,
-    headers: { "Content-Type": "application/json"}
+    headers: { "Content-Type": "application/json",  "ngrok-skip-browser-warning": "true" }
 });
 
 instance.interceptors.response.use(
